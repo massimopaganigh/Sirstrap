@@ -269,8 +269,42 @@ namespace Sirstrap
 
         public async Task<string> GetLatestVersionAsync(string binaryType)
         {
-            Log.Information("[*] No version specified, getting version from API...");
+            Log.Information("[*] No version specified, getting versions from APIs...");
 
+            var sirhurtVersion = await GetSirhurtVersionAsync(binaryType);
+            var robloxVersion = await GetRobloxVersionAsync();
+
+            if (string.IsNullOrEmpty(sirhurtVersion) || string.IsNullOrEmpty(robloxVersion))
+            {
+                Log.Error("[!] Failed to retrieve one or both versions.");
+
+                return string.Empty;
+            }
+
+            if (sirhurtVersion.Equals(robloxVersion, StringComparison.OrdinalIgnoreCase))
+            {
+                Log.Information("[*] Using version: {0}", sirhurtVersion);
+
+                return sirhurtVersion;
+            }
+
+            Log.Information("[*] Version mismatch detected:");
+            Log.Information("[*] Please choose which version to use:");
+            Log.Information("    1. SirHurt version: {0}", sirhurtVersion);
+            Log.Information("    2. Roblox version: {0}", robloxVersion);
+
+            var choice = Console.ReadLine();
+
+            if (choice == "1")
+            {
+                return sirhurtVersion;
+            }
+
+            return robloxVersion;
+        }
+
+        private async Task<string> GetSirhurtVersionAsync(string binaryType)
+        {
             var versionApiUrl = GetVersionApiUrl(binaryType);
 
             if (string.IsNullOrEmpty(versionApiUrl))
@@ -279,6 +313,7 @@ namespace Sirstrap
 
                 return string.Empty;
             }
+
             try
             {
                 var response = await _httpClient.GetStringAsync(versionApiUrl);
@@ -303,7 +338,32 @@ namespace Sirstrap
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Error getting version from API: {0}", ex.Message);
+                Log.Error(ex, "[!] Error getting SirHurt version from API: {0}", ex.Message);
+
+                return string.Empty;
+            }
+        }
+
+        private async Task<string> GetRobloxVersionAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync("https://clientsettingscdn.roblox.com/v1/client-version/WindowsPlayer");
+
+                using var jsonDocument = JsonDocument.Parse(response);
+
+                if (jsonDocument.RootElement.TryGetProperty("clientVersionUpload", out JsonElement version))
+                {
+                    return version.GetString() ?? string.Empty;
+                }
+
+                Log.Error("[!] clientVersionUpload field not found in JSON response.");
+
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Error getting Roblox version from API: {0}", ex.Message);
 
                 return string.Empty;
             }
