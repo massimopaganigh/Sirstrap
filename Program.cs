@@ -12,7 +12,7 @@ namespace Sirstrap
     {
         private static async Task Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").CreateLogger();
 
             await new RobloxDownloader().ExecuteAsync(args);
             await Log.CloseAndFlushAsync();
