@@ -84,22 +84,12 @@ namespace Sirstrap
 
         private static bool IsAlreadyInstalled(DownloadConfiguration downloadConfiguration)
         {
-            if (!downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            return Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version));
+            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version));
         }
 
         private static bool LaunchApplication(DownloadConfiguration downloadConfiguration)
         {
-            if (downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
-            {
-                return ApplicationLauncher.Launch(downloadConfiguration);
-            }
-
-            return false;
+            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration);
         }
 
         private async Task DownloadAndProcessFilesAsync(DownloadConfiguration downloadConfiguration)
@@ -121,12 +111,14 @@ namespace Sirstrap
 
         private static void InstallAndLaunchApplication(DownloadConfiguration downloadConfiguration)
         {
-            if (downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
+            if (!downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
             {
-                ApplicationInstaller.Install(downloadConfiguration);
-
-                LaunchApplication(downloadConfiguration);
+                return;
             }
+            
+            ApplicationInstaller.Install(downloadConfiguration);
+
+            LaunchApplication(downloadConfiguration);
         }
     }
 
@@ -185,7 +177,7 @@ namespace Sirstrap
 
         private static int GetCompressionLevel(Dictionary<string, string> args)
         {
-            if (args.TryGetValue("compressionLevel", out var value) && int.TryParse(value, out var level) && level >= 1 && level <= 9)
+            if (args.TryGetValue("compressionLevel", out var value) && int.TryParse(value, out var level) && level is >= 1 and <= 9)
             {
                 return level;
             }
@@ -203,12 +195,12 @@ namespace Sirstrap
 
         private static string NormalizeBlobDirectory(string blobDir)
         {
-            if (!blobDir.StartsWith("/"))
+            if (!blobDir.StartsWith($"/"))
             {
                 blobDir = "/" + blobDir;
             }
 
-            if (!blobDir.EndsWith("/"))
+            if (!blobDir.EndsWith($"/"))
             {
                 blobDir += "/";
             }
@@ -295,12 +287,7 @@ namespace Sirstrap
 
             var choice = Console.ReadLine();
 
-            if (choice == "1")
-            {
-                return sirhurtVersion;
-            }
-
-            return robloxVersion;
+            return choice == "1" ? sirhurtVersion : robloxVersion;
         }
 
         private async Task<string> GetSirhurtVersionAsync(string binaryType)
@@ -320,9 +307,9 @@ namespace Sirstrap
 
                 using var jsonDocument = JsonDocument.Parse(response);
 
-                if (jsonDocument.RootElement.EnumerateArray().FirstOrDefault().TryGetProperty("SirHurt V5", out JsonElement sirhurt))
+                if (jsonDocument.RootElement.EnumerateArray().FirstOrDefault().TryGetProperty("SirHurt V5", out var sirhurt))
                 {
-                    if (sirhurt.TryGetProperty("roblox_version", out JsonElement version))
+                    if (sirhurt.TryGetProperty("roblox_version", out var version))
                     {
                         return version.GetString() ?? string.Empty;
                     }
@@ -352,7 +339,7 @@ namespace Sirstrap
 
                 using var jsonDocument = JsonDocument.Parse(response);
 
-                if (jsonDocument.RootElement.TryGetProperty("clientVersionUpload", out JsonElement version))
+                if (jsonDocument.RootElement.TryGetProperty("clientVersionUpload", out var version))
                 {
                     return version.GetString() ?? string.Empty;
                 }
@@ -411,12 +398,9 @@ namespace Sirstrap
 
             var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetBinaryUrl(downloadConfiguration, zipFileName));
 
-            if (bytes != null)
-            {
-                await File.WriteAllBytesAsync(downloadConfiguration.GetOutputFileName(), bytes);
+            await File.WriteAllBytesAsync(downloadConfiguration.GetOutputFileName(), bytes);
 
-                Log.Information("[+] File downloaded: {0}", downloadConfiguration.GetOutputFileName());
-            }
+            Log.Information("[+] File downloaded: {0}", downloadConfiguration.GetOutputFileName());
         }
 
         public async Task<string> DownloadManifestAsync(DownloadConfiguration downloadConfiguration)
@@ -452,11 +436,7 @@ namespace Sirstrap
 
         private static void AddDefaultSettings(ZipArchive finalZip)
         {
-            const string settings = @"<?xml version=""1.0"" encoding=""UTF-8""?>
-            <Settings>
-                <ContentFolder>content</ContentFolder>
-                <BaseUrl>http://www.roblox.com</BaseUrl>
-            </Settings>";
+            const string settings = """<?xml version="1.0" encoding="UTF-8"?><Settings><ContentFolder>content</ContentFolder><BaseUrl>http://www.roblox.com</BaseUrl></Settings>""";
 
             PackageExtractor.AddTextFile(finalZip, "AppSettings.xml", settings);
         }
@@ -472,10 +452,7 @@ namespace Sirstrap
 
             var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetPackageUrl(downloadConfiguration, package));
 
-            if (bytes != null)
-            {
-                await PackageExtractor.ProcessPackageAsync(bytes, package, finalZip);
-            }
+            await PackageExtractor.ProcessPackageAsync(bytes, package, finalZip);
         }
     }
 
@@ -522,7 +499,7 @@ namespace Sirstrap
             {
                 Log.Error(ex, "[!] Error requesting binary from {Url}: {ErrorMessage}", url, ex.Message);
 
-                return null;
+                return null!;
             }
         }
 
@@ -564,7 +541,7 @@ namespace Sirstrap
 
         private static List<string> GetPackages(string[] lines)
         {
-            return lines.Where(line => line.Contains(".") && line.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)).Select(line => line.Trim()).ToList();
+            return lines.Where(line => line.Contains('.') && line.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)).Select(line => line.Trim()).ToList();
         }
     }
 
@@ -719,10 +696,9 @@ namespace Sirstrap
 
             lock (_zipLock)
             {
-                using (var entryStream = finalZip.CreateEntry(targetValue, CompressionLevel.Optimal).Open())
-                {
-                    entryStream.Write(fileData, 0, fileData.Length);
-                }
+                using var entryStream = finalZip.CreateEntry(targetValue, CompressionLevel.Optimal).Open();
+                
+                entryStream.Write(fileData, 0, fileData.Length);
             }
         }
     }
@@ -749,7 +725,7 @@ namespace Sirstrap
                         {
                             var destinationPath = Path.GetFullPath(Path.Combine(targetPath, entry.FullName));
 
-                            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath));
+                            Directory.CreateDirectory(Path.GetDirectoryName(destinationPath) ?? string.Empty);
 
                             if (!string.IsNullOrEmpty(entry.Name))
                             {
@@ -801,7 +777,7 @@ namespace Sirstrap
 
         private static void DeleteFileWithRetry(string filePath, int maxAttempts = 3)
         {
-            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
             {
                 try
                 {
