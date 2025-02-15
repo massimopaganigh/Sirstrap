@@ -47,7 +47,7 @@ namespace Sirstrap
                 }
                 if (IsAlreadyInstalled(downloadConfiguration))
                 {
-                    Log.Information("[+] Version {0} is already installed.", downloadConfiguration.Version);
+                    Log.Information("[*] Version {0} is already installed.", downloadConfiguration.Version);
 
                     if (LaunchApplication(downloadConfiguration))
                     {
@@ -394,13 +394,13 @@ namespace Sirstrap
         {
             var zipFileName = downloadConfiguration.BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
 
-            Log.Information("[+] Downloading ZIP archive for {0} ({1})...", downloadConfiguration.BinaryType, zipFileName);
+            Log.Information("[*] Downloading ZIP archive for {0} ({1})...", downloadConfiguration.BinaryType, zipFileName);
 
             var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetBinaryUrl(downloadConfiguration, zipFileName));
 
             await File.WriteAllBytesAsync(downloadConfiguration.GetOutputFileName(), bytes);
 
-            Log.Information("[+] File downloaded: {0}", downloadConfiguration.GetOutputFileName());
+            Log.Information("[*] File downloaded: {0}", downloadConfiguration.GetOutputFileName());
         }
 
         public async Task<string> DownloadManifestAsync(DownloadConfiguration downloadConfiguration)
@@ -431,7 +431,7 @@ namespace Sirstrap
                 await DownloadAndProcessPackagesAsync(manifest, finalZip, downloadConfiguration);
             }
 
-            Log.Information("[+] Archive assembled: {0}", downloadConfiguration.GetOutputFileName());
+            Log.Information("[*] Archive assembled: {0}", downloadConfiguration.GetOutputFileName());
         }
 
         private static void AddDefaultSettings(ZipArchive finalZip)
@@ -448,7 +448,7 @@ namespace Sirstrap
 
         private async Task DownloadAndProcessPackageAsync(string package, ZipArchive finalZip, DownloadConfiguration downloadConfiguration)
         {
-            Log.Information("[+] Downloading package {0}...", package);
+            Log.Information("[*] Downloading package {0}...", package);
 
             var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetPackageUrl(downloadConfiguration, package));
 
@@ -673,7 +673,7 @@ namespace Sirstrap
                 await IntegrateEntryAsync(entry, targetValue, finalZip);
             }
 
-            Log.Information("[+] Package {0} extracted and integrated.", package);
+            Log.Information("[*] Package {0} extracted and integrated.", package);
         }
 
         private static void AddPackageAsFile(byte[] bytes, string package, ZipArchive finalZip)
@@ -739,7 +739,7 @@ namespace Sirstrap
                     DeleteFileWithRetry(zipPath);
                 }
 
-                Log.Information("[+] Archive successfully extracted to: {0}", targetPath);
+                Log.Information("[*] Archive successfully extracted to: {0}", targetPath);
             }
             catch (Exception ex)
             {
@@ -806,7 +806,7 @@ namespace Sirstrap
 
             if (File.Exists(executablePath))
             {
-                Log.Information("[+] Launching {0}...", executablePath);
+                Log.Information("[*] Launching {0}...", executablePath);
                 Process.Start(new ProcessStartInfo { FileName = executablePath, WorkingDirectory = Path.GetDirectoryName(executablePath), UseShellExecute = true });
 
                 return true;
