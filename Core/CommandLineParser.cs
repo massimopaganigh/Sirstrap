@@ -1,4 +1,4 @@
-﻿namespace Sirstrap
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to parse command-line arguments in the format "--key=value"

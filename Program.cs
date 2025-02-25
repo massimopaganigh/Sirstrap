@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using Sirstrap.Core;
 
 namespace Sirstrap
 {

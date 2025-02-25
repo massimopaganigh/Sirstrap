@@ -1,4 +1,4 @@
-﻿namespace Sirstrap
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to parse manifest content from Roblox deployment files

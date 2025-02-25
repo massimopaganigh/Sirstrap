@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.IO.Compression;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Coordinates the download and assembly of Roblox application packages, handling 

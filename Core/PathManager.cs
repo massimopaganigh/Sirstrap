@@ -1,4 +1,4 @@
-﻿namespace Sirstrap
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides utility methods for managing file system paths related to

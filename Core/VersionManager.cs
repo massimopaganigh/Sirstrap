@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.Text.Json;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Manages version information for Roblox deployments, providing functionality to 

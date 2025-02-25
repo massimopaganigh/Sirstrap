@@ -1,4 +1,4 @@
-﻿namespace Sirstrap
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides methods to construct standardized URLs for accessing Roblox

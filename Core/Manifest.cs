@@ -1,4 +1,4 @@
-﻿namespace Sirstrap
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Represents a manifest that contains information about Roblox packages 

@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.IO.Compression;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to extract and integrate downloaded Roblox packages 

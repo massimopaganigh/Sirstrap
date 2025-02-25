@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides HTTP utility methods for downloading strings and byte arrays from URLs,

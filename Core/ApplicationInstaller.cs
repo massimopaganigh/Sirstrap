@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.IO.Compression;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to install the Roblox application by extracting the 

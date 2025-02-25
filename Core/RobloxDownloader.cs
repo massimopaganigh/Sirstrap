@@ -1,6 +1,6 @@
 ﻿using Serilog;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Orchestrates the complete Roblox application deployment process, including 

@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using System.Diagnostics;
 
-namespace Sirstrap
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to launch the Roblox application executable based on 
