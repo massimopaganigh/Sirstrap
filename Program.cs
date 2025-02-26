@@ -18,6 +18,17 @@ namespace Sirstrap
         private static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").CreateLogger();
+            Console.WriteLine(@"
+   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
+  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
+  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███ 
+  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███ 
+▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀  
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███        
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███        
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀      
+                    ███    ███                            ███    ███                           
+");
 
             await new RobloxDownloader().ExecuteAsync(args).ConfigureAwait(false);
             await Log.CloseAndFlushAsync().ConfigureAwait(false);
