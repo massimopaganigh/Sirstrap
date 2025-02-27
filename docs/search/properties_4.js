@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['packages_0',['Packages',['../class_sirstrap_1_1_core_1_1_manifest.html#a3bd901961b3ab21ad096e231cdff01bc',1,'Sirstrap::Core::Manifest']]]
+  ['launchurl_0',['LaunchUrl',['../class_sirstrap_1_1_core_1_1_download_configuration.html#a849474df3ce4a0a8cd3f04650110f27b',1,'Sirstrap::Core::DownloadConfiguration']]]
 ];

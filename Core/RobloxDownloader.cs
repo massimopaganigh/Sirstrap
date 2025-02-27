@@ -51,11 +51,12 @@ namespace Sirstrap.Core
                 {
                     return;
                 }
+
                 if (IsAlreadyInstalled(downloadConfiguration))
                 {
                     Log.Information("[*] Version {0} is already installed.", downloadConfiguration.Version);
 
-                    if (LaunchApplication(downloadConfiguration))
+                    if (LaunchApplication(downloadConfiguration, string.IsNullOrEmpty(downloadConfiguration.LaunchUrl)))
                     {
                         return;
                     }
@@ -121,15 +122,17 @@ namespace Sirstrap.Core
         /// Attempts to launch the Roblox application.
         /// </summary>
         /// <param name="downloadConfiguration">The download configuration containing the version to launch.</param>
+        /// <param name="waitForExit">Whether to wait for the Roblox process to exit.</param>
         /// <returns>
         /// <c>true</c> if the application was successfully launched; otherwise, <c>false</c>.
         /// </returns>
         /// <remarks>
         /// Currently only supports launching the Windows Player version.
+        /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static bool LaunchApplication(DownloadConfiguration downloadConfiguration)
+        private static bool LaunchApplication(DownloadConfiguration downloadConfiguration, bool waitForExit = false)
         {
-            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration);
+            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration, waitForExit);
         }
 
         /// <summary>
@@ -165,6 +168,7 @@ namespace Sirstrap.Core
         /// <remarks>
         /// Currently only installs and launches the Windows Player version.
         /// The application is installed from the downloaded ZIP archive and then launched.
+        /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
         private static void InstallAndLaunchApplication(DownloadConfiguration downloadConfiguration)
         {
@@ -175,7 +179,9 @@ namespace Sirstrap.Core
 
             ApplicationInstaller.Install(downloadConfiguration);
 
-            LaunchApplication(downloadConfiguration);
+            bool hasLaunchUrl = !string.IsNullOrEmpty(downloadConfiguration.LaunchUrl);
+
+            LaunchApplication(downloadConfiguration, !hasLaunchUrl);
         }
     }
 }

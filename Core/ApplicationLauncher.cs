@@ -14,6 +14,7 @@ namespace Sirstrap.Core
         /// </summary>
         /// <param name="downloadConfiguration">Configuration containing the version information 
         /// for the Roblox executable to launch.</param>
+        /// <param name="waitForExit">Whether to wait for the Roblox process to exit.</param>
         /// <returns>
         /// <c>true</c> if the application was successfully launched; 
         /// <c>false</c> if the executable file could not be found.
@@ -21,16 +22,39 @@ namespace Sirstrap.Core
         /// <remarks>
         /// The method determines the executable path based on the version in the configuration,
         /// logs the launch attempt, and starts the process with its working directory set to 
-        /// the executable's directory.
+        /// the executable's directory. If a LaunchUrl is specified, it will be passed as an
+        /// argument to the Roblox process to launch directly into a specific experience.
         /// </remarks>
-        public static bool Launch(DownloadConfiguration downloadConfiguration)
+        public static bool Launch(DownloadConfiguration downloadConfiguration, bool waitForExit = false)
         {
             var executablePath = Path.Combine(PathManager.GetVersionInstallPath(downloadConfiguration.Version), "RobloxPlayerBeta.exe");
 
             if (File.Exists(executablePath))
             {
+                bool capturedSingleton = waitForExit && SingletonManager.CaptureSingleton();
+
                 Log.Information("[*] Launching {0}...", executablePath);
-                Process.Start(new ProcessStartInfo { FileName = executablePath, WorkingDirectory = Path.GetDirectoryName(executablePath), UseShellExecute = true });
+
+                ProcessStartInfo startInfo = new()
+                {
+                    FileName = executablePath,
+                    WorkingDirectory = Path.GetDirectoryName(executablePath),
+                    UseShellExecute = true
+                };
+
+                if (!string.IsNullOrEmpty(downloadConfiguration.LaunchUrl))
+                {
+                    Log.Information("[*] With launch URL: {0}", downloadConfiguration.LaunchUrl);
+
+                    startInfo.Arguments = downloadConfiguration.LaunchUrl;
+                }
+
+                var process = Process.Start(startInfo);
+
+                if (capturedSingleton && process != null)
+                {
+                    Task.Run(() => WaitForProcessExit(process));
+                }
 
                 return true;
             }
@@ -40,6 +64,23 @@ namespace Sirstrap.Core
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Waits for a Roblox process to exit and releases the singleton mutex afterward.
+        /// </summary>
+        /// <param name="process">The Roblox process to monitor.</param>
+        private static void WaitForProcessExit(Process process)
+        {
+            Log.Information("[*] Waiting for Roblox to exit...");
+
+            while (SingletonManager.HasCapturedSingleton && !process.HasExited && Process.GetProcessesByName("RobloxPlayerBeta").Length > 0)
+            {
+                Thread.Sleep(100);
+            }
+
+            SingletonManager.ReleaseSingleton();
+            Log.Information("[*] Roblox has exited.");
         }
     }
 }

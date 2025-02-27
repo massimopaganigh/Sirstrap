@@ -62,7 +62,7 @@
   <td id="projectlogo"><img alt="Logo" src="favicon.ico"/></td>
   <td id="projectalign" style="padding-left: 0.5em;">
    <div id="projectname">Sirstrap
-   &#160;<span id="projectnumber">v1.1.0-alpha</span>
+   &#160;<span id="projectnumber">v1.0.0-beta</span>
    </div>
   </td>
  </tr>
@@ -171,6 +171,9 @@ Properties</h2></td></tr>
 <tr class="memitem:a2c49b39018661484b0bf7b1b3de51fe2" id="r_a2c49b39018661484b0bf7b1b3de51fe2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2c49b39018661484b0bf7b1b3de51fe2">CompressionLevel</a><code> [get, set]</code></td></tr>
 <tr class="memdesc:a2c49b39018661484b0bf7b1b3de51fe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets or sets the compression level to use when creating the ZIP archive.  <br /></td></tr>
 <tr class="separator:a2c49b39018661484b0bf7b1b3de51fe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a849474df3ce4a0a8cd3f04650110f27b" id="r_a849474df3ce4a0a8cd3f04650110f27b"><td class="memItemLeft" align="right" valign="top">string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a849474df3ce4a0a8cd3f04650110f27b">LaunchUrl</a><code> [get, set]</code></td></tr>
+<tr class="memdesc:a849474df3ce4a0a8cd3f04650110f27b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets or sets the launch URL or arguments to pass to the Roblox executable.  <br /></td></tr>
+<tr class="separator:a849474df3ce4a0a8cd3f04650110f27b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Encapsulates configuration settings for downloading and processing Roblox application packages, including version, channel, binary type, and compression parameters. </p>
@@ -338,6 +341,31 @@ Properties</h2></td></tr>
 
 <p>Gets or sets a value indicating whether to compress the final ZIP archive. </p>
 <p><code>true</code> if the final ZIP should be compressed; otherwise, <code>false</code>. </p>
+
+</div>
+</div>
+<a id="a849474df3ce4a0a8cd3f04650110f27b" name="a849474df3ce4a0a8cd3f04650110f27b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a849474df3ce4a0a8cd3f04650110f27b">&#9670;&#160;</a></span>LaunchUrl</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">string Sirstrap.Core.DownloadConfiguration.LaunchUrl</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel get">get</span><span class="mlabel set">set</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets or sets the launch URL or arguments to pass to the Roblox executable. </p>
+<p>The URL or arguments string that specifies which Roblox experience to launch. Typically a protocol URL like "roblox://game/placeid=12345678". </p>
 
 </div>
 </div>

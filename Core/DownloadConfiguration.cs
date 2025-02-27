@@ -56,6 +56,15 @@
         public int CompressionLevel { get; set; }
 
         /// <summary>
+        /// Gets or sets the launch URL or arguments to pass to the Roblox executable.
+        /// </summary>
+        /// <value>
+        /// The URL or arguments string that specifies which Roblox experience to launch.
+        /// Typically a protocol URL like "roblox://game/placeid=12345678".
+        /// </value>
+        public string LaunchUrl { get; set; }
+
+        /// <summary>
         /// Determines whether the configured binary type is a macOS application.
         /// </summary>
         /// <returns>

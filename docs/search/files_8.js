@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['urlbuilder_2ecs_0',['UrlBuilder.cs',['../_url_builder_8cs.html',1,'']]]
+  ['singletonmanager_2ecs_0',['SingletonManager.cs',['../_singleton_manager_8cs.html',1,'']]]
 ];

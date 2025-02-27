@@ -12,7 +12,9 @@ var dir_55fe5e45a05f6720e7ff172edcdb41d1 =
     [ "PackageExtractor.cs", "_package_extractor_8cs.html", null ],
     [ "PackageManager.cs", "_package_manager_8cs.html", "_package_manager_8cs" ],
     [ "PathManager.cs", "_path_manager_8cs.html", null ],
+    [ "RegistryManager.cs", "_registry_manager_8cs.html", null ],
     [ "RobloxDownloader.cs", "_roblox_downloader_8cs.html", "_roblox_downloader_8cs" ],
+    [ "SingletonManager.cs", "_singleton_manager_8cs.html", null ],
     [ "UrlBuilder.cs", "_url_builder_8cs.html", null ],
     [ "VersionManager.cs", "_version_manager_8cs.html", "_version_manager_8cs" ]
 ];

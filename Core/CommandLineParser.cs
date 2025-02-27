@@ -12,7 +12,8 @@
         /// <param name="args">The command-line arguments to parse.</param>
         /// <returns>
         /// A dictionary mapping argument names to their values, with case-insensitive keys.
-        /// Only arguments in the format "--key=value" are included.
+        /// Arguments in the format "--key=value" are included as key-value pairs.
+        /// The first positional argument (if any) is included as "launchUrl".
         /// </returns>
         /// <remarks>
         /// The parsing process:
@@ -21,12 +22,21 @@
         /// 3. Splits each argument at the first "=" character
         /// 4. Discards arguments that don't contain an "=" character
         /// 5. Creates a dictionary with keys being the part before "=" and values being the part after
+        /// 6. If a positional argument exists (doesn't start with "--"), it's added as "launchUrl"
         /// 
         /// Example: "--channel=LIVE" becomes a dictionary entry with key "channel" and value "LIVE"
+        /// Example: "roblox://game/placeid=1234" becomes a dictionary entry with key "launchUrl" and value "roblox://game/placeid=1234"
         /// </remarks>
         public static Dictionary<string, string> Parse(string[] args)
         {
-            return args.Where(arg => arg.StartsWith("--")).Select(arg => arg[2..].Split('=', 2)).Where(parts => parts.Length == 2).ToDictionary(parts => parts[0], parts => parts[1], StringComparer.OrdinalIgnoreCase);
+            var result = args.Where(arg => arg.StartsWith("--")).Select(arg => arg[2..].Split('=', 2)).Where(parts => parts.Length == 2).ToDictionary(parts => parts[0], parts => parts[1], StringComparer.OrdinalIgnoreCase);
+
+            if (args.Length > 0 && !args[0].StartsWith("--"))
+            {
+                result["launchUrl"] = args[0];
+            }
+
+            return result;
         }
     }
 }

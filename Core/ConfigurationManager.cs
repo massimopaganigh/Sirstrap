@@ -52,7 +52,8 @@
                 Version = args.GetValueOrDefault("version") ?? string.Empty,
                 BlobDir = GetBlobDirectory(args),
                 CompressZip = args.GetValueOrDefault("compressZip", "false").Equals("true", StringComparison.OrdinalIgnoreCase),
-                CompressionLevel = GetCompressionLevel(args)
+                CompressionLevel = GetCompressionLevel(args),
+                LaunchUrl = args.GetValueOrDefault("launchUrl") ?? string.Empty
             };
 
             ValidateConfiguration(downloadConfiguration);

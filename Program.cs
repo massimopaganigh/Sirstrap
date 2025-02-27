@@ -30,6 +30,7 @@ namespace Sirstrap
                     ███    ███                            ███    ███                           
 ");
 
+            RegistryManager.RegisterProtocolHandler("roblox-player");
             await new RobloxDownloader().ExecuteAsync(args).ConfigureAwait(false);
             await Log.CloseAndFlushAsync().ConfigureAwait(false);
         }
