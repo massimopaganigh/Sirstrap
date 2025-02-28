@@ -13,9 +13,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="docs\**" />
     <Compile Remove="Sirstrap.Core\**" />
+    <Compile Remove="Sirstrap.UI\**" />
+    <EmbeddedResource Remove="docs\**" />
     <EmbeddedResource Remove="Sirstrap.Core\**" />
+    <EmbeddedResource Remove="Sirstrap.UI\**" />
+    <None Remove="docs\**" />
     <None Remove="Sirstrap.Core\**" />
+    <None Remove="Sirstrap.UI\**" />
   </ItemGroup>
 
   <ItemGroup>

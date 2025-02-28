@@ -17,7 +17,7 @@ namespace Sirstrap
         /// <returns>A task representing the asynchronous operation.</returns>
         private static async Task Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").WriteTo.LastLog().CreateLogger();
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").CreateLogger();
             Console.WriteLine(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
