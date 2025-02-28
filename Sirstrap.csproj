@@ -13,6 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Sirstrap.Core\**" />
+    <EmbeddedResource Remove="Sirstrap.Core\**" />
+    <None Remove="Sirstrap.Core\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="favicon.ico" />
   </ItemGroup>
 
@@ -20,6 +26,10 @@
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="Sirstrap.Core\Sirstrap.Core.csproj" />
   </ItemGroup>
 
 </Project>

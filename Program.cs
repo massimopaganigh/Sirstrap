@@ -17,7 +17,7 @@ namespace Sirstrap
         /// <returns>A task representing the asynchronous operation.</returns>
         private static async Task Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").CreateLogger();
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").WriteTo.LastLog().CreateLogger();
             Console.WriteLine(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
@@ -31,6 +31,7 @@ namespace Sirstrap
 ");
 
             RegistryManager.RegisterProtocolHandler("roblox-player");
+
             await new RobloxDownloader().ExecuteAsync(args).ConfigureAwait(false);
             await Log.CloseAndFlushAsync().ConfigureAwait(false);
         }
