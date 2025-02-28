@@ -3,18 +3,43 @@
         xmlns:vm="using:Sirstrap.UI.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="150"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
         x:Class="Sirstrap.UI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/favicon.ico"
         Title="Sirstrap"
         Width="400"
-        Height="150"
+        Height="200"
         WindowStartupLocation="CenterScreen"
-        CanResize="False">
-  
+        CanResize="False"
+        ExtendClientAreaToDecorationsHint="True">
   <Design.DataContext>
     <vm:MainWindowViewModel/>
   </Design.DataContext>
-  
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="300"/>
+      <ColumnDefinition Width="100"/>
+    </Grid.ColumnDefinitions>
+    <Image Grid.Column="1"
+           Source="avares://Sirstrap.UI/Assets/Icon2022.ico"
+           Height="100"
+           HorizontalAlignment="Right"
+           Margin="0,0,-50,0">
+      <Image.Styles>
+        <Style Selector="Image">
+          <Style.Animations>
+            <Animation Duration="0:0:15" IterationCount="Infinite">
+              <KeyFrame Cue="0%">
+                <Setter Property="RotateTransform.Angle" Value="0"/>
+              </KeyFrame>
+              <KeyFrame Cue="100%">
+                <Setter Property="RotateTransform.Angle" Value="360"/>
+              </KeyFrame>
+            </Animation>
+          </Style.Animations>
+        </Style>
+      </Image.Styles>
+    </Image>
+  </Grid>
 </Window>
