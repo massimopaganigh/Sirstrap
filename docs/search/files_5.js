@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['manifest_2ecs_0',['Manifest.cs',['../_manifest_8cs.html',1,'']]],
-  ['manifestparser_2ecs_1',['ManifestParser.cs',['../_manifest_parser_8cs.html',1,'']]]
+  ['lastlogsink_2ecs_0',['LastLogSink.cs',['../_last_log_sink_8cs.html',1,'']]],
+  ['lastlogsinkextensions_2ecs_1',['LastLogSinkExtensions.cs',['../_last_log_sink_extensions_8cs.html',1,'']]]
 ];

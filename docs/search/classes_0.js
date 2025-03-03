@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['binarytypeinfo_0',['BinaryTypeInfo',['../class_sirstrap_1_1_core_1_1_binary_type_info.html',1,'Sirstrap::Core']]]
+  ['app_0',['App',['../class_sirstrap_1_1_u_i_1_1_app.html',1,'Sirstrap::UI']]]
 ];
