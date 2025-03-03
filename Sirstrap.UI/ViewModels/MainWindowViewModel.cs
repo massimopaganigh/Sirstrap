@@ -101,7 +101,7 @@ namespace Sirstrap.UI.ViewModels
         {
             try
             {
-                string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Logs", "Sirstrap");
+                string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
 
                 Directory.CreateDirectory(logDirectory);
 

@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using System.Text.Json;
 
 namespace Sirstrap.Core
 {
@@ -9,14 +8,14 @@ namespace Sirstrap.Core
     /// </summary>
     public static class SettingsManager
     {
-        private static AppSettings? _settings;
+        private static AppSettings _settings;
         private static readonly object _lock = new();
 
         /// <summary>
         /// Gets the path where the settings file is stored.
         /// </summary>
         /// <returns>
-        /// The full path to the settings.json file in the %localappdata%\Sirstrap directory.
+        /// The full path to the settings.ini file in the %localappdata%\Sirstrap directory.
         /// </returns>
         public static string GetSettingsFilePath()
         {
@@ -24,7 +23,7 @@ namespace Sirstrap.Core
 
             Directory.CreateDirectory(settingsDir);
 
-            return Path.Combine(settingsDir, "settings.json");
+            return Path.Combine(settingsDir, "settings.ini");
         }
 
         /// <summary>
@@ -55,20 +54,47 @@ namespace Sirstrap.Core
         private static AppSettings LoadSettings()
         {
             string filePath = GetSettingsFilePath();
+            var settings = new AppSettings();
 
             try
             {
                 if (File.Exists(filePath))
                 {
-                    string json = File.ReadAllText(filePath);
-                    var settings = JsonSerializer.Deserialize<AppSettings>(json);
+                    string[] lines = File.ReadAllLines(filePath);
 
-                    if (settings != null)
+                    foreach (string line in lines)
                     {
-                        Log.Information("[*] Settings loaded from {0}", filePath);
+                        string trimmedLine = line.Trim();
 
-                        return settings;
+                        if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#"))
+                        {
+                            continue;
+                        }
+
+                        string[] parts = trimmedLine.Split('=', 2);
+
+                        if (parts.Length != 2)
+                        {
+                            continue;
+                        }
+
+                        string key = parts[0].Trim();
+                        string value = parts[1].Trim();
+
+                        if (string.IsNullOrEmpty(key) || string.IsNullOrEmpty(value))
+                        {
+                            continue;
+                        }
+
+                        if (string.Equals(key, "RobloxCdnUrl", StringComparison.OrdinalIgnoreCase))
+                        {
+                            settings.RobloxCdnUrl = value;
+                        }
                     }
+
+                    Log.Information("[*] Settings loaded from {0}", filePath);
+
+                    return settings;
                 }
             }
             catch (Exception ex)
@@ -76,11 +102,9 @@ namespace Sirstrap.Core
                 Log.Warning(ex, "[!] Error loading settings: {0}", ex.Message);
             }
 
-            var defaultSettings = new AppSettings();
+            SaveSettings(settings);
 
-            SaveSettings(defaultSettings);
-
-            return defaultSettings;
+            return settings;
         }
 
         /// <summary>
@@ -96,12 +120,12 @@ namespace Sirstrap.Core
 
             try
             {
-                string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions
+                var lines = new List<string>
                 {
-                    WriteIndented = true
-                });
+                    $"RobloxCdnUrl={settings.RobloxCdnUrl}"
+                };
 
-                File.WriteAllText(filePath, json);
+                File.WriteAllLines(filePath, lines);
 
                 _settings = settings;
 
