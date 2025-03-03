@@ -9,6 +9,7 @@
     <PublishAot>True</PublishAot>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <AssemblyName>Sirstrap</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

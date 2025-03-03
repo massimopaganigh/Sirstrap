@@ -16,7 +16,7 @@
   <Design.DataContext>
     <vm:MainWindowViewModel/>
   </Design.DataContext>
-  <Image Source="avares://Sirstrap.UI/Assets/Icon2022.ico"
+  <Image Source="avares://Sirstrap/Assets/Icon2022.ico"
          Height="100"
          Width="100"
          HorizontalAlignment="Center"

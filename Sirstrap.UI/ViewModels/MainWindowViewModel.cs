@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using Sirstrap.Core;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sirstrap.UI.ViewModels
@@ -61,7 +62,9 @@ namespace Sirstrap.UI.ViewModels
                 Log.Logger = new LoggerConfiguration().WriteTo.File("SirstrapLog.txt").CreateLogger();
                 RegistryManager.RegisterProtocolHandler("roblox-player");
 
-                await new RobloxDownloader().ExecuteAsync(args).ConfigureAwait(false);
+                var filteredArgs = args.Skip(1).ToArray();
+
+                await new RobloxDownloader().ExecuteAsync(filteredArgs).ConfigureAwait(false);
             }
             finally
             {
