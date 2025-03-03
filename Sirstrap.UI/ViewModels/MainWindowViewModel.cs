@@ -3,6 +3,7 @@ using Serilog;
 using Serilog.Events;
 using Sirstrap.Core;
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -100,7 +101,13 @@ namespace Sirstrap.UI.ViewModels
         {
             try
             {
-                Log.Logger = new LoggerConfiguration().WriteTo.File("SirstrapLog.txt").WriteTo.LastLog().CreateLogger();
+                string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Logs", "Sirstrap");
+
+                Directory.CreateDirectory(logDirectory);
+
+                string logFilePath = Path.Combine(logDirectory, "SirstrapLog.txt");
+
+                Log.Logger = new LoggerConfiguration().WriteTo.File(logFilePath).WriteTo.LastLog().CreateLogger();
                 RegistryManager.RegisterProtocolHandler("roblox-player");
 
                 var filteredArgs = args.Skip(1).ToArray();

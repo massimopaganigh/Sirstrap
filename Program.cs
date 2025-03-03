@@ -19,7 +19,13 @@ namespace Sirstrap
         {
             try
             {
-                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").CreateLogger();
+                string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Logs", "Sirstrap");
+
+                Directory.CreateDirectory(logDirectory);
+
+                string logFilePath = Path.Combine(logDirectory, "SirstrapLog.txt");
+
+                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath).CreateLogger();
                 Console.WriteLine(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
