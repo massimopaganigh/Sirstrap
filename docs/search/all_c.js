@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['singletonmanager_2ecs_0',['SingletonManager.cs',['../_singleton_manager_8cs.html',1,'']]],
-  ['sirstrap_1',['Sirstrap',['../namespace_sirstrap.html',1,'']]],
-  ['sirstrap_3a_3acore_2',['Core',['../namespace_sirstrap_1_1_core.html',1,'Sirstrap']]]
+  ['registrymanager_2ecs_0',['RegistryManager.cs',['../_registry_manager_8cs.html',1,'']]],
+  ['robloxdownloader_1',['RobloxDownloader',['../class_sirstrap_1_1_core_1_1_roblox_downloader.html',1,'Sirstrap.Core.RobloxDownloader'],['../class_sirstrap_1_1_core_1_1_roblox_downloader.html#a8fa3b6eac0ccd23803df33f44a431002',1,'Sirstrap.Core.RobloxDownloader.RobloxDownloader()']]],
+  ['robloxdownloader_2ecs_2',['RobloxDownloader.cs',['../_roblox_downloader_8cs.html',1,'']]]
 ];

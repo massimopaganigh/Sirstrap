@@ -17,8 +17,16 @@ namespace Sirstrap
         /// <returns>A task representing the asynchronous operation.</returns>
         private static async Task Main(string[] args)
         {
-            Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File("SirstrapLog.txt").CreateLogger();
-            Console.WriteLine(@"
+            try
+            {
+                string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Logs", "Sirstrap");
+
+                Directory.CreateDirectory(logDirectory);
+
+                string logFilePath = Path.Combine(logDirectory, "SirstrapLog.txt");
+
+                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath).CreateLogger();
+                Console.WriteLine(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███ 
@@ -30,10 +38,16 @@ namespace Sirstrap
                     ███    ███                            ███    ███                           
 ");
 
-            RegistryManager.RegisterProtocolHandler("roblox-player");
+                RegistryManager.RegisterProtocolHandler("roblox-player");
 
-            await new RobloxDownloader().ExecuteAsync(args).ConfigureAwait(false);
-            await Log.CloseAndFlushAsync().ConfigureAwait(false);
+                await new RobloxDownloader().ExecuteAsync(args).ConfigureAwait(false);
+            }
+            finally
+            {
+                await Log.CloseAndFlushAsync().ConfigureAwait(false);
+
+                Environment.Exit(0);
+            }
         }
     }
 }

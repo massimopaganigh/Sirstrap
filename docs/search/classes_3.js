@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['robloxdownloader_0',['RobloxDownloader',['../class_sirstrap_1_1_core_1_1_roblox_downloader.html',1,'Sirstrap::Core']]]
+  ['lastlogsink_0',['LastLogSink',['../class_sirstrap_1_1_core_1_1_last_log_sink.html',1,'Sirstrap::Core']]]
 ];

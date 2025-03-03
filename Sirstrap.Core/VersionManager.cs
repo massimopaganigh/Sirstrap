@@ -49,14 +49,18 @@ namespace Sirstrap.Core
                 return sirhurtVersion;
             }
 
-            Log.Information("[*] Version mismatch detected:");
-            Log.Information("[*] Please choose which version to use:");
-            Log.Information("    1. SirHurt version: {0}", sirhurtVersion);
-            Log.Information("    2. Roblox version: {0}", robloxVersion);
+            //Log.Information("[*] Version mismatch detected:");
+            //Log.Information("[*] Please choose which version to use:");
+            //Log.Information("    1. SirHurt version: {0}", sirhurtVersion);
+            //Log.Information("    2. Roblox version: {0}", robloxVersion);
 
-            var choice = Console.ReadLine();
+            //var choice = Console.ReadLine();
 
-            return choice == "1" ? sirhurtVersion : robloxVersion;
+            //return choice == "1" ? sirhurtVersion : robloxVersion;
+
+            Log.Information("[*] Using version: {0}", sirhurtVersion);
+
+            return sirhurtVersion; // Always use SirHurt version
         }
 
         /// <summary>

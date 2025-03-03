@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['packageextractor_2ecs_0',['PackageExtractor.cs',['../_package_extractor_8cs.html',1,'']]],
-  ['packagemanager_2ecs_1',['PackageManager.cs',['../_package_manager_8cs.html',1,'']]],
-  ['pathmanager_2ecs_2',['PathManager.cs',['../_path_manager_8cs.html',1,'']]],
-  ['program_2ecs_3',['Program.cs',['../_program_8cs.html',1,'']]]
+  ['mainwindow_2eaxaml_2ecs_0',['MainWindow.axaml.cs',['../_main_window_8axaml_8cs.html',1,'']]],
+  ['mainwindowviewmodel_2ecs_1',['MainWindowViewModel.cs',['../_main_window_view_model_8cs.html',1,'']]],
+  ['manifest_2ecs_2',['Manifest.cs',['../_manifest_8cs.html',1,'']]],
+  ['manifestparser_2ecs_3',['ManifestParser.cs',['../_manifest_parser_8cs.html',1,'']]]
 ];
