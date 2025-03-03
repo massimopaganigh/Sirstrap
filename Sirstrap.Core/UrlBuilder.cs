@@ -7,9 +7,15 @@
     public static class UrlBuilder
     {
         /// <summary>
-        /// The base host path for Roblox deployment resources.
+        /// Gets the base host path for Roblox deployment resources from application settings.
         /// </summary>
-        private const string HostPath = "https://setup-cfly.rbxcdn.com";
+        /// <returns>
+        /// The configured host path for Roblox CDN.
+        /// </returns>
+        private static string GetHostPath()
+        {
+            return SettingsManager.GetSettings().RobloxCdnUrl;
+        }
 
         /// <summary>
         /// Constructs a URL for downloading a specific binary file.
@@ -70,10 +76,13 @@
         /// <remarks>
         /// For the "LIVE" channel, the base host path is used directly.
         /// For other channels, the channel name is appended to the path.
+        /// The host path is configurable via the application settings.
         /// </remarks>
         private static string GetBasePath(DownloadConfiguration downloadConfiguration)
         {
-            return downloadConfiguration.Channel.Equals("LIVE", StringComparison.OrdinalIgnoreCase) ? HostPath : $"{HostPath}/channel/{downloadConfiguration.Channel}";
+            string hostPath = GetHostPath();
+
+            return downloadConfiguration.Channel.Equals("LIVE", StringComparison.OrdinalIgnoreCase) ? hostPath : $"{hostPath}/channel/{downloadConfiguration.Channel}";
         }
     }
 }
