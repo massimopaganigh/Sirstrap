@@ -107,6 +107,13 @@ namespace Sirstrap.Core
         /// </remarks>
         public static async Task ProcessPackageAsync(byte[] bytes, string package, ZipArchive finalZip)
         {
+            if (bytes == null)
+            {
+                Log.Error("[!] Failed to download package {0}: Received null data", package);
+
+                return;
+            }
+
             if (GetExtractRoots(package).TryGetValue(package, out string? value))
             {
                 await ExtractAndIntegratePackageAsync(bytes, package, finalZip, value).ConfigureAwait(false);

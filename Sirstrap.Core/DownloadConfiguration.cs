@@ -1,4 +1,6 @@
-﻿namespace Sirstrap.Core
+﻿using Serilog;
+
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Encapsulates configuration settings for downloading and processing Roblox application
@@ -84,7 +86,47 @@
         /// </returns>
         public string GetOutputFileName()
         {
-            return $"{Version}.zip";
+            return Path.Combine(GetCacheDirectory(), $"{Version}.zip");
+        }
+
+        public static string GetCacheDirectory()
+        {
+            string cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Cache");
+
+            Directory.CreateDirectory(cacheDir);
+
+            return cacheDir;
+        }
+
+        public static void ClearCacheDirectory()
+        {
+            string cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Cache");
+
+            if (Directory.Exists(cacheDir))
+            {
+                try
+                {
+                    Log.Information("[*] Clearing cache directory: {0}", cacheDir);
+
+                    foreach (string file in Directory.GetFiles(cacheDir))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warning("[!] Could not delete cache file {0}: {1}", file, ex.Message);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[!] Error clearing cache directory: {0}", ex.Message);
+                }
+            }
+
+            Directory.CreateDirectory(cacheDir);
         }
     }
 }

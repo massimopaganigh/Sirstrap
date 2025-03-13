@@ -21,18 +21,32 @@ namespace Sirstrap.Core
         /// Exceptions that occur during the download are caught, logged, and null is returned.
         /// This method does not throw exceptions to the caller.
         /// </remarks>
-        public static async Task<byte[]> GetBytesAsync(HttpClient httpClient, string url)
+        public static async Task<byte[]> GetBytesAsync(HttpClient httpClient, string url, int maxRetries = 3)
         {
-            try
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                return await httpClient.GetByteArrayAsync(url).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[!] Error requesting binary from {Url}: {ErrorMessage}", url, ex.Message);
+                try
+                {
+                    return await httpClient.GetByteArrayAsync(url).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    if (attempt < maxRetries)
+                    {
+                        Log.Warning("[!] Error requesting binary from {Url} (Attempt {Attempt}/{MaxRetries}): {ErrorMessage}", url, attempt, maxRetries, ex.Message);
 
-                return null!;
+                        await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt))).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        Log.Error(ex, "[!] Failed all {MaxRetries} attempts requesting binary from {Url}: {ErrorMessage}", maxRetries, url, ex.Message);
+
+                        return null!;
+                    }
+                }
             }
+
+            return null!;
         }
 
         /// <summary>

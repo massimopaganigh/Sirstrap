@@ -10,8 +10,8 @@
         /// </summary>
         /// <value>
         /// The URL used as the base for all Roblox CDN requests.
-        /// Defaults to "https://setup-cfly.rbxcdn.com".
+        /// Defaults to "https://setup.rbxcdn.com".
         /// </value>
-        public string RobloxCdnUrl { get; set; } = "https://setup-cfly.rbxcdn.com";
+        public string RobloxCdnUrl { get; set; } = "https://setup.rbxcdn.com";
     }
 }

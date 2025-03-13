@@ -21,6 +21,8 @@ namespace Sirstrap.Core
         {
             var httpClient = new HttpClient();
 
+            httpClient.Timeout = TimeSpan.FromMinutes(5);
+
             _versionManager = new VersionManager(httpClient);
             _packageManager = new PackageManager(httpClient);
         }
@@ -61,6 +63,8 @@ namespace Sirstrap.Core
                         return;
                     }
                 }
+
+                DownloadConfiguration.ClearCacheDirectory();
 
                 await DownloadAndProcessFilesAsync(downloadConfiguration).ConfigureAwait(false);
 
