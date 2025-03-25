@@ -13,54 +13,50 @@ namespace Sirstrap.Core
         private readonly HttpClient _httpClient = httpClient;
 
         /// <summary>
-        /// Retrieves the latest version for the specified binary type by checking both
-        /// SirHurt and official Roblox APIs, and prompting for user selection if versions differ.
+        /// Retrieves the latest version for the specified binary type by first checking
+        /// the SirHurt API, and falling back to the official Roblox API if that fails.
         /// </summary>
         /// <param name="binaryType">The type of binary to get the version for (e.g., "WindowsPlayer").</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result contains
-        /// the selected version string, or an empty string if version retrieval fails.
+        /// the selected version string, or an empty string if version retrieval fails from both sources.
         /// </returns>
         /// <remarks>
         /// This method:
-        /// 1. Attempts to retrieve version information from both SirHurt and Roblox APIs
-        /// 2. If both versions match, returns that version automatically
-        /// 3. If versions differ, prompts the user to choose which version to use
-        /// 4. Returns an empty string if version retrieval fails from either source
+        /// 1. Attempts to retrieve version information from the SirHurt API
+        /// 2. If SirHurt API retrieval fails, falls back to the Roblox API
+        /// 3. Returns an empty string if version retrieval fails from both sources
         /// </remarks>
         public async Task<string> GetLatestVersionAsync(string binaryType)
         {
-            Log.Information("[*] No version specified, getting versions from APIs...");
+            Log.Information("[*] No version specified, getting version from APIs...");
 
+            // Try SirHurt API first
             var sirhurtVersion = await GetSirhurtVersionAsync(binaryType).ConfigureAwait(false);
-            var robloxVersion = await GetRobloxVersionAsync().ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(sirhurtVersion) || string.IsNullOrEmpty(robloxVersion))
+            if (!string.IsNullOrEmpty(sirhurtVersion))
             {
-                Log.Error("[!] Failed to retrieve one or both versions.");
-
-                return string.Empty;
-            }
-
-            if (sirhurtVersion.Equals(robloxVersion, StringComparison.OrdinalIgnoreCase))
-            {
-                Log.Information("[*] Using version: {0}", sirhurtVersion);
+                Log.Information("[*] Using SirHurt version: {0}", sirhurtVersion);
 
                 return sirhurtVersion;
             }
 
-            //Log.Information("[*] Version mismatch detected:");
-            //Log.Information("[*] Please choose which version to use:");
-            //Log.Information("    1. SirHurt version: {0}", sirhurtVersion);
-            //Log.Information("    2. Roblox version: {0}", robloxVersion);
+            // Fall back to Roblox API if SirHurt API failed
+            Log.Information("[*] SirHurt version retrieval failed, trying Roblox API...");
 
-            //var choice = Console.ReadLine();
+            var robloxVersion = await GetRobloxVersionAsync().ConfigureAwait(false);
 
-            //return choice == "1" ? sirhurtVersion : robloxVersion;
+            if (!string.IsNullOrEmpty(robloxVersion))
+            {
+                Log.Information("[*] Using Roblox version: {0}", robloxVersion);
 
-            Log.Information("[*] Using version: {0}", sirhurtVersion);
+                return robloxVersion;
+            }
 
-            return sirhurtVersion; // Always use SirHurt version
+            // Both APIs failed
+            Log.Error("[!] Failed to retrieve version from both APIs.");
+
+            return string.Empty;
         }
 
         /// <summary>
