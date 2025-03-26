@@ -24,29 +24,24 @@ namespace Sirstrap.Core
         {
             try
             {
-                string executablePath = AppDomain.CurrentDomain.BaseDirectory + AppDomain.CurrentDomain.FriendlyName;
+                string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}";
 
-                Log.Information("[*] Registering Sirstrap as handler for {0} protocol.", protocol);
-                Log.Information("[*] Executable path: {0}", executablePath);
+                Log.Information("[*] Registration of Sirstrap ({0}) as a handler of the {1} protocol.", exePath, protocol);
 
-                using RegistryKey key = Registry.ClassesRoot.OpenSubKey($"{protocol}\\shell\\open\\command", true);
+                using RegistryKey protocolKey = Registry.ClassesRoot.CreateSubKey(protocol);
+                using RegistryKey shellKey = protocolKey.CreateSubKey("shell");
+                using RegistryKey openKey = shellKey.CreateSubKey("open");
+                using RegistryKey commandKey = openKey.CreateSubKey("command");
 
-                if (key == null)
-                {
-                    Log.Error("[!] Registry key not found: {0}\\shell\\open\\command", protocol);
+                commandKey.SetValue(string.Empty, $"\"{exePath}\" %1");
 
-                    return false;
-                }
-
-                key.SetValue(string.Empty, $"\"{executablePath}\" %1");
-
-                Log.Information("[*] Successfully registered as {0} protocol handler.", protocol);
+                Log.Information("[*] Registration successfully completed.");
 
                 return true;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Error registering protocol handler: {0}", ex.Message);
+                Log.Error(ex, "[!] Registration ended with exception: {0}.", ex.Message);
 
                 return false;
             }
