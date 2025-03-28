@@ -19,9 +19,10 @@ namespace Sirstrap.Core
         /// </remarks>
         public RobloxDownloader()
         {
-            var httpClient = new HttpClient();
-
-            httpClient.Timeout = TimeSpan.FromMinutes(5);
+            var httpClient = new HttpClient
+            {
+                Timeout = TimeSpan.FromMinutes(5)
+            };
 
             _versionManager = new VersionManager(httpClient);
             _packageManager = new PackageManager(httpClient);
@@ -47,6 +48,8 @@ namespace Sirstrap.Core
         {
             try
             {
+                await new SirstrapUpdater().CheckAndInstallUpdateAsync().ConfigureAwait(false);
+
                 var downloadConfiguration = ConfigurationManager.CreateDownloadConfiguration(CommandLineParser.Parse(args));
 
                 if (!await InitializeDownloadAsync(downloadConfiguration).ConfigureAwait(false))
