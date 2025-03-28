@@ -75,7 +75,7 @@ namespace Sirstrap.Core
         /// </returns>
         public static bool ReleaseSingleton()
         {
-            Log.Information("Attempting to release Roblox singleton...");
+            Log.Information("[*] Attempting to release Roblox singleton...");
 
             lock (_lockObject)
             {
