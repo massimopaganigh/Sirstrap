@@ -61,7 +61,7 @@ namespace Sirstrap.Core
                 {
                     Log.Information("[*] Version {0} is already installed.", downloadConfiguration.Version);
 
-                    if (LaunchApplication(downloadConfiguration, string.IsNullOrEmpty(downloadConfiguration.LaunchUrl)))
+                    if (LaunchApplication(downloadConfiguration))
                     {
                         return;
                     }
@@ -137,9 +137,9 @@ namespace Sirstrap.Core
         /// Currently only supports launching the Windows Player version.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static bool LaunchApplication(DownloadConfiguration downloadConfiguration, bool waitForExit = false)
+        private static bool LaunchApplication(DownloadConfiguration downloadConfiguration)
         {
-            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration, waitForExit);
+            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration);
         }
 
         /// <summary>
@@ -186,9 +186,7 @@ namespace Sirstrap.Core
 
             ApplicationInstaller.Install(downloadConfiguration);
 
-            bool hasLaunchUrl = !string.IsNullOrEmpty(downloadConfiguration.LaunchUrl);
-
-            LaunchApplication(downloadConfiguration, !hasLaunchUrl);
+            LaunchApplication(downloadConfiguration);
         }
     }
 }

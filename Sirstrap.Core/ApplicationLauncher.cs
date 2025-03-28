@@ -4,83 +4,84 @@ using System.Diagnostics;
 namespace Sirstrap.Core
 {
     /// <summary>
-    /// Provides functionality to launch the Roblox application executable based on 
-    /// specified version configuration.
+    /// Provides functionality to launch the Roblox application with specific configurations.
     /// </summary>
     public static class ApplicationLauncher
     {
+        private const string ROBLOX_PLAYER_BETA_EXE = "RobloxPlayerBeta.exe";
+        private const int PROCESS_POLLING_INTERVAL_MS = 100;
+
         /// <summary>
-        /// Attempts to launch the Roblox Player application for the specified version.
+        /// Launches the Roblox application with the specified download configuration.
         /// </summary>
-        /// <param name="downloadConfiguration">Configuration containing the version information 
-        /// for the Roblox executable to launch.</param>
-        /// <param name="waitForExit">Whether to wait for the Roblox process to exit.</param>
+        /// <param name="downloadConfiguration">Configuration containing version and launch parameters.</param>
         /// <returns>
-        /// <c>true</c> if the application was successfully launched; 
-        /// <c>false</c> if the executable file could not be found.
+        /// <c>true</c> if the application was successfully launched; otherwise, <c>false</c>.
         /// </returns>
-        /// <remarks>
-        /// The method determines the executable path based on the version in the configuration,
-        /// logs the launch attempt, and starts the process with its working directory set to 
-        /// the executable's directory. If a LaunchUrl is specified, it will be passed as an
-        /// argument to the Roblox process to launch directly into a specific experience.
-        /// </remarks>
-        public static bool Launch(DownloadConfiguration downloadConfiguration, bool waitForExit = false)
+        public static bool Launch(DownloadConfiguration downloadConfiguration)
         {
-            var executablePath = Path.Combine(PathManager.GetVersionInstallPath(downloadConfiguration.Version), "RobloxPlayerBeta.exe");
+            var robloxPlayerBetaExePath = Path.Combine(PathManager.GetVersionInstallPath(downloadConfiguration.Version), ROBLOX_PLAYER_BETA_EXE);
 
-            if (File.Exists(executablePath))
+            if (!File.Exists(robloxPlayerBetaExePath))
             {
-                bool capturedSingleton = waitForExit && SingletonManager.CaptureSingleton();
+                Log.Warning("[*] Roblox has not been found in: {0}.", robloxPlayerBetaExePath);
 
-                Log.Information("[*] Launching {0}...", executablePath);
+                return false;
+            }
 
-                ProcessStartInfo startInfo = new()
+            var capturedSingleton = false;
+
+            try
+            {
+                capturedSingleton = SingletonManager.CaptureSingleton();
+
+                ProcessStartInfo robloxPlayerBetaExeStartInfo = new()
                 {
-                    FileName = executablePath,
-                    WorkingDirectory = Path.GetDirectoryName(executablePath),
+                    FileName = robloxPlayerBetaExePath,
+                    WorkingDirectory = Path.GetDirectoryName(robloxPlayerBetaExePath),
                     UseShellExecute = true
                 };
 
                 if (!string.IsNullOrEmpty(downloadConfiguration.LaunchUrl))
                 {
-                    Log.Information("[*] With launch URL: {0}", downloadConfiguration.LaunchUrl);
+                    robloxPlayerBetaExeStartInfo.Arguments = downloadConfiguration.LaunchUrl;
 
-                    startInfo.Arguments = downloadConfiguration.LaunchUrl;
+                    Log.Information("[*] Launch url: {0}.", robloxPlayerBetaExeStartInfo.Arguments);
                 }
 
-                var process = Process.Start(startInfo);
+                Log.Information("[*] Launching Roblox ({0})...", robloxPlayerBetaExePath);
 
-                if (capturedSingleton && process != null)
+                var robloxPlayerBetaExeProcess = Process.Start(robloxPlayerBetaExeStartInfo) ?? throw new Exception();
+
+                Log.Information("[*] Waiting for Roblox process input idle...");
+
+                robloxPlayerBetaExeProcess.WaitForInputIdle();
+
+                if (capturedSingleton)
                 {
-                    Task.Run(() => WaitForProcessExit(process));
+                    Log.Information("[*] Waiting for Roblox process exit...");
+
+                    while (SingletonManager.HasCapturedSingleton && !robloxPlayerBetaExeProcess.HasExited && Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ROBLOX_PLAYER_BETA_EXE)).Length > 0)
+                    {
+                        Thread.Sleep(PROCESS_POLLING_INTERVAL_MS);
+                    }
                 }
 
                 return true;
             }
-            else
+            catch (Exception ex)
             {
-                Log.Error("[!] Could not find {0}.", executablePath);
+                Log.Error(ex, "[!] Error during the launch of Roblox: {0}.", ex.Message);
 
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Waits for a Roblox process to exit and releases the singleton mutex afterward.
-        /// </summary>
-        /// <param name="process">The Roblox process to monitor.</param>
-        private static void WaitForProcessExit(Process process)
-        {
-            Log.Information("[*] Waiting for Roblox to exit...");
-
-            while (SingletonManager.HasCapturedSingleton && !process.HasExited && Process.GetProcessesByName("RobloxPlayerBeta").Length > 0)
+            finally
             {
-                Thread.Sleep(100);
+                if (capturedSingleton)
+                {
+                    SingletonManager.ReleaseSingleton();
+                }
             }
-
-            SingletonManager.ReleaseSingleton();
-            Log.Information("[*] Roblox has exited.");
         }
     }
 }
