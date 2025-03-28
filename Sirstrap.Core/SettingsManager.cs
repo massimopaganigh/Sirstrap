@@ -90,6 +90,10 @@ namespace Sirstrap.Core
                         {
                             settings.RobloxCdnUrl = value;
                         }
+                        if (string.Equals(key, "SirstrapUpdateChannel", StringComparison.OrdinalIgnoreCase))
+                        {
+                            settings.SirstrapUpdateChannel = value;
+                        }
                     }
 
                     Log.Information("[*] Settings loaded from {0}", filePath);
@@ -122,7 +126,8 @@ namespace Sirstrap.Core
             {
                 var lines = new List<string>
                 {
-                    $"RobloxCdnUrl={settings.RobloxCdnUrl}"
+                    $"RobloxCdnUrl={settings.RobloxCdnUrl}",
+                    $"SirstrapUpdateChannel={settings.SirstrapUpdateChannel}"
                 };
 
                 File.WriteAllLines(filePath, lines);

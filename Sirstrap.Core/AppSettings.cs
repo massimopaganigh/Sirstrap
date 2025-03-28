@@ -13,5 +13,7 @@
         /// Defaults to "https://setup.rbxcdn.com".
         /// </value>
         public string RobloxCdnUrl { get; set; } = "https://setup.rbxcdn.com";
+
+        public string SirstrapUpdateChannel { get; set; } = "-beta";
     }
 }
