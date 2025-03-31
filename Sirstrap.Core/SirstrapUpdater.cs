@@ -181,12 +181,21 @@ exit
         }
 
         /// <summary>
+        /// Gets the current full version of Sirstrap.
+        /// </summary>
+        /// <returns>The current version of Sirstrap.</returns>
+        public static string GetCurrentFullVersion()
+        {
+            return $"v{GetCurrentVersion()}{GetCurrentChannel()}";
+        }
+
+        /// <summary>
         /// Gets the current version of Sirstrap.
         /// </summary>
         /// <returns>The current version of Sirstrap.</returns>
         private static Version GetCurrentVersion()
         {
-            return new Version("1.1.5.1");
+            return new Version("1.1.5.2");
         }
 
         /// <summary>

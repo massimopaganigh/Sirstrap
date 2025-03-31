@@ -27,6 +27,12 @@ namespace Sirstrap.UI.ViewModels
     public partial class MainWindowViewModel : ObservableObject
     {
         /// <summary>
+        /// Gets or sets the current full version.
+        /// </summary>
+        [ObservableProperty]
+        private string _currentFullVersion = SirstrapUpdater.GetCurrentFullVersion();
+
+        /// <summary>
         /// Gets or sets the most recent log message from the application.
         /// </summary>
         [ObservableProperty]

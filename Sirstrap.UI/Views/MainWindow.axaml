@@ -38,12 +38,22 @@
       </Image.Styles>
     </Image>
     <TextBlock Text="{Binding LastLogMessage}"
-               HorizontalAlignment="Center"
+               HorizontalAlignment="Left"
                VerticalAlignment="Bottom"
                Margin="10"
                FontSize="10"
+               TextAlignment="Left"
                TextWrapping="NoWrap"
                TextTrimming="CharacterEllipsis"
-               MaxWidth="380"/>
+               MaxWidth="295"/>
+    <TextBlock Text="{Binding CurrentFullVersion}"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Bottom"
+               Margin="10"
+               FontSize="10"
+               TextAlignment="Right"
+               TextWrapping="NoWrap"
+               TextTrimming="CharacterEllipsis"
+               MaxWidth="75"/>
   </Grid>
 </Window>
