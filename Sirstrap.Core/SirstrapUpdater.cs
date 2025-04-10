@@ -1,7 +1,6 @@
 ﻿using Serilog;
 using System.Diagnostics;
 using System.IO.Compression;
-using System.Reflection;
 using System.Text.Json;
 
 namespace Sirstrap.Core
@@ -66,6 +65,7 @@ namespace Sirstrap.Core
                 if (latestVersion.Major == 0 && latestVersion.Minor == 0 && latestVersion.Build == 0 && latestVersion.Revision == 0)
                 {
                     Log.Warning("[!] Could not retrieve latest version information.");
+
                     return false;
                 }
 
@@ -195,7 +195,7 @@ exit
         /// <returns>The current version of Sirstrap.</returns>
         private static Version GetCurrentVersion()
         {
-            return new Version("1.1.5.2");
+            return new Version("1.1.5.3");
         }
 
         /// <summary>
