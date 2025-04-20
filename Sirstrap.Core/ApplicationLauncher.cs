@@ -59,7 +59,7 @@ namespace Sirstrap.Core
 
                 if (capturedSingleton)
                 {
-                    Log.Information("[*] Waiting for Roblox process exit...");
+                    Log.Information("[*][MultiInstance] Waiting for Roblox process exit...");
 
                     while (SingletonManager.HasCapturedSingleton && !robloxPlayerBetaExeProcess.HasExited && Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ROBLOX_PLAYER_BETA_EXE)).Length > 0)
                     {

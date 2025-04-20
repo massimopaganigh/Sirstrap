@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using System.Diagnostics;
 
 namespace Sirstrap.Core
 {
@@ -46,6 +47,8 @@ namespace Sirstrap.Core
                     if (createdNew)
                     {
                         Log.Information("[*] Successfully captured Roblox singleton.");
+
+                        CloseAllRobloxInstances();
 
                         return true;
                     }
@@ -100,6 +103,47 @@ namespace Sirstrap.Core
 
                     return false;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Closes all running instances of Roblox by killing the processes directly.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the operation was successful; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool CloseAllRobloxInstances()
+        {
+            try
+            {
+                // Get Roblox processes with their exact names
+                var processNames = new[] { "Roblox", "RobloxCrashHandler" };
+
+                foreach (var processName in processNames)
+                {
+                    foreach (var process in Process.GetProcessesByName(processName))
+                    {
+                        try
+                        {
+                            // Kill the process directly
+                            process.Kill();
+                        }
+                        catch
+                        {
+                            // No logging of exceptions
+                        }
+                        finally
+                        {
+                            process.Dispose();
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }
