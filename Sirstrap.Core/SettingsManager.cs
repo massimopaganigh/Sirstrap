@@ -86,6 +86,8 @@ namespace Sirstrap.Core
         {
             string filePath = GetSettingsFilePath();
             var settings = new AppSettings();
+            bool needsUpdate = false;
+            var loadedKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             try
             {
@@ -117,6 +119,8 @@ namespace Sirstrap.Core
                             continue;
                         }
 
+                        loadedKeys.Add(key);
+
                         if (string.Equals(key, "RobloxCdnUrl", StringComparison.OrdinalIgnoreCase))
                         {
                             settings.RobloxCdnUrl = value;
@@ -132,9 +136,28 @@ namespace Sirstrap.Core
                                 settings.SafeMode = safeMode;
                             }
                         }
+                        else if (string.Equals(key, "MultiInstance", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (bool.TryParse(value, out bool multiInstance))
+                            {
+                                settings.MultiInstance = multiInstance;
+                            }
+                        }
+                    }
+
+                    if (!loadedKeys.Contains("RobloxCdnUrl") || !loadedKeys.Contains("SirstrapUpdateChannel") || !loadedKeys.Contains("SafeMode") || !loadedKeys.Contains("MultiInstance"))
+                    {
+                        needsUpdate = true;
                     }
 
                     Log.Information("[*] Settings loaded from {0}", filePath);
+
+                    if (needsUpdate)
+                    {
+                        Log.Information("[*] Upgrading settings file with missing parameters");
+
+                        SaveSettings(settings);
+                    }
 
                     return settings;
                 }
@@ -173,7 +196,8 @@ namespace Sirstrap.Core
                 {
                     $"RobloxCdnUrl={settings.RobloxCdnUrl}",
                     $"SirstrapUpdateChannel={settings.SirstrapUpdateChannel}",
-                    $"SafeMode={settings.SafeMode}"
+                    $"SafeMode={settings.SafeMode}",
+                    $"MultiInstance={settings.MultiInstance}"
                 };
 
                 File.WriteAllLines(filePath, lines);

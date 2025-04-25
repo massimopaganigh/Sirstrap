@@ -30,10 +30,14 @@ namespace Sirstrap.Core
             }
 
             var capturedSingleton = false;
+            var multiInstanceEnabled = SettingsManager.GetSettings().MultiInstance;
 
             try
             {
-                capturedSingleton = SingletonManager.CaptureSingleton();
+                if (multiInstanceEnabled)
+                {
+                    capturedSingleton = SingletonManager.CaptureSingleton();
+                }
 
                 ProcessStartInfo robloxPlayerBetaExeStartInfo = new()
                 {

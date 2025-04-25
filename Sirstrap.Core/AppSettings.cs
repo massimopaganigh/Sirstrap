@@ -56,5 +56,26 @@
         /// - Falls back to the official Roblox API if SirHurt API fails
         /// </remarks>
         public bool SafeMode { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether multiple instances of the application can run simultaneously.
+        /// </summary>
+        /// <value>
+        /// <c>true</c> to allow multiple instances of the application to run concurrently;
+        /// <c>false</c> to allow only one instance at a time.
+        /// Defaults to <c>true</c>.
+        /// </value>
+        /// <remarks>
+        /// This setting controls the application's instance behavior:
+        /// 
+        /// When enabled:
+        /// - Multiple instances of the application can be launched and run simultaneously
+        /// - Each instance operates independently with its own resources
+        /// 
+        /// When disabled (default):
+        /// - Only one instance of the application can run at a time
+        /// - Attempting to launch another instance will activate the existing one
+        /// </remarks>
+        public bool MultiInstance { get; set; } = true;
     }
 }
