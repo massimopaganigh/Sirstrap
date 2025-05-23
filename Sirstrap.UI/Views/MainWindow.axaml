@@ -48,19 +48,52 @@
                 </Style>
             </Image.Styles>
         </Image>
-        <Border
-            Grid.Row="0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Background="Orange"
-            CornerRadius="0,0,10,0">
-            <!--Background="#4EA2FF"-->
-            <TextBlock
-                FontFamily="Verdana"
-                FontSize="10"
-                Padding="10"
-                Text="{Binding CurrentFullVersion}" />
-        </Border>
+        <StackPanel Orientation="Horizontal">
+            <Border
+                Grid.Row="0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="#4EA2FF"
+                CornerRadius="0,10,10,0"
+                ZIndex="100">
+                <!--Background="Orange"-->
+                <TextBlock
+                    FontFamily="Verdana"
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding CurrentFullVersion}" />
+            </Border>
+            <Border
+                Grid.Row="0"
+                Margin="-10,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Gray"
+                CornerRadius="0,10,10,0"
+                IsVisible="{Binding IsRobloxRunning}"
+                ZIndex="99">
+                <StackPanel Orientation="Horizontal">
+                    <Image
+                        Width="20"
+                        Height="20"
+                        Margin="20,0,0,0"
+                        Source="avares://Sirstrap/Assets/Icon2022.ico"
+                        ZIndex="100" />
+                    <Image
+                        Width="20"
+                        Height="20"
+                        Margin="-12.5,0,0,0"
+                        Opacity="0.25"
+                        Source="avares://Sirstrap/Assets/Icon2022.ico"
+                        ZIndex="99" />
+                    <TextBlock
+                        FontFamily="Verdana"
+                        FontSize="10"
+                        Padding="10"
+                        Text="{Binding RobloxProcessCount}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
         <TextBlock
             Grid.Row="2"
             HorizontalAlignment="Left"

@@ -3,6 +3,7 @@ using Serilog;
 using Serilog.Events;
 using Sirstrap.Core;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -50,6 +51,18 @@ namespace Sirstrap.UI.ViewModels
         [ObservableProperty]
         private LogEventLevel? _lastLogLevel;
 
+        /// <summary>
+        /// Gets or sets the number of currently running Roblox processes.
+        /// </summary>
+        [ObservableProperty]
+        private int _robloxProcessCount;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Roblox is currently running.
+        /// </summary>
+        [ObservableProperty]
+        private bool _isRobloxRunning;
+
         private readonly System.Timers.Timer _logPollingTimer;
 
         /// <summary>
@@ -79,6 +92,27 @@ namespace Sirstrap.UI.ViewModels
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;
                 LastLogLevel = LastLogSink.LastLogLevel;
+            }
+
+            // Aggiorna anche il conteggio dei processi di Roblox
+            UpdateRobloxProcessCount();
+        }
+
+        /// <summary>
+        /// Updates the count of running Roblox processes.
+        /// </summary>
+        private void UpdateRobloxProcessCount()
+        {
+            try
+            {
+                var robloxProcessNames = new[] { "RobloxPlayerBeta" };
+                var count = Process.GetProcesses().Count(x => robloxProcessNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
+
+                RobloxProcessCount = count;
+                IsRobloxRunning = count > 0;
+            }
+            catch (Exception)
+            {
             }
         }
 
