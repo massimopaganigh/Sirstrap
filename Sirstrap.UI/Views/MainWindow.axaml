@@ -58,7 +58,6 @@
             <TextBlock
                 FontFamily="Verdana"
                 FontSize="10"
-                FontWeight="Bold"
                 Padding="10"
                 Text="{Binding CurrentFullVersion}" />
         </Border>
@@ -68,7 +67,6 @@
             VerticalAlignment="Bottom"
             FontFamily="Verdana"
             FontSize="10"
-            FontWeight="Bold"
             Padding="10"
             Text="{Binding LastLogMessage}"
             TextAlignment="Left"
