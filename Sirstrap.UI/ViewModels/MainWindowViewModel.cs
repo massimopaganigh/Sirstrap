@@ -30,7 +30,7 @@ namespace Sirstrap.UI.ViewModels
         /// Gets or sets the current full version.
         /// </summary>
         [ObservableProperty]
-        private string _currentFullVersion = SirstrapUpdater.GetCurrentFullVersion();
+        private string _currentFullVersion = $"Sirstrap {SirstrapUpdater.GetCurrentFullVersion()}";
 
         /// <summary>
         /// Gets or sets the most recent log message from the application.
