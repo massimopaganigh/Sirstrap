@@ -76,6 +76,6 @@
         /// - Only one instance of the application can run at a time
         /// - Attempting to launch another instance will activate the existing one
         /// </remarks>
-        public bool MultiInstance { get; set; } = true;
+        public bool MultiInstance { get; set; }
     }
 }
