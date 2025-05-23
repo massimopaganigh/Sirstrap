@@ -1,59 +1,76 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:Sirstrap.UI.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="200"
-        x:Class="Sirstrap.UI.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/favicon.ico"
-        Title="Sirstrap"
-        Width="400"
-        Height="200"
-        WindowStartupLocation="CenterScreen"
-        CanResize="False"
-        ExtendClientAreaToDecorationsHint="True">
-  <Design.DataContext>
-    <vm:MainWindowViewModel/>
-  </Design.DataContext>
-  <Grid>
-    <Image Source="avares://Sirstrap/Assets/Icon2022.ico"
-           Height="100"
-           Width="100"
-           HorizontalAlignment="Center"
-           VerticalAlignment="Center">
-      <Image.Styles>
-        <Style Selector="Image">
-          <Style.Animations>
-            <Animation Duration="0:0:30" IterationCount="Infinite">
-              <KeyFrame Cue="0%">
-                <Setter Property="RotateTransform.Angle" Value="0"/>
-              </KeyFrame>
-              <KeyFrame Cue="100%">
-                <Setter Property="RotateTransform.Angle" Value="360"/>
-              </KeyFrame>
-            </Animation>
-          </Style.Animations>
-        </Style>
-      </Image.Styles>
-    </Image>
-    <TextBlock Text="{Binding LastLogMessage}"
-               HorizontalAlignment="Left"
-               VerticalAlignment="Bottom"
-               Margin="10"
-               FontSize="10"
-               TextAlignment="Left"
-               TextWrapping="NoWrap"
-               TextTrimming="CharacterEllipsis"
-               MaxWidth="295"/>
-    <TextBlock Text="{Binding CurrentFullVersion}"
-               HorizontalAlignment="Right"
-               VerticalAlignment="Bottom"
-               Margin="10"
-               FontSize="10"
-               TextAlignment="Right"
-               TextWrapping="NoWrap"
-               TextTrimming="CharacterEllipsis"
-               MaxWidth="75"/>
-  </Grid>
+<Window
+    x:Class="Sirstrap.UI.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Sirstrap.UI.ViewModels"
+    Width="400"
+    Height="200"
+    mc:Ignorable="d"
+    CanResize="False"
+    d:DesignHeight="200"
+    d:DesignWidth="400"
+    ExtendClientAreaToDecorationsHint="True"
+    Icon="/Assets/favicon.ico"
+    Title="Sirstrap"
+    WindowStartupLocation="CenterScreen"
+    x:DataType="vm:MainWindowViewModel">
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Image
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Width="100"
+            Height="100"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Source="avares://Sirstrap/Assets/Icon2022.ico">
+            <Image.Styles>
+                <Style Selector="Image">
+                    <Style.Animations>
+                        <Animation Duration="0:0:30" IterationCount="Infinite">
+                            <KeyFrame Cue="0%">
+                                <Setter Property="RotateTransform.Angle" Value="0" />
+                            </KeyFrame>
+                            <KeyFrame Cue="100%">
+                                <Setter Property="RotateTransform.Angle" Value="360" />
+                            </KeyFrame>
+                        </Animation>
+                    </Style.Animations>
+                </Style>
+            </Image.Styles>
+        </Image>
+        <Border
+            Grid.Row="0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="Orange"
+            CornerRadius="0,0,10,0">
+            <!--Background="#4EA2FF"-->
+            <TextBlock
+                FontFamily="Verdana"
+                FontSize="10"
+                Padding="10"
+                Text="{Binding CurrentFullVersion}" />
+        </Border>
+        <TextBlock
+            Grid.Row="2"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            FontFamily="Verdana"
+            FontSize="10"
+            Padding="10"
+            Text="{Binding LastLogMessage}"
+            TextAlignment="Left"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap" />
+    </Grid>
 </Window>

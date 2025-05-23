@@ -195,7 +195,7 @@ exit
         /// <returns>The current version of Sirstrap.</returns>
         private static Version GetCurrentVersion()
         {
-            return new Version("1.1.5.5");
+            return new Version("1.1.6.0");
         }
 
         /// <summary>
