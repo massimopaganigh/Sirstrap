@@ -44,11 +44,11 @@ namespace Sirstrap.Core
         /// 
         /// Exceptions during any part of the process are caught, logged, and will halt execution.
         /// </remarks>
-        public async Task ExecuteAsync(string[] args)
+        public async Task ExecuteAsync(string[] args, SirstrapType sirstrapType)
         {
             try
             {
-                await new SirstrapUpdater().CheckAndInstallUpdateAsync().ConfigureAwait(false);
+                await new SirstrapUpdater().CheckAndInstallUpdateAsync(sirstrapType).ConfigureAwait(false);
 
                 var downloadConfiguration = ConfigurationManager.CreateDownloadConfiguration(CommandLineParser.Parse(args));
 

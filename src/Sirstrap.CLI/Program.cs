@@ -31,7 +31,7 @@ namespace Sirstrap
 
                 RegistryManager.RegisterProtocolHandler("roblox-player");
 
-                await new RobloxDownloader().ExecuteAsync(arguments);
+                await new RobloxDownloader().ExecuteAsync(arguments, SirstrapType.CLI);
             }
             finally
             {

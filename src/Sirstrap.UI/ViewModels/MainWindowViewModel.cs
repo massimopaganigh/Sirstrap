@@ -58,7 +58,7 @@ namespace Sirstrap.UI.ViewModels
 
                 string[] fixedArguments = [.. arguments.Skip(1)];
 
-                await new RobloxDownloader().ExecuteAsync(fixedArguments);
+                await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
             }
             finally
             {
