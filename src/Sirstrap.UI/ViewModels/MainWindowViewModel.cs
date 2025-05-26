@@ -70,7 +70,7 @@ namespace Sirstrap.UI.ViewModels
 
         private void UpdateLastLogFromSink()
         {
-            if (LastLogMessage.Equals(LastLogSink.LastLog))
+            if (!LastLogMessage.Equals(LastLogSink.LastLog))
             {
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;
