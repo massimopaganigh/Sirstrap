@@ -16,8 +16,8 @@ namespace Sirstrap.Core
     /// </remarks>
     public static class SettingsManager
     {
-        private static AppSettings _settings;
-        private static readonly object _lock = new();
+        private static AppSettings? _settings;
+        private static readonly Lock _lock = new();
 
         /// <summary>
         /// Gets the path where the settings file is stored.
@@ -99,7 +99,7 @@ namespace Sirstrap.Core
                     {
                         string trimmedLine = line.Trim();
 
-                        if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith("#"))
+                        if (string.IsNullOrEmpty(trimmedLine) || trimmedLine.StartsWith('#'))
                         {
                             continue;
                         }

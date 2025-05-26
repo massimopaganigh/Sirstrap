@@ -11,7 +11,7 @@ namespace Sirstrap.Core
     {
         private const string ROBLOX_MUTEX_NAME = "ROBLOX_singletonMutex";
         private static Mutex? _robloxMutex;
-        private static readonly object _lockObject = new();
+        private static readonly Lock _lockObject = new();
 
         /// <summary>
         /// Gets a value indicating whether the singleton has been successfully captured.

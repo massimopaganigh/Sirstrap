@@ -73,7 +73,7 @@ namespace Sirstrap.Core
             { "extracontent-models.zip", "ExtraContent/models/" }
         };
 
-        private static readonly object _zipLock = new();
+        private static readonly Lock _zipLock = new();
 
         /// <summary>
         /// Creates and adds a text file with the specified content to the final ZIP archive.
@@ -167,7 +167,7 @@ namespace Sirstrap.Core
                     continue;
                 }
 
-                var targetValue = value + entry.FullName.Replace('\\', '/');
+                var targetValue = $"{value}{entry.FullName.Replace('\\', '/')}";
 
                 await IntegrateEntryAsync(entry, targetValue, finalZip).ConfigureAwait(false);
             }

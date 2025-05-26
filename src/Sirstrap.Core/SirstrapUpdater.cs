@@ -60,7 +60,7 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] Current version: {0}, channel: {1}.", currentVersion, currentChannel);
 
-                var (latestVersion, latestChannel, downloadUrl) = await GetLatestVersionInfoAsync(currentChannel).ConfigureAwait(false);
+                var (latestVersion, latestChannel, _) = await GetLatestVersionInfoAsync(currentChannel).ConfigureAwait(false);
 
                 if (latestVersion.Major == 0 && latestVersion.Minor == 0 && latestVersion.Build == 0 && latestVersion.Revision == 0)
                 {

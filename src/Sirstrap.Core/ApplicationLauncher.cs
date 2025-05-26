@@ -20,7 +20,7 @@ namespace Sirstrap.Core
         /// </returns>
         public static bool Launch(DownloadConfiguration downloadConfiguration)
         {
-            var robloxPlayerBetaExePath = Path.Combine(PathManager.GetVersionInstallPath(downloadConfiguration.Version), ROBLOX_PLAYER_BETA_EXE);
+            var robloxPlayerBetaExePath = Path.Combine(PathManager.GetVersionInstallPath(downloadConfiguration.Version!), ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {

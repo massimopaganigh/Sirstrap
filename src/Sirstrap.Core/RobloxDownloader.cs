@@ -96,7 +96,7 @@ namespace Sirstrap.Core
         {
             if (string.IsNullOrEmpty(downloadConfiguration.Version))
             {
-                downloadConfiguration.Version = await _versionManager.GetLatestVersionAsync(downloadConfiguration.BinaryType).ConfigureAwait(false);
+                downloadConfiguration.Version = await _versionManager.GetLatestVersionAsync(downloadConfiguration.BinaryType!).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(downloadConfiguration.Version))
                 {
@@ -122,7 +122,7 @@ namespace Sirstrap.Core
         /// </remarks>
         private static bool IsAlreadyInstalled(DownloadConfiguration downloadConfiguration)
         {
-            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version));
+            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version));
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace Sirstrap.Core
         /// </remarks>
         private static bool LaunchApplication(DownloadConfiguration downloadConfiguration)
         {
-            return downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration);
+            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace Sirstrap.Core
         /// </remarks>
         private static void InstallAndLaunchApplication(DownloadConfiguration downloadConfiguration)
         {
-            if (!downloadConfiguration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
+            if (!downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }

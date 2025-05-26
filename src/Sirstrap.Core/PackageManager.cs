@@ -24,7 +24,7 @@ namespace Sirstrap.Core
         /// </remarks>
         public async Task DownloadMacBinaryAsync(DownloadConfiguration downloadConfiguration)
         {
-            var zipFileName = downloadConfiguration.BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
+            var zipFileName = downloadConfiguration.BinaryType!.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
 
             Log.Information("[*] Downloading ZIP archive for {0} ({1})...", downloadConfiguration.BinaryType, zipFileName);
 
@@ -122,7 +122,7 @@ namespace Sirstrap.Core
         /// </remarks>
         private async Task DownloadAndProcessPackagesAsync(Manifest manifest, ZipArchive finalZip, DownloadConfiguration downloadConfiguration)
         {
-            await Task.WhenAll(manifest.Packages.Select(package => DownloadAndProcessPackageAsync(package, finalZip, downloadConfiguration)).ToList()).ConfigureAwait(false);
+            await Task.WhenAll(manifest.Packages!.Select(package => DownloadAndProcessPackageAsync(package, finalZip, downloadConfiguration)).ToList()).ConfigureAwait(false);
         }
 
         /// <summary>

@@ -78,7 +78,7 @@
 
             if (string.IsNullOrEmpty(blobDir))
             {
-                return BinaryTypes.TryGetValue(arguments.GetValueOrDefault("binaryType", "WindowsPlayer"), out var bt) ? bt.DefaultBlobDir : string.Empty;
+                return BinaryTypes.TryGetValue(arguments.GetValueOrDefault("binaryType", "WindowsPlayer"), out var bt) ? bt.DefaultBlobDir! : string.Empty;
             }
 
             return NormalizeBlobDirectory(blobDir);
