@@ -82,7 +82,7 @@ jobs:
         name: Sirstrap-CLI-${{ steps.version.outputs.VERSION }}
         path: out/Sirstrap.CLI_${{ steps.version.outputs.VERSION }}.zip
         
-    - name: Upload UI artifacts
+    - name: Upload Sirstrap.UI artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Sirstrap-UI-${{ steps.version.outputs.VERSION }}
