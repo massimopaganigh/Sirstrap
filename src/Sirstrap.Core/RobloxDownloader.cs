@@ -122,7 +122,7 @@ namespace Sirstrap.Core
         /// </remarks>
         private static bool IsAlreadyInstalled(DownloadConfiguration downloadConfiguration)
         {
-            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version));
+            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version!));
         }
 
         /// <summary>

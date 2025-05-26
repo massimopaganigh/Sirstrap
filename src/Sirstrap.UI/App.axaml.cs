@@ -28,7 +28,7 @@ namespace Sirstrap.UI
             base.OnFrameworkInitializationCompleted();
         }
 
-        [RequiresUnreferencedCode("Calls Avalonia.Data.Core.Plugins.BindingPlugins.DataValidators")]
+        [SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
         private void DisableAvaloniaDataAnnotationValidation()
         {
             var dataValidationPluginsToRemove = BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();

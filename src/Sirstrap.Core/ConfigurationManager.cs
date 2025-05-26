@@ -114,7 +114,7 @@
         /// </exception>
         private static void ValidateConfiguration(DownloadConfiguration downloadConfiguration)
         {
-            if (!BinaryTypes.ContainsKey(downloadConfiguration.BinaryType))
+            if (!BinaryTypes.ContainsKey(downloadConfiguration.BinaryType!))
             {
                 throw new ArgumentException($"Unsupported binary type: {downloadConfiguration.BinaryType}");
             }
