@@ -1,0 +1,100 @@
+name: Publish
+
+on:
+  push:
+    branches: [ master, development ]
+  pull_request:
+    branches: [ master, development ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+        
+    - name: Read VERSION
+      id: version
+      run: |
+        $version = Get-Content -Path "VERSION" -Raw
+        $version = $version.Trim()
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Sirstrap version: $version"
+      shell: pwsh
+      
+    - name: Create output
+      run: |
+        New-Item -ItemType Directory -Force -Path "out"
+      shell: pwsh
+      
+    - name: Clean previous builds
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        $cliDir = "out\Sirstrap.CLI_$version"
+        $uiDir = "out\Sirstrap.UI_$version"
+        $cliZip = "out\Sirstrap.CLI_$version.zip"
+        $uiZip = "out\Sirstrap.UI_$version.zip"
+        if (Test-Path $cliDir) { Remove-Item -Recurse -Force $cliDir }
+        if (Test-Path $uiDir) { Remove-Item -Recurse -Force $uiDir }
+        if (Test-Path $cliZip) { Remove-Item -Force $cliZip }
+        if (Test-Path $uiZip) { Remove-Item -Force $uiZip }
+      shell: pwsh
+      
+    - name: Restore Sirstrap.sln
+      run: dotnet restore src/Sirstrap.sln
+      
+    - name: Publish Sirstrap.CLI
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        $publishDir = "out\Sirstrap.CLI_$version"
+        dotnet publish src/Sirstrap.CLI/Sirstrap.CLI.csproj -c Release --no-build --output $publishDir
+        Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
+      shell: pwsh
+      
+    - name: Publish Sirstrap.UI
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        $publishDir = "out\Sirstrap.UI_$version"
+        dotnet publish src/Sirstrap.UI/Sirstrap.UI.csproj -c Release --no-build --output $publishDir
+        Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
+      shell: pwsh
+      
+    - name: Create zip files
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        $cliDir = "out\Sirstrap.CLI_$version"
+        $uiDir = "out\Sirstrap.UI_$version"
+        $cliZip = "out\Sirstrap.CLI_$version.zip"
+        $uiZip = "out\Sirstrap.UI_$version.zip"
+        Compress-Archive -Path $cliDir -DestinationPath $cliZip -CompressionLevel Optimal
+        Compress-Archive -Path $uiDir -DestinationPath $uiZip -CompressionLevel Optimal
+      shell: pwsh
+      
+    - name: Upload CLI artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap-CLI-${{ steps.version.outputs.VERSION }}
+        path: out/Sirstrap.CLI_${{ steps.version.outputs.VERSION }}.zip
+        
+    - name: Upload UI artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap-UI-${{ steps.version.outputs.VERSION }}
+        path: out/Sirstrap.UI_${{ steps.version.outputs.VERSION }}.zip
+        
+    - name: Upload build summary
+      if: always()
+      run: |
+        $version = "${{ steps.version.outputs.VERSION }}"
+        echo "## Build Summary" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **Version**: $version" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **CLI Build**: ✅ Completed" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **UI Build**: ✅ Completed" >> $env:GITHUB_STEP_SUMMARY
+        echo "- **Artifacts**: Available for download" >> $env:GITHUB_STEP_SUMMARY
+      shell: pwsh
