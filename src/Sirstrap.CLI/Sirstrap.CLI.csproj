@@ -7,9 +7,10 @@
     <Nullable>enable</Nullable>
     <PublishAot>true</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
-    <ApplicationIcon>favicon.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>favicon.ico</ApplicationIcon>
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <AssemblyName>Sirstrap</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="Sirstrap.Core\Sirstrap.Core.csproj" />
+    <ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
   </ItemGroup>
 
 </Project>
