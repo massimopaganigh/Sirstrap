@@ -7,164 +7,92 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace Sirstrap.UI.ViewModels
 {
-    /// <summary>
-    /// Main view model that initializes the application and handles the Roblox protocol integration.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// This class serves as the entry point for the Sirstrap application. It is responsible for:
-    /// - Configuring and initializing the Serilog logger
-    /// - Registering the Roblox protocol handler
-    /// - Initiating the Roblox download process
-    /// - Exposing the last log message for the UI
-    /// </para>
-    /// <para>
-    /// The view model starts these operations asynchronously in a background thread upon instantiation.
-    /// </para>
-    /// </remarks>
     public partial class MainWindowViewModel : ObservableObject
     {
-        /// <summary>
-        /// Gets or sets the current full version.
-        /// </summary>
         [ObservableProperty]
         private string _currentFullVersion = $"Sirstrap {SirstrapUpdater.GetCurrentFullVersion()}";
 
-        /// <summary>
-        /// Gets or sets the most recent log message from the application.
-        /// </summary>
-        [ObservableProperty]
-        private string _lastLogMessage = string.Empty;
-
-        /// <summary>
-        /// Gets or sets the timestamp of the last log message.
-        /// </summary>
-        [ObservableProperty]
-        private DateTimeOffset? _lastLogTimestamp;
-
-        /// <summary>
-        /// Gets or sets the level of the last log message.
-        /// </summary>
-        [ObservableProperty]
-        private LogEventLevel? _lastLogLevel;
-
-        /// <summary>
-        /// Gets or sets the number of currently running Roblox processes.
-        /// </summary>
-        [ObservableProperty]
-        private int _robloxProcessCount;
-
-        /// <summary>
-        /// Gets or sets a value indicating whether Roblox is currently running.
-        /// </summary>
         [ObservableProperty]
         private bool _isRobloxRunning;
 
-        private readonly System.Timers.Timer _logPollingTimer;
+        [ObservableProperty]
+        private LogEventLevel? _lastLogLevel;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
-        /// </summary>
-        /// <remarks>
-        /// This constructor launches the main application logic asynchronously in a background thread
-        /// to avoid blocking the UI thread during initialization. It also sets up a timer to poll
-        /// for log updates from the LastLogSink.
-        /// </remarks>
+        [ObservableProperty]
+        private string _lastLogMessage = string.Empty;
+
+        [ObservableProperty]
+        private DateTimeOffset? _lastLogTimestamp;
+
+        private readonly Timer _logPollingTimer;
+
+        [ObservableProperty]
+        private int _robloxProcessCount;
+
         public MainWindowViewModel()
         {
-            _logPollingTimer = new System.Timers.Timer(100);
+            _logPollingTimer = new(100);
             _logPollingTimer.Elapsed += (s, e) => UpdateLastLogFromSink();
             _logPollingTimer.Start();
 
             Task.Run(() => Main(Environment.GetCommandLineArgs()));
         }
 
-        /// <summary>
-        /// Updates the observable properties with the latest log information from LastLogSink.
-        /// </summary>
+        private static async Task Main(string[] arguments)
+        {
+            try
+            {
+                string logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+
+                Directory.CreateDirectory(logsDirectory);
+
+                string logsPath = Path.Combine(logsDirectory, "SirstrapLog.txt");
+
+                Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath).WriteTo.LastLog().CreateLogger();
+
+                RegistryManager.RegisterProtocolHandler("roblox-player");
+
+                string[] fixedArguments = [.. arguments.Skip(1)];
+
+                await new RobloxDownloader().ExecuteAsync(fixedArguments);
+            }
+            finally
+            {
+                await Log.CloseAndFlushAsync();
+
+                Environment.Exit(0);
+            }
+        }
+
         private void UpdateLastLogFromSink()
         {
-            if (LastLogMessage != LastLogSink.LastLog)
+            if (LastLogMessage.Equals(LastLogSink.LastLog))
             {
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;
                 LastLogLevel = LastLogSink.LastLogLevel;
             }
 
-            // Aggiorna anche il conteggio dei processi di Roblox
             UpdateRobloxProcessCount();
         }
 
-        /// <summary>
-        /// Updates the count of running Roblox processes.
-        /// </summary>
         private void UpdateRobloxProcessCount()
         {
             try
             {
-                var robloxProcessNames = new[] { "RobloxPlayerBeta" };
-                var count = Process.GetProcesses().Count(x => robloxProcessNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
+                string[] commonRobloxNames = ["RobloxPlayerBeta"];
+                int count = Process.GetProcesses().Count(x => commonRobloxNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
 
                 RobloxProcessCount = count;
                 IsRobloxRunning = count > 0;
             }
-            catch (Exception)
-            {
-            }
+            catch (Exception) { } //ignore
         }
 
-        /// <summary>
-        /// Executes the main application logic.
-        /// </summary>
-        /// <param name="args">
-        /// Command line arguments passed to the application, obtained from <see cref="Environment.GetCommandLineArgs"/>.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Task"/> that represents the asynchronous operation.
-        /// </returns>
-        /// <remarks>
-        /// <para>
-        /// This method performs the following operations in sequence:
-        /// 1. Configures Serilog to write logs to a file named "SirstrapLog.txt"
-        /// 2. Registers "roblox-player" as a protocol handler using <see cref="RegistryManager"/>
-        /// 3. Executes the Roblox download process with the provided command line arguments
-        /// 4. Ensures all log messages are properly flushed before the application exits
-        /// </para>
-        /// <para>
-        /// The method is designed to be called only once during the application lifecycle.
-        /// </para>
-        /// </remarks>
-        private static async Task Main(string[] args)
-        {
-            try
-            {
-                string logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
-
-                Directory.CreateDirectory(logDirectory);
-
-                string logFilePath = Path.Combine(logDirectory, "SirstrapLog.txt");
-
-                Log.Logger = new LoggerConfiguration().WriteTo.File(logFilePath).WriteTo.LastLog().CreateLogger();
-                RegistryManager.RegisterProtocolHandler("roblox-player");
-
-                var filteredArgs = args.Skip(1).ToArray();
-
-                await new RobloxDownloader().ExecuteAsync(filteredArgs).ConfigureAwait(false);
-            }
-            finally
-            {
-                await Log.CloseAndFlushAsync().ConfigureAwait(false);
-
-                Environment.Exit(0);
-            }
-        }
-
-        /// <summary>
-        /// Performs cleanup when the view model is being disposed.
-        /// </summary>
         public void Dispose()
         {
             _logPollingTimer?.Stop();
