@@ -36,10 +36,10 @@ jobs:
     - name: Clean output folder
       run: |
         $version = "${{ steps.version.outputs.VERSION }}"
-        $cliDir = "..\out\Sirstrap.CLI_$version"
-        $uiDir = "..\out\Sirstrap.UI_$version"
-        $cliZip = "..\out\Sirstrap.CLI_$version.zip"
-        $uiZip = "..\out\Sirstrap.UI_$version.zip"
+        $cliDir = "out\Sirstrap.CLI_$version"
+        $uiDir = "out\Sirstrap.UI_$version"
+        $cliZip = "out\Sirstrap.CLI_$version.zip"
+        $uiZip = "out\Sirstrap.UI_$version.zip"
         if (Test-Path $cliDir) { Remove-Item -Recurse -Force $cliDir }
         if (Test-Path $uiDir) { Remove-Item -Recurse -Force $uiDir }
         if (Test-Path $cliZip) { Remove-Item -Force $cliZip }
@@ -52,26 +52,26 @@ jobs:
     - name: Publish Sirstrap.CLI
       run: |
         $version = "${{ steps.version.outputs.VERSION }}"
-        $publishDir = "..\..\out\Sirstrap.CLI_$version"
-        dotnet publish src/Sirstrap.CLI/Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir=$publishDir -c Release
+        $publishDir = "out\Sirstrap.CLI_$version"
+        dotnet publish src/Sirstrap.CLI/Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir=../../$publishDir -c Release
         Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
       shell: pwsh
       
     - name: Publish Sirstrap.UI
       run: |
         $version = "${{ steps.version.outputs.VERSION }}"
-        $publishDir = "..\..\out\Sirstrap.UI_$version"
-        dotnet publish src/Sirstrap.UI/Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir=$publishDir -c Release
+        $publishDir = "out\Sirstrap.UI_$version"
+        dotnet publish src/Sirstrap.UI/Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir=../../$publishDir -c Release
         Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
       shell: pwsh
       
     - name: Create zip files
       run: |
         $version = "${{ steps.version.outputs.VERSION }}"
-        $cliDir = "..\out\Sirstrap.CLI_$version"
-        $uiDir = "..\out\Sirstrap.UI_$version"
-        $cliZip = "..\out\Sirstrap.CLI_$version.zip"
-        $uiZip = "..\out\Sirstrap.UI_$version.zip"
+        $cliDir = "out\Sirstrap.CLI_$version"
+        $uiDir = "out\Sirstrap.UI_$version"
+        $cliZip = "out\Sirstrap.CLI_$version.zip"
+        $uiZip = "out\Sirstrap.UI_$version.zip"
         Compress-Archive -Path $cliDir -DestinationPath $cliZip -CompressionLevel Optimal
         Compress-Archive -Path $uiDir -DestinationPath $uiZip -CompressionLevel Optimal
       shell: pwsh
@@ -80,10 +80,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Sirstrap-CLI-${{ steps.version.outputs.VERSION }}
-        path: ../out/Sirstrap.CLI_${{ steps.version.outputs.VERSION }}.zip
+        path: out/Sirstrap.CLI_${{ steps.version.outputs.VERSION }}.zip
         
     - name: Upload UI artifacts
       uses: actions/upload-artifact@v4
       with:
         name: Sirstrap-UI-${{ steps.version.outputs.VERSION }}
-        path: ../out/Sirstrap.UI_${{ steps.version.outputs.VERSION }}.zip
+        path: out/Sirstrap.UI_${{ steps.version.outputs.VERSION }}.zip
