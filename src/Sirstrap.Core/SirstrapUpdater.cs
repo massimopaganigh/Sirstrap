@@ -28,15 +28,15 @@ namespace Sirstrap.Core
         /// Checks for updates and installs them if available.
         /// </summary>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task CheckAndInstallUpdateAsync()
+        public async Task CheckAndInstallUpdateAsync(SirstrapType sirstrapType)
         {
             try
             {
-                if (await CheckForUpdatesAsync().ConfigureAwait(false))
+                if (await CheckForUpdatesAsync(sirstrapType).ConfigureAwait(false))
                 {
                     Log.Information("[*] Update is available. Starting update process...");
 
-                    await DownloadAndInstallUpdateAsync().ConfigureAwait(false);
+                    await DownloadAndInstallUpdateAsync(sirstrapType).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@ namespace Sirstrap.Core
         /// Checks for updates by comparing the current version with the latest version on GitHub.
         /// </summary>
         /// <returns>A task representing the asynchronous operation. The task result is <c>true</c> if an update is available; otherwise, <c>false</c>.</returns>
-        private async Task<bool> CheckForUpdatesAsync()
+        private async Task<bool> CheckForUpdatesAsync(SirstrapType sirstrapType)
         {
             try
             {
@@ -60,7 +60,7 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] Current version: {0}, channel: {1}.", currentVersion, currentChannel);
 
-                var (latestVersion, latestChannel, downloadUrl) = await GetLatestVersionInfoAsync(currentChannel).ConfigureAwait(false);
+                var (latestVersion, latestChannel, _) = await GetLatestVersionInfoAsync(currentChannel, sirstrapType).ConfigureAwait(false);
 
                 if (latestVersion.Major == 0 && latestVersion.Minor == 0 && latestVersion.Build == 0 && latestVersion.Revision == 0)
                 {
@@ -96,12 +96,12 @@ namespace Sirstrap.Core
         /// Downloads and installs the latest update from GitHub.
         /// </summary>
         /// <returns>A task representing the asynchronous operation. The task result is <c>true</c> if the update was successful; otherwise, <c>false</c>.</returns>
-        private async Task<bool> DownloadAndInstallUpdateAsync()
+        private async Task<bool> DownloadAndInstallUpdateAsync(SirstrapType sirstrapType)
         {
             try
             {
                 var currentChannel = GetCurrentChannel();
-                var (_, _, downloadUrl) = await GetLatestVersionInfoAsync(currentChannel).ConfigureAwait(false);
+                var (_, _, downloadUrl) = await GetLatestVersionInfoAsync(currentChannel, sirstrapType).ConfigureAwait(false);
 
                 if (string.IsNullOrEmpty(downloadUrl))
                 {
@@ -195,7 +195,7 @@ exit
         /// <returns>The current version of Sirstrap.</returns>
         private static Version GetCurrentVersion()
         {
-            return new Version("1.1.6.1");
+            return new Version("1.1.6.2");
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ exit
         /// </summary>
         /// <param name="targetChannel">The channel to look for.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains the latest version, channel, and download URL.</returns>
-        private async Task<(Version version, string channel, string downloadUrl)> GetLatestVersionInfoAsync(string targetChannel)
+        private async Task<(Version version, string channel, string downloadUrl)> GetLatestVersionInfoAsync(string targetChannel, SirstrapType sirstrapType)
         {
             try
             {
@@ -276,7 +276,15 @@ exit
                                 name = nameElement.GetString() ?? string.Empty;
                             }
 
-                            if (name.Equals("Sirstrap.UI.zip", StringComparison.OrdinalIgnoreCase))
+                            if (sirstrapType == SirstrapType.CLI && name.Equals("Sirstrap.CLI.zip", StringComparison.OrdinalIgnoreCase))
+                            {
+                                if (asset.TryGetProperty("browser_download_url", out JsonElement urlElement))
+                                {
+                                    downloadUrl = urlElement.GetString() ?? string.Empty;
+                                    break;
+                                }
+                            }
+                            else if (sirstrapType == SirstrapType.UI && name.Equals("Sirstrap.UI.zip", StringComparison.OrdinalIgnoreCase))
                             {
                                 if (asset.TryGetProperty("browser_download_url", out JsonElement urlElement))
                                 {

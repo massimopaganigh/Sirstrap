@@ -12,7 +12,7 @@
         /// <value>
         /// The filename used to retrieve or store version information for this binary type.
         /// </value>
-        public string VersionFile { get; set; }
+        public string? VersionFile { get; set; }
 
         /// <summary>
         /// Gets or sets the default content blob directory path for this binary type.
@@ -21,6 +21,6 @@
         /// The relative path to the default blob directory where packages for this binary type
         /// are stored in the Roblox CDN.
         /// </value>
-        public string DefaultBlobDir { get; set; }
+        public string? DefaultBlobDir { get; set; }
     }
 }

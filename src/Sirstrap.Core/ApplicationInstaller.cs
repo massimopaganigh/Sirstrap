@@ -24,7 +24,7 @@ namespace Sirstrap.Core
         /// </remarks>
         public static void Install(DownloadConfiguration downloadConfiguration)
         {
-            var targetPath = PathManager.GetVersionInstallPath(downloadConfiguration.Version);
+            var targetPath = PathManager.GetVersionInstallPath(downloadConfiguration.Version!);
             var zipPath = downloadConfiguration.GetOutputFileName();
 
             try

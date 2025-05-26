@@ -14,7 +14,7 @@ namespace Sirstrap.Core
         /// <value>
         /// The channel name that determines which Roblox deployment source is used.
         /// </value>
-        public string Channel { get; set; }
+        public string? Channel { get; set; }
 
         /// <summary>
         /// Gets or sets the type of binary to download (e.g., "WindowsPlayer", "WindowsStudio", "MacPlayer", "MacStudio").
@@ -22,7 +22,7 @@ namespace Sirstrap.Core
         /// <value>
         /// The binary type that determines which Roblox application package to download.
         /// </value>
-        public string BinaryType { get; set; }
+        public string? BinaryType { get; set; }
 
         /// <summary>
         /// Gets or sets the version identifier for the Roblox application to download.
@@ -30,7 +30,7 @@ namespace Sirstrap.Core
         /// <value>
         /// The version string, typically in the format "version-X.Y.Z.W".
         /// </value>
-        public string Version { get; set; }
+        public string? Version { get; set; }
 
         /// <summary>
         /// Gets or sets the blob directory path within the CDN where the packages are stored.
@@ -38,7 +38,7 @@ namespace Sirstrap.Core
         /// <value>
         /// The relative path to the blob directory, typically ending with a forward slash.
         /// </value>
-        public string BlobDir { get; set; }
+        public string? BlobDir { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to compress the final ZIP archive.
@@ -64,7 +64,7 @@ namespace Sirstrap.Core
         /// The URL or arguments string that specifies which Roblox experience to launch.
         /// Typically a protocol URL like "roblox://game/placeid=12345678".
         /// </value>
-        public string LaunchUrl { get; set; }
+        public string? LaunchUrl { get; set; }
 
         /// <summary>
         /// Determines whether the configured binary type is a macOS application.
@@ -75,7 +75,7 @@ namespace Sirstrap.Core
         /// </returns>
         public bool IsMacBinary()
         {
-            return BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) || BinaryType.Equals("MacStudio", StringComparison.OrdinalIgnoreCase);
+            return BinaryType!.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) || BinaryType.Equals("MacStudio", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

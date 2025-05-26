@@ -20,6 +20,7 @@ namespace Sirstrap.Core
         /// with Sirstrap, allowing web links to launch Sirstrap with the appropriate arguments.
         /// This requires administrative privileges.
         /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
         public static bool RegisterProtocolHandler(string protocol)
         {
             try

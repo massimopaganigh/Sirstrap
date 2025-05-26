@@ -78,7 +78,7 @@
 
             if (string.IsNullOrEmpty(blobDir))
             {
-                return BinaryTypes.TryGetValue(arguments.GetValueOrDefault("binaryType", "WindowsPlayer"), out var bt) ? bt.DefaultBlobDir : string.Empty;
+                return BinaryTypes.TryGetValue(arguments.GetValueOrDefault("binaryType", "WindowsPlayer"), out var bt) ? bt.DefaultBlobDir! : string.Empty;
             }
 
             return NormalizeBlobDirectory(blobDir);
@@ -114,7 +114,7 @@
         /// </exception>
         private static void ValidateConfiguration(DownloadConfiguration downloadConfiguration)
         {
-            if (!BinaryTypes.ContainsKey(downloadConfiguration.BinaryType))
+            if (!BinaryTypes.ContainsKey(downloadConfiguration.BinaryType!))
             {
                 throw new ArgumentException($"Unsupported binary type: {downloadConfiguration.BinaryType}");
             }

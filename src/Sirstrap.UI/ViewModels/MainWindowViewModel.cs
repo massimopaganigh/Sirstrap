@@ -58,7 +58,7 @@ namespace Sirstrap.UI.ViewModels
 
                 string[] fixedArguments = [.. arguments.Skip(1)];
 
-                await new RobloxDownloader().ExecuteAsync(fixedArguments);
+                await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
             }
             finally
             {
@@ -70,7 +70,7 @@ namespace Sirstrap.UI.ViewModels
 
         private void UpdateLastLogFromSink()
         {
-            if (LastLogMessage.Equals(LastLogSink.LastLog))
+            if (!LastLogMessage.Equals(LastLogSink.LastLog))
             {
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;

@@ -22,6 +22,6 @@
         /// <value>
         /// A list of strings where each string represents a package filename.
         /// </value>
-        public List<string> Packages { get; set; }
+        public List<string>? Packages { get; set; }
     }
 }

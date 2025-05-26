@@ -82,7 +82,7 @@
         {
             string hostPath = GetHostPath();
 
-            return downloadConfiguration.Channel.Equals("LIVE", StringComparison.OrdinalIgnoreCase) ? hostPath : $"{hostPath}/channel/{downloadConfiguration.Channel}";
+            return downloadConfiguration.Channel!.Equals("LIVE", StringComparison.OrdinalIgnoreCase) ? hostPath : $"{hostPath}/channel/{downloadConfiguration.Channel}";
         }
     }
 }
