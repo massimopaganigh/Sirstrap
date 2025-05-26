@@ -65,25 +65,14 @@ jobs:
         Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
       shell: pwsh
       
-    - name: Create zip files
-      run: |
-        $version = "${{ steps.version.outputs.VERSION }}"
-        $cliDir = "out\Sirstrap.CLI_$version"
-        $uiDir = "out\Sirstrap.UI_$version"
-        $cliZip = "out\Sirstrap.CLI_$version.zip"
-        $uiZip = "out\Sirstrap.UI_$version.zip"
-        Compress-Archive -Path $cliDir -DestinationPath $cliZip -CompressionLevel Optimal
-        Compress-Archive -Path $uiDir -DestinationPath $uiZip -CompressionLevel Optimal
-      shell: pwsh
-      
     - name: Upload Sirstrap.CLI artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Sirstrap-CLI-${{ steps.version.outputs.VERSION }}
-        path: out/Sirstrap.CLI_${{ steps.version.outputs.VERSION }}.zip
+        name: Sirstrap.CLI_${{ steps.version.outputs.VERSION }}
+        path: out/Sirstrap.CLI_${{ steps.version.outputs.VERSION }}
         
     - name: Upload Sirstrap.UI artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: Sirstrap-UI-${{ steps.version.outputs.VERSION }}
-        path: out/Sirstrap.UI_${{ steps.version.outputs.VERSION }}.zip
+        name: Sirstrap.UI_${{ steps.version.outputs.VERSION }}
+        path: out/Sirstrap.UI_${{ steps.version.outputs.VERSION }}
