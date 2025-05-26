@@ -1,0 +1,109 @@
+<Window
+    x:Class="Sirstrap.UI.Views.MainWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Sirstrap.UI.ViewModels"
+    Width="400"
+    Height="200"
+    mc:Ignorable="d"
+    CanResize="False"
+    d:DesignHeight="200"
+    d:DesignWidth="400"
+    ExtendClientAreaToDecorationsHint="True"
+    Icon="/Assets/favicon.ico"
+    Title="Sirstrap"
+    WindowStartupLocation="CenterScreen"
+    x:DataType="vm:MainWindowViewModel">
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Image
+            Grid.Row="0"
+            Grid.RowSpan="3"
+            Width="100"
+            Height="100"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Source="avares://Sirstrap/Assets/Icon2022.ico">
+            <Image.Styles>
+                <Style Selector="Image">
+                    <Style.Animations>
+                        <Animation Duration="0:0:30" IterationCount="Infinite">
+                            <KeyFrame Cue="0%">
+                                <Setter Property="RotateTransform.Angle" Value="0" />
+                            </KeyFrame>
+                            <KeyFrame Cue="100%">
+                                <Setter Property="RotateTransform.Angle" Value="360" />
+                            </KeyFrame>
+                        </Animation>
+                    </Style.Animations>
+                </Style>
+            </Image.Styles>
+        </Image>
+        <StackPanel Orientation="Horizontal">
+            <Border
+                Grid.Row="0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="#4EA2FF"
+                CornerRadius="0,10,10,0"
+                ZIndex="100">
+                <!--Background="Orange"-->
+                <TextBlock
+                    FontFamily="Verdana"
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding CurrentFullVersion}" />
+            </Border>
+            <Border
+                Grid.Row="0"
+                Margin="-10,0,0,0"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Background="Gray"
+                CornerRadius="0,10,10,0"
+                IsVisible="{Binding IsRobloxRunning}"
+                ZIndex="99">
+                <StackPanel Orientation="Horizontal">
+                    <Image
+                        Width="20"
+                        Height="20"
+                        Margin="20,0,0,0"
+                        Source="avares://Sirstrap/Assets/Icon2022.ico"
+                        ZIndex="100" />
+                    <Image
+                        Width="20"
+                        Height="20"
+                        Margin="-12.5,0,0,0"
+                        Opacity="0.25"
+                        Source="avares://Sirstrap/Assets/Icon2022.ico"
+                        ZIndex="99" />
+                    <TextBlock
+                        FontFamily="Verdana"
+                        FontSize="10"
+                        Padding="10"
+                        Text="{Binding RobloxProcessCount}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        <TextBlock
+            Grid.Row="2"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            FontFamily="Verdana"
+            FontSize="10"
+            Padding="10"
+            Text="{Binding LastLogMessage}"
+            TextAlignment="Left"
+            TextTrimming="CharacterEllipsis"
+            TextWrapping="NoWrap" />
+    </Grid>
+</Window>
