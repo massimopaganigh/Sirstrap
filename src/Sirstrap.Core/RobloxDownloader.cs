@@ -8,7 +8,7 @@ namespace Sirstrap.Core
     /// </summary>
     public class RobloxDownloader
     {
-        private readonly VersionManager _versionManager;
+        private readonly RobloxVersionService _robloxVersionService;
         private readonly PackageManager _packageManager;
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Sirstrap.Core
                 Timeout = TimeSpan.FromMinutes(5)
             };
 
-            _versionManager = new VersionManager(httpClient);
+            _robloxVersionService = new RobloxVersionService(httpClient);
             _packageManager = new PackageManager(httpClient);
         }
 
@@ -96,15 +96,13 @@ namespace Sirstrap.Core
         {
             if (string.IsNullOrEmpty(downloadConfiguration.Version))
             {
-                downloadConfiguration.Version = await _versionManager.GetLatestVersionAsync(downloadConfiguration.BinaryType!).ConfigureAwait(false);
+                downloadConfiguration.Version = await _robloxVersionService.GetLatestVersionAsync();
 
                 if (string.IsNullOrEmpty(downloadConfiguration.Version))
                 {
                     return false;
                 }
             }
-
-            downloadConfiguration.Version = VersionManager.NormalizeVersion(downloadConfiguration.Version);
 
             return true;
         }
