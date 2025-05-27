@@ -1,0 +1,94 @@
+name: build
+
+on:
+  push:
+    branches: [ main, development ]
+  pull_request:
+    branches: [ main, development ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Read VERSION file
+      id: get_version
+      shell: pwsh
+      run: |
+        $version = Get-Content -Path "VERSION" -Raw
+        $version = $version.Trim()
+        echo "SIRSTRAP_VERSION=$version" >> $env:GITHUB_ENV
+        echo "Version: $version"
+
+    - name: Clean previous build artifacts
+      shell: pwsh
+      run: |
+        $cliDir = "out/Sirstrap.CLI_$env:SIRSTRAP_VERSION"
+        $uiDir = "out/Sirstrap.UI_$env:SIRSTRAP_VERSION"
+        if (Test-Path $cliDir) {
+          Write-Host "Cleaning $cliDir..."
+          Remove-Item -Path $cliDir -Recurse -Force
+        }
+        if (Test-Path $uiDir) {
+          Write-Host "Cleaning $uiDir..."
+          Remove-Item -Path $uiDir -Recurse -Force
+        }
+
+    - name: Create out directory
+      shell: pwsh
+      run: |
+        if (-not (Test-Path "out")) {
+          New-Item -ItemType Directory -Path "out"
+        }
+
+    - name: Restore Sirstrap.sln
+      run: dotnet restore src/Sirstrap.sln
+
+    - name: Build Sirstrap.CLI
+      shell: pwsh
+      run: |
+        $publishDir = "out/Sirstrap.CLI_$env:SIRSTRAP_VERSION"
+        Write-Host "Building Sirstrap.CLI..."
+        dotnet publish src/Sirstrap.CLI/Sirstrap.CLI.csproj -c Release -o $publishDir
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Building Sirstrap.CLI failed."
+          exit $LASTEXITCODE
+        }
+        # Remove PDB files
+        Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
+
+    - name: Build Sirstrap.UI
+      shell: pwsh
+      run: |
+        $publishDir = "out/Sirstrap.UI_$env:SIRSTRAP_VERSION"
+        Write-Host "Building Sirstrap.UI..."
+        dotnet publish src/Sirstrap.UI/Sirstrap.UI.csproj -c Release -o $publishDir
+        if ($LASTEXITCODE -ne 0) {
+          Write-Error "Building Sirstrap.UI failed."
+          exit $LASTEXITCODE
+        }
+        # Remove PDB files
+        Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
+
+    - name: Upload Sirstrap.CLI artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap.CLI_${{ env.SIRSTRAP_VERSION }}
+        path: out/Sirstrap.CLI_${{ env.SIRSTRAP_VERSION }}
+        retention-days: 30
+
+    - name: Upload Sirstrap.UI artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap.UI_${{ env.SIRSTRAP_VERSION }}
+        path: out/Sirstrap.UI_${{ env.SIRSTRAP_VERSION }}
+        retention-days: 30
