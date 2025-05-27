@@ -161,25 +161,30 @@ exit
                                 name = nameElement.GetString() ?? string.Empty;
 
                             if (sirstrapType == SirstrapType.CLI && name.Equals("Sirstrap.CLI.zip", StringComparison.OrdinalIgnoreCase))
-                                if (assetElement.TryGetProperty("browser_download_url", out JsonElement browserDownloadUrlElement1))
+                            {
+                                if (assetElement.TryGetProperty("browser_download_url", out JsonElement browserDownloadUrlElement))
                                 {
-                                    downloadUri = browserDownloadUrlElement1.GetString() ?? string.Empty;
+                                    downloadUri = browserDownloadUrlElement.GetString() ?? string.Empty;
 
                                     break;
                                 }
-                                else if (sirstrapType == SirstrapType.UI && name.Equals("Sirstrap.UI.zip", StringComparison.OrdinalIgnoreCase))
-                                    if (assetElement.TryGetProperty("browser_download_url", out JsonElement browserDownloadUrlElement2))
-                                    {
-                                        downloadUri = browserDownloadUrlElement2.GetString() ?? string.Empty;
+                            }
+                            else if (sirstrapType == SirstrapType.UI && name.Equals("Sirstrap.UI.zip", StringComparison.OrdinalIgnoreCase))
+                                if (assetElement.TryGetProperty("browser_download_url", out JsonElement browserDownloadUrlElement))
+                                {
+                                    downloadUri = browserDownloadUrlElement.GetString() ?? string.Empty;
 
-                                        break;
-                                    }
+                                    break;
+                                }
                         }
                     }
 
-                    latestVersion = version;
-                    latestChannel = channelPart;
-                    latestDownloadUri = downloadUri;
+                    if (latestVersion > version)
+                    {
+                        latestVersion = version;
+                        latestChannel = channelPart;
+                        latestDownloadUri = downloadUri;
+                    }
                 }
 
                 return (latestVersion, latestChannel, latestDownloadUri);
@@ -231,7 +236,7 @@ exit
         {
             try
             {
-                if (await IsUpToDateAsync(sirstrapType))
+                if (!await IsUpToDateAsync(sirstrapType))
                     await DownloadAndApplyUpdateAsync(sirstrapType);
             }
             catch (Exception ex)
