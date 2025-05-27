@@ -50,7 +50,7 @@ namespace Sirstrap.Core
             {
                 await new SirstrapUpdateService().UpdateAsync(sirstrapType);
 
-                var downloadConfiguration = ConfigurationManager.CreateDownloadConfiguration(CommandLineParser.Parse(args));
+                var downloadConfiguration = ConfigurationManager.CreateDownloadConfiguration(new ConfigurationParser().ParseConfiguration(args));
 
                 if (!await InitializeDownloadAsync(downloadConfiguration).ConfigureAwait(false))
                 {

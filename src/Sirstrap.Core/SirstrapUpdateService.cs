@@ -160,7 +160,8 @@ exit
                             if (assetElement.TryGetProperty("name", out JsonElement nameElement))
                                 name = nameElement.GetString() ?? string.Empty;
 
-                            if (sirstrapType == SirstrapType.CLI && name.Equals("Sirstrap.CLI.zip", StringComparison.OrdinalIgnoreCase))
+                            if (sirstrapType == SirstrapType.CLI
+                                && name.Equals("Sirstrap.CLI.zip", StringComparison.OrdinalIgnoreCase))
                             {
                                 if (assetElement.TryGetProperty("browser_download_url", out JsonElement browserDownloadUrlElement))
                                 {
@@ -169,7 +170,8 @@ exit
                                     break;
                                 }
                             }
-                            else if (sirstrapType == SirstrapType.UI && name.Equals("Sirstrap.UI.zip", StringComparison.OrdinalIgnoreCase))
+                            else if (sirstrapType == SirstrapType.UI
+                                && name.Equals("Sirstrap.UI.zip", StringComparison.OrdinalIgnoreCase))
                                 if (assetElement.TryGetProperty("browser_download_url", out JsonElement browserDownloadUrlElement))
                                 {
                                     downloadUri = browserDownloadUrlElement.GetString() ?? string.Empty;
