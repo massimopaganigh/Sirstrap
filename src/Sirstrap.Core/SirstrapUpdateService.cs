@@ -179,7 +179,7 @@ exit
                         }
                     }
 
-                    if (latestVersion > version)
+                    if (version > latestVersion)
                     {
                         latestVersion = version;
                         latestChannel = channelPart;
