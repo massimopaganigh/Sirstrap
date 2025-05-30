@@ -26,14 +26,14 @@ jobs:
       run: |
         $version = Get-Content -Path "VERSION" -Raw
         $version = $version.Trim()
-        echo "VERSION=$version" >> $env:GITHUB_ENV
+        echo "SIRSTRAP_VERSION=$version" >> $env:GITHUB_ENV
         echo "Version: $version"
 
     - name: Cleaning...
       shell: pwsh
       run: |
-        $cliDir = "out/Sirstrap.CLI_$env:VERSION"
-        $uiDir = "out/Sirstrap.UI_$env:VERSION"
+        $cliDir = "out/Sirstrap.CLI_$env:SIRSTRAP_VERSION"
+        $uiDir = "out/Sirstrap.UI_$env:SIRSTRAP_VERSION"
         if (Test-Path $cliDir) {
           Write-Host "Cleaning $cliDir..."
           Remove-Item -Path $cliDir -Recurse -Force
@@ -59,7 +59,7 @@ jobs:
     - name: Building Sirstrap.CLI.csproj...
       shell: pwsh
       run: |
-        $publishDir = "out/Sirstrap.CLI_$env:VERSION"
+        $publishDir = "out/Sirstrap.CLI_$env:SIRSTRAP_VERSION"
         Write-Host "Building Sirstrap.CLI.csproj..."
         dotnet publish src/Sirstrap.CLI/Sirstrap.CLI.csproj -c Release -o $publishDir
         if ($LASTEXITCODE -ne 0) {
@@ -71,7 +71,7 @@ jobs:
     - name: Building Sirstrap.UI.csproj...
       shell: pwsh
       run: |
-        $publishDir = "out/Sirstrap.UI_$env:VERSION"
+        $publishDir = "out/Sirstrap.UI_$env:SIRSTRAP_VERSION"
         Write-Host "Building Sirstrap.UI.csproj..."
         dotnet publish src/Sirstrap.UI/Sirstrap.UI.csproj -c Release -o $publishDir
         if ($LASTEXITCODE -ne 0) {
@@ -83,13 +83,13 @@ jobs:
     - name: Uploading Sirstrap.CLI.csproj...
       uses: actions/upload-artifact@v4
       with:
-        name: Sirstrap.CLI_${{ env.VERSION }}
-        path: out/Sirstrap.CLI_${{ env.VERSION }}
+        name: Sirstrap.CLI_${{ env.SIRSTRAP_VERSION }}
+        path: out/Sirstrap.CLI_${{ env.SIRSTRAP_VERSION }}
         retention-days: 7
 
     - name: Uploading Sirstrap.UI.csproj...
       uses: actions/upload-artifact@v4
       with:
-        name: Sirstrap.UI_${{ env.VERSION }}
-        path: out/Sirstrap.UI_${{ env.VERSION }}
+        name: Sirstrap.UI_${{ env.SIRSTRAP_VERSION }}
+        path: out/Sirstrap.UI_${{ env.SIRSTRAP_VERSION }}
         retention-days: 7
