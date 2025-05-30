@@ -1,4 +1,5 @@
 @echo off
+
 setlocal enabledelayedexpansion
 
 set /p sirstrap_version=<..\VERSION
@@ -27,27 +28,38 @@ if exist "%sirstrap_ui_zip_file%" (
     del /f /q "%sirstrap_ui_zip_file%"
 )
 
+for /r "..\src" %%p in (bin obj) do (
+    if exist "%%~p" (
+        echo Cleaning "%%~p"...
+        rd /s /q "%%~p"
+    )
+)
+
 echo Restoring Sirstrap.sln...
 
 dotnet restore ..\src\Sirstrap.sln
 
-echo Publishing Sirstrap.CLI...
+echo Running tests...
+
+dotnet test ..\src\Sirstrap.Core.Tests\Sirstrap.Core.Tests.csproj
+
+echo Building Sirstrap.CLI...
 
 dotnet publish ..\src\Sirstrap.CLI\Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_cli_publish_dir%" -c Release
 
 if %ERRORLEVEL% neq 0 (
-    echo Publishing Sirstrap.CLI failed.
+    echo Building Sirstrap.CLI failed.
     exit /b %ERRORLEVEL%
 )
 
 del /f /q "%sirstrap_cli_publish_dir%\*.pdb"
 
-echo Publishing Sirstrap.UI...
+echo Building Sirstrap.UI...
 
 dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -c Release
 
 if %ERRORLEVEL% neq 0 (
-    echo Publishing Sirstrap.UI failed.
+    echo Building Sirstrap.UI failed.
     exit /b %ERRORLEVEL%
 )
 

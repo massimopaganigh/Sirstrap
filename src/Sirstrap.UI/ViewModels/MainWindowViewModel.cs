@@ -14,7 +14,7 @@ namespace Sirstrap.UI.ViewModels
     public partial class MainWindowViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string _currentFullVersion = $"Sirstrap {SirstrapUpdater.GetCurrentFullVersion()}";
+        private string _currentFullVersion = $"Sirstrap {SirstrapUpdateService.GetCurrentFullVersion()}";
 
         [ObservableProperty]
         private bool _isRobloxRunning;

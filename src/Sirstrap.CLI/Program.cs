@@ -1,7 +1,7 @@
 ﻿using Serilog;
 using Sirstrap.Core;
 
-namespace Sirstrap
+namespace Sirstrap.CLI
 {
     public static class Program
     {
