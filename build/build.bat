@@ -28,9 +28,20 @@ if exist "%sirstrap_ui_zip_file%" (
     del /f /q "%sirstrap_ui_zip_file%"
 )
 
+for /r "..\src" %%p in (bin obj) do (
+    if exist "%%~p" (
+        echo Cleaning "%%~p"...
+        rd /s /q "%%~p"
+    )
+)
+
 echo Restoring Sirstrap.sln...
 
 dotnet restore ..\src\Sirstrap.sln
+
+echo Running tests...
+
+dotnet test ..\src\Sirstrap.Core.Tests\Sirstrap.Core.Tests.csproj
 
 echo Building Sirstrap.CLI...
 
