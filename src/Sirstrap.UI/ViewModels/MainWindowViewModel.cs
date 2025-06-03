@@ -13,6 +13,10 @@ namespace Sirstrap.UI.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        private const int MIN_POLLING_INTERVAL = 100;
+        private const int MAX_POLLING_INTERVAL = 10000;
+        private const int LOG_ACTIVITY_THRESHOLD_SECONDS = 30;
+
         [ObservableProperty]
         private string _currentFullVersion = $"Sirstrap {SirstrapUpdateService.GetCurrentFullVersion()}";
 
@@ -29,13 +33,14 @@ namespace Sirstrap.UI.ViewModels
         private DateTimeOffset? _lastLogTimestamp;
 
         private readonly Timer _logPollingTimer;
+        private DateTimeOffset? _lastLogReceived;
 
         [ObservableProperty]
         private int _robloxProcessCount;
 
         public MainWindowViewModel()
         {
-            _logPollingTimer = new(100);
+            _logPollingTimer = new(_currentPollingInterval);
             _logPollingTimer.Elapsed += (s, e) => UpdateLastLogFromSink();
             _logPollingTimer.Start();
 
@@ -75,9 +80,25 @@ namespace Sirstrap.UI.ViewModels
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;
                 LastLogLevel = LastLogSink.LastLogLevel;
+
+                _lastLogReceived = DateTimeOffset.Now;
             }
 
             UpdateRobloxProcessCount();
+            UpdatePollingInterval();
+        }
+
+        private void UpdatePollingInterval()
+        {
+            bool hasRecentLogActivity = _lastLogReceived.HasValue && (DateTimeOffset.Now - _lastLogReceived.Value).TotalSeconds <= LOG_ACTIVITY_THRESHOLD_SECONDS;
+            
+            int newInterval = hasRecentLogActivity ? MIN_POLLING_INTERVAL : MAX_POLLING_INTERVAL;
+            
+            if (newInterval != _currentPollingInterval)
+            {
+                _currentPollingInterval = newInterval;
+                _logPollingTimer.Interval = _currentPollingInterval;
+            }
         }
 
         private void UpdateRobloxProcessCount()
