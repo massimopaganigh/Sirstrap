@@ -1,4 +1,4 @@
-name: build
+name: Build
 
 on:
   push:
@@ -12,84 +12,26 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checking out repository...
+    - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setting up .NET...
+    - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
 
-    - name: Reading VERSION file...
-      id: get_version
-      shell: pwsh
-      run: |
-        $version = Get-Content -Path "VERSION" -Raw
-        $version = $version.Trim()
-        echo "SIRSTRAP_VERSION=$version" >> $env:GITHUB_ENV
-        echo "Version: $version"
+    - name: Build
+      run: build\build.bat
+      shell: cmd
 
-    - name: Cleaning...
-      shell: pwsh
-      run: |
-        $cliDir = "out/Sirstrap.CLI_$env:SIRSTRAP_VERSION"
-        $uiDir = "out/Sirstrap.UI_$env:SIRSTRAP_VERSION"
-        if (Test-Path $cliDir) {
-          Write-Host "Cleaning $cliDir..."
-          Remove-Item -Path $cliDir -Recurse -Force
-        }
-        if (Test-Path $uiDir) {
-          Write-Host "Cleaning $uiDir..."
-          Remove-Item -Path $uiDir -Recurse -Force
-        }
-
-    - name: Creating out directory...
-      shell: pwsh
-      run: |
-        if (-not (Test-Path "out")) {
-          New-Item -ItemType Directory -Path "out"
-        }
-
-    - name: Restoring Sirstrap.sln...
-      run: dotnet restore src/Sirstrap.sln
-
-    - name: Running tests...
-      run: dotnet test src/Sirstrap.Core.Tests/Sirstrap.Core.Tests.csproj
-
-    - name: Building Sirstrap.CLI.csproj...
-      shell: pwsh
-      run: |
-        $publishDir = "out/Sirstrap.CLI_$env:SIRSTRAP_VERSION"
-        Write-Host "Building Sirstrap.CLI.csproj..."
-        dotnet publish src/Sirstrap.CLI/Sirstrap.CLI.csproj -c Release -o $publishDir
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "Build of Sirstrap.CLI.csproj failed."
-          exit $LASTEXITCODE
-        }
-        Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
-
-    - name: Building Sirstrap.UI.csproj...
-      shell: pwsh
-      run: |
-        $publishDir = "out/Sirstrap.UI_$env:SIRSTRAP_VERSION"
-        Write-Host "Building Sirstrap.UI.csproj..."
-        dotnet publish src/Sirstrap.UI/Sirstrap.UI.csproj -c Release -o $publishDir
-        if ($LASTEXITCODE -ne 0) {
-          Write-Error "Build of Sirstrap.UI.csproj failed."
-          exit $LASTEXITCODE
-        }
-        Get-ChildItem -Path $publishDir -Filter "*.pdb" | Remove-Item -Force
-
-    - name: Uploading Sirstrap.CLI.csproj...
+    - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4
       with:
-        name: Sirstrap.CLI_${{ env.SIRSTRAP_VERSION }}
-        path: out/Sirstrap.CLI_${{ env.SIRSTRAP_VERSION }}
-        retention-days: 7
+        name: Sirstrap.CLI
+        path: out/Sirstrap.CLI
 
-    - name: Uploading Sirstrap.UI.csproj...
+    - name: Upload artifact Sirstrap.UI
       uses: actions/upload-artifact@v4
       with:
-        name: Sirstrap.UI_${{ env.SIRSTRAP_VERSION }}
-        path: out/Sirstrap.UI_${{ env.SIRSTRAP_VERSION }}
-        retention-days: 7
+        name: Sirstrap.UI
+        path: out/Sirstrap.UI
