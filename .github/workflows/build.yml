@@ -8,8 +8,18 @@ on:
   workflow_dispatch:
 
 jobs:
+  pre-build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: TruffleHog OSS
+      uses: trufflesecurity/trufflehog@v3.88.35
+
   build:
     runs-on: windows-latest
+    needs: pre-build
 
     steps:
     - name: Checkout
@@ -19,9 +29,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
-    
-    - name: TruffleHog OSS
-      uses: trufflesecurity/trufflehog@v3.88.35
 
     - name: Build
       run: cd build && build.bat
