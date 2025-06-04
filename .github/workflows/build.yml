@@ -19,6 +19,9 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
+    
+    - name: TruffleHog OSS
+      uses: trufflesecurity/trufflehog@v3.88.35
 
     - name: Build
       run: cd build && build.bat
