@@ -29,7 +29,7 @@ namespace Sirstrap.UI.ViewModels
         private LogEventLevel? _lastLogLevel;
 
         [ObservableProperty]
-        private string _lastLogMessage = string.Empty;
+        private string? _lastLogMessage = string.Empty;
 
         private DateTimeOffset? _lastLogReceived;
 
@@ -78,7 +78,7 @@ namespace Sirstrap.UI.ViewModels
 
         private void UpdateLastLogFromSink()
         {
-            if (!LastLogMessage.Equals(LastLogSink.LastLog))
+            if (!LastLogMessage?.Equals(LastLogSink.LastLog) == false)
             {
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;
