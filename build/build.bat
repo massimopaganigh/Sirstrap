@@ -14,15 +14,6 @@ for %%d in ("%sirstrap_cli_publish_dir%" "%sirstrap_ui_publish_dir%") do (
     )
 )
 
-echo Cleaning zip files...
-
-for %%f in ("%sirstrap_cli_zip_file%" "%sirstrap_ui_zip_file%") do (
-    if exist "%%f" (
-        echo Cleaning %%f...
-        del /f /q "%%f"
-    )
-)
-
 echo Cleaning bin and obj directories...
 
 for /r "..\src" %%p in (bin obj) do (
