@@ -46,7 +46,7 @@ namespace Sirstrap.Core
                         Directory.Delete(updateDirectory, recursive: true);
                         Directory.CreateDirectory(updateDirectory);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         Log.Error(ex, "[!] Error during the cleaning of {0}...", updateDirectory);
                     }
