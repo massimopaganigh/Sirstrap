@@ -1,10 +1,4 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="SirstrapUpdateService.cs" company="Sirstrap">
-//     Author: massimopaganigh
-//     Copyright (c) 2025. All rights reserved.
-// </copyright>
-//-----------------------------------------------------------------------
-using Serilog;
+﻿using Serilog;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Text.Json;
@@ -27,6 +21,11 @@ namespace Sirstrap.Core
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "Sirstrap");
         }
 
+        /// <summary>
+        /// Downloads and applies the latest update for the specified Sirstrap type.
+        /// </summary>
+        /// <param name="sirstrapType">The type of Sirstrap to update.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<bool> DownloadAndApplyUpdateAsync(SirstrapType sirstrapType)
         {
             try
@@ -49,7 +48,7 @@ namespace Sirstrap.Core
                     }
                     catch (Exception)
                     {
-                        //ignore
+                        Log.Error(ex, "[!] Error during the cleaning of {0}...", updateDirectory);
                     }
                 }
                 else
@@ -84,7 +83,6 @@ exit
 
                 ProcessStartInfo updateBatStartInfo = new()
                 {
-
                     FileName = batchPath,
                     CreateNoWindow = true,
                     UseShellExecute = true
@@ -104,10 +102,23 @@ exit
             }
         }
 
+        /// <summary>
+        /// Gets the current channel of Sirstrap.
+        /// </summary>
+        /// <returns>The current channel of Sirstrap.</returns>
         private static string GetCurrentChannel() => SettingsManager.GetSettings().SirstrapUpdateChannel;
 
+        /// <summary>
+        /// Gets the current version of Sirstrap.
+        /// </summary>
+        /// <returns>The current version of Sirstrap.</returns>
         private static Version GetCurrentVersion() => new(SIRSTRAP_CURRENT_VERSION);
 
+        /// <summary>
+        /// Gets the latest version, channel, and download URI for the specified Sirstrap type.
+        /// </summary>
+        /// <param name="sirstrapType">The type of Sirstrap to check.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<(Version latestVersion, string latestChannel, string latestDownloadUri)> GetLatestVersionChannelAndDownloadUriAsync(SirstrapType sirstrapType)
         {
             try
@@ -199,6 +210,11 @@ exit
             }
         }
 
+        /// <summary>
+        /// Checks if the current Sirstrap version is up to date.
+        /// </summary>
+        /// <param name="sirstrapType">The type of Sirstrap to check.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<bool> IsUpToDateAsync(SirstrapType sirstrapType)
         {
             try
@@ -232,8 +248,17 @@ exit
             }
         }
 
+        /// <summary>
+        /// Gets the current full version of Sirstrap.
+        /// </summary>
+        /// <returns>The current full version of Sirstrap.</returns>
         public static string GetCurrentFullVersion() => $"v{GetCurrentVersion()}{GetCurrentChannel()}";
 
+        /// <summary>
+        /// Updates the Sirstrap application to the latest version.
+        /// </summary>
+        /// <param name="sirstrapType">The type of Sirstrap to update.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task UpdateAsync(SirstrapType sirstrapType)
         {
             try
