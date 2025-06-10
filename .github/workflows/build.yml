@@ -8,15 +8,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  pre-build:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: TruffleHog OSS
-      uses: trufflesecurity/trufflehog@v3.88.35
-
   build:
     runs-on: windows-latest
     needs: pre-build

@@ -2,6 +2,7 @@
 
 setlocal enabledelayedexpansion
 
+set "upx_path=..\src\ext\upx-5.0.1-win64\upx.exe"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
 
@@ -23,20 +24,20 @@ for /r "..\src" %%p in (bin obj) do (
     )
 )
 
-echo Checking for outdated packages...
-
-powershell -command "$output = dotnet list ..\src\Sirstrap.sln package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($output.projects.frameworks.topLevelPackages.Count -gt 0) { Write-Host '[build.bat] Outdated packages found.' -ForegroundColor Red; exit 1 } else { Write-Host '[build.bat] No outdated packages found.' -ForegroundColor Green }"
-
-if %ERRORLEVEL% neq 0 (
-    exit /b %ERRORLEVEL%
-)
-
 echo Restoring Sirstrap.sln...
 
 dotnet restore ..\src\Sirstrap.sln
 
 if %ERRORLEVEL% neq 0 (
     echo Restore of Sirstrap.sln failed.
+    exit /b %ERRORLEVEL%
+)
+
+echo Checking for outdated packages...
+
+powershell -command "$output = dotnet list ..\src\Sirstrap.sln package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($output.projects.frameworks.topLevelPackages.Count -gt 0) { Write-Host 'Outdated packages found.' -ForegroundColor Red; exit 1 } else { Write-Host 'No outdated packages found.' -ForegroundColor Green }"
+
+if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
@@ -60,6 +61,26 @@ if %ERRORLEVEL% neq 0 (
 
 del /f /q "%sirstrap_cli_publish_dir%\*.pdb"
 
+echo Compressing Sirstrap.CLI...
+
+ren "%sirstrap_cli_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
+
+"%upx_path%" -9 "%sirstrap_cli_publish_dir%\_Sirstrap.exe" -o "%sirstrap_cli_publish_dir%\Sirstrap.exe"
+
+if %ERRORLEVEL% neq 0 (
+    echo Compression of Sirstrap.CLI failed.
+    exit /b %ERRORLEVEL%
+)
+
+"%upx_path%" -t "%sirstrap_cli_publish_dir%\Sirstrap.exe"
+
+if %ERRORLEVEL% neq 0 (
+    echo Verification of Sirstrap.CLI compression failed.
+    exit /b %ERRORLEVEL%
+)
+
+del /f /q "%sirstrap_cli_publish_dir%\_Sirstrap.exe"
+
 echo Building Sirstrap.UI...
 
 dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -c Release
@@ -70,5 +91,25 @@ if %ERRORLEVEL% neq 0 (
 )
 
 del /f /q "%sirstrap_ui_publish_dir%\*.pdb"
+
+echo Compressing Sirstrap.UI...
+
+ren "%sirstrap_ui_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
+
+"%upx_path%" -9 "%sirstrap_ui_publish_dir%\_Sirstrap.exe" -o "%sirstrap_ui_publish_dir%\Sirstrap.exe"
+
+if %ERRORLEVEL% neq 0 (
+    echo Compression of Sirstrap.UI failed.
+    exit /b %ERRORLEVEL%
+)
+
+"%upx_path%" -t "%sirstrap_ui_publish_dir%\Sirstrap.exe"
+
+if %ERRORLEVEL% neq 0 (
+    echo Verification of Sirstrap.UI compression failed.
+    exit /b %ERRORLEVEL%
+)
+
+del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
 
 endlocal
