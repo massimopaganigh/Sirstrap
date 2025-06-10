@@ -10,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    needs: pre-build
 
     steps:
     - name: Checkout
