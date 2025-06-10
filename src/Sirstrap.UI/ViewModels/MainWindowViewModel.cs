@@ -29,7 +29,7 @@ namespace Sirstrap.UI.ViewModels
         private LogEventLevel? _lastLogLevel;
 
         [ObservableProperty]
-        private string? _lastLogMessage = string.Empty;
+        private string _lastLogMessage = string.Empty;
 
         private DateTimeOffset? _lastLogReceived;
 

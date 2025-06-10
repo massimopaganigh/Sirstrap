@@ -5,7 +5,7 @@ namespace Sirstrap.Core
 {
     public class LastLogSink : ILogEventSink
     {
-        public static string? LastLog { get; private set; }
+        public static string LastLog { get; private set; } = string.Empty;
 
         public static DateTimeOffset? LastLogTimestamp { get; private set; }
 
