@@ -143,9 +143,16 @@ namespace Sirstrap.Core
                                 settings.MultiInstance = multiInstance;
                             }
                         }
+                        else if (string.Equals(key, "Overwrite", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (bool.TryParse(value, out bool overwrite))
+                            {
+                                settings.Overwrite = overwrite;
+                            }
+                        }
                     }
 
-                    if (!loadedKeys.Contains("RobloxCdnUrl") || !loadedKeys.Contains("SirstrapUpdateChannel") || !loadedKeys.Contains("SafeMode") || !loadedKeys.Contains("MultiInstance"))
+                    if (!loadedKeys.Contains("RobloxCdnUrl") || !loadedKeys.Contains("SirstrapUpdateChannel") || !loadedKeys.Contains("SafeMode") || !loadedKeys.Contains("MultiInstance") || !loadedKeys.Contains("Overwrite"))
                     {
                         needsUpdate = true;
                     }
@@ -197,7 +204,9 @@ namespace Sirstrap.Core
                     $"RobloxCdnUrl={settings.RobloxCdnUrl}",
                     $"SirstrapUpdateChannel={settings.SirstrapUpdateChannel}",
                     $"SafeMode={settings.SafeMode}",
-                    $"MultiInstance={settings.MultiInstance}"
+                    $"MultiInstance={settings.MultiInstance}",
+                    "[DEVELOP]",
+                    $"Overwrite={settings.Overwrite}"
                 };
 
                 File.WriteAllLines(filePath, lines);

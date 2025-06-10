@@ -77,5 +77,7 @@
         /// - Attempting to launch another instance will activate the existing one
         /// </remarks>
         public bool MultiInstance { get; set; }
+
+        public bool Overwrite { get; set; }
     }
 }
