@@ -43,7 +43,7 @@ namespace Sirstrap.Core
                 {
                     FileName = robloxPlayerBetaExePath,
                     WorkingDirectory = Path.GetDirectoryName(robloxPlayerBetaExePath),
-                    UseShellExecute = true
+                    UseShellExecute = false
                 };
 
                 if (!string.IsNullOrEmpty(downloadConfiguration.LaunchUrl))
