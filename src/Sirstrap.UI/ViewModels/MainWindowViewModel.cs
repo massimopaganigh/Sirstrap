@@ -54,7 +54,7 @@ namespace Sirstrap.UI.ViewModels
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath).WriteTo.LastLog().CreateLogger();
 
-                RegistryManager.RegisterProtocolHandler("roblox-player");
+                RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
 
                 string[] fixedArguments = [.. arguments.Skip(1)];
 
