@@ -137,7 +137,7 @@ namespace Sirstrap.Core
         /// </remarks>
         private static bool LaunchApplication(DownloadConfiguration downloadConfiguration)
         {
-            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && ApplicationLauncher.Launch(downloadConfiguration);
+            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && RobloxLauncher.Launch(downloadConfiguration);
         }
 
         /// <summary>
