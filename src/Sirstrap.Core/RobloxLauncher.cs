@@ -13,7 +13,7 @@ namespace Sirstrap.Core
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {
-                Log.Warning("[*] Roblox not found in: {0}.", robloxPlayerBetaExePath);
+                Log.Error("[!] Roblox not found in: {0}.", robloxPlayerBetaExePath);
 
                 return false;
             }
@@ -29,6 +29,7 @@ namespace Sirstrap.Core
                 ProcessStartInfo robloxPlayerBetaExeStartInfo = new()
                 {
                     FileName = robloxPlayerBetaExePath,
+                    WorkingDirectory = Path.GetDirectoryName(robloxPlayerBetaExePath),
                     UseShellExecute = true
                 };
 
@@ -45,16 +46,23 @@ namespace Sirstrap.Core
 
                 Process? robloxPlayerBetaExeProcess = Process.Start(robloxPlayerBetaExeStartInfo);
 
+                if (robloxPlayerBetaExeProcess == null)
+                {
+                    Log.Error("[!] Failed to launch Roblox.");
+
+                    return false;
+                }
+
                 Log.Information("[*] Waiting for input idle...");
 
-                robloxPlayerBetaExeProcess?.WaitForInputIdle();
+                robloxPlayerBetaExeProcess.WaitForInputIdle();
 
                 if (singletonCaptured)
                 {
                     Log.Information("[*] Waiting for exit (MultiInstance enabled)...");
 
                     while (SingletonManager.HasCapturedSingleton
-                        && !robloxPlayerBetaExeProcess!.HasExited
+                        && !robloxPlayerBetaExeProcess.HasExited
                         && Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ROBLOX_PLAYER_BETA_EXE)).Length > 0)
                         Thread.Sleep(100);
                 }
