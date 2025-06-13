@@ -1,10 +1,10 @@
-name: Build
+name: Main Branch Build
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -19,6 +19,14 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
 
     - name: Build
       run: cd build && build.bat
