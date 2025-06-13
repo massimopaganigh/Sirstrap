@@ -67,7 +67,7 @@ echo Copying Sirstrap.CLI to Sirstrap.CLI_winget...
 
 mkdir "%sirstrap_cli_winget_publish_dir%"
 
-copy /s /y "%sirstrap_cli_publish_dir%\*" "%sirstrap_cli_winget_publish_dir%"
+xcopy /e /i /y "%sirstrap_cli_publish_dir%\*" "%sirstrap_cli_winget_publish_dir%"
 
 if %ERRORLEVEL% neq 0 (
     echo Copy of Sirstrap.CLI to Sirstrap.CLI_winget failed.
@@ -109,7 +109,7 @@ echo Copying Sirstrap.UI to Sirstrap.UI_winget...
 
 mkdir "%sirstrap_ui_winget_publish_dir%"
 
-copy /s /y "%sirstrap_ui_publish_dir%\*" "%sirstrap_ui_winget_publish_dir%"
+xcopy /e /i /y "%sirstrap_ui_publish_dir%\*" "%sirstrap_ui_winget_publish_dir%"
 
 if %ERRORLEVEL% neq 0 (
     echo Copy of Sirstrap.UI to Sirstrap.UI_winget failed.
