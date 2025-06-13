@@ -7,6 +7,9 @@ on:
     branches: [ develop ]
   workflow_dispatch:
 
+permissions:
+  security-events: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -31,6 +34,15 @@ jobs:
     - name: Build
       run: cd build && build.bat
       shell: cmd
+
+    - name: Run Microsoft Security DevOps
+      uses: microsoft/security-devops-action@v1.12.0
+      id: msdo
+
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
     - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4
