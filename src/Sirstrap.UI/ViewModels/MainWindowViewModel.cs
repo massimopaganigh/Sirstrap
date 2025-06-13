@@ -56,7 +56,7 @@ namespace Sirstrap.UI.ViewModels
 
                 string[] fixedArguments = arguments.Skip(1).ToArray();
 
-                RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
+                RegistryManager.RegisterProtocolHandler("roblox-player", fixedArguments);
 
                 await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
             }
