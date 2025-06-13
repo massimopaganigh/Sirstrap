@@ -143,11 +143,11 @@ namespace Sirstrap.Core
                                 settings.MultiInstance = multiInstance;
                             }
                         }
-                        else if (string.Equals(key, "Overwrite", StringComparison.OrdinalIgnoreCase))
+                        else if (string.Equals(key, "IncognitoMode", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (bool.TryParse(value, out bool overwrite))
+                            if (bool.TryParse(value, out bool incognitoMode))
                             {
-                                settings.Overwrite = overwrite;
+                                settings.IncognitoMode = incognitoMode;
                             }
                         }
                     }
@@ -205,8 +205,8 @@ namespace Sirstrap.Core
                     $"SirstrapUpdateChannel={settings.SirstrapUpdateChannel}",
                     $"SafeMode={settings.SafeMode}",
                     $"MultiInstance={settings.MultiInstance}",
-                    "[DEVELOP]",
-                    $"Overwrite={settings.Overwrite}"
+                    $"[WIP]",
+                    $"IncognitoMode={settings.IncognitoMode}"
                 };
 
                 File.WriteAllLines(filePath, lines);
