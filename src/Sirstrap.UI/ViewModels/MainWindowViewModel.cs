@@ -54,9 +54,9 @@ namespace Sirstrap.UI.ViewModels
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath).WriteTo.LastLog().CreateLogger();
 
-                RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
+                string[] fixedArguments = arguments.Skip(1).Where(arg => !arg.Equals(arguments[0], StringComparison.OrdinalIgnoreCase)).ToArray();
 
-                string[] fixedArguments = [.. arguments.Skip(1)];
+                RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
 
                 await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
             }
