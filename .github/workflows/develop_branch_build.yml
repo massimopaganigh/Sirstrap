@@ -1,10 +1,10 @@
-name: Build
+name: Develop Branch Build
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ develop ]
   workflow_dispatch:
 
 jobs:
