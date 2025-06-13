@@ -62,7 +62,7 @@ namespace Sirstrap.Core
         /// <returns>
         /// <c>true</c> if the application has administrator privileges; otherwise, <c>false</c>.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Convalida compatibilità della piattaforma", Justification = "<In sospeso>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
         public static bool IsRunningAsAdministrator()
         {
             try
