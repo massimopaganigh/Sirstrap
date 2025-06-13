@@ -16,6 +16,8 @@ jobs:
     permissions:
       contents: write
       discussions: write
+      id-token: write
+      security-events: write
 
     steps:
     - name: Checkout
@@ -26,9 +28,26 @@ jobs:
       with:
         dotnet-version: '9.0.x'
 
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
     - name: Build
       run: cd build && build.bat
       shell: cmd
+
+    - name: Run Microsoft Security DevOps
+      uses: microsoft/security-devops-action@latest
+      id: msdo
+
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
     - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4
