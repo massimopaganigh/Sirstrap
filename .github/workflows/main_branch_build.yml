@@ -3,6 +3,8 @@ name: Main Branch Build
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -10,6 +12,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
+    permissions:
+      contents: write
+      discussions: write
 
     steps:
     - name: Checkout
@@ -47,3 +53,10 @@ jobs:
       with:
         name: Sirstrap.UI_fat
         path: out/Sirstrap.UI_fat
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        generate_release_notes: true
+        files: out/**/*
