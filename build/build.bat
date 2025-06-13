@@ -65,7 +65,7 @@ echo Compressing Sirstrap.CLI...
 
 ren "%sirstrap_cli_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
 
-"%upx_path%" -9 "%sirstrap_cli_publish_dir%\_Sirstrap.exe" -o "%sirstrap_cli_publish_dir%\Sirstrap.exe"
+"%upx_path%" --best --ultra-brute "%sirstrap_cli_publish_dir%\_Sirstrap.exe" -o "%sirstrap_cli_publish_dir%\Sirstrap.exe"
 
 if %ERRORLEVEL% neq 0 (
     echo Compression of Sirstrap.CLI failed.
@@ -96,7 +96,7 @@ echo Compressing Sirstrap.UI...
 
 ren "%sirstrap_ui_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
 
-"%upx_path%" -9 "%sirstrap_ui_publish_dir%\_Sirstrap.exe" -o "%sirstrap_ui_publish_dir%\Sirstrap.exe"
+"%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\_Sirstrap.exe" -o "%sirstrap_ui_publish_dir%\Sirstrap.exe"
 
 if %ERRORLEVEL% neq 0 (
     echo Compression of Sirstrap.UI failed.
