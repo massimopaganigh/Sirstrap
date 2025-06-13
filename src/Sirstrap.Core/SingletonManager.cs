@@ -117,7 +117,7 @@ namespace Sirstrap.Core
             try
             {
                 // Get Roblox processes with their exact names
-                var processNames = new[] { "Roblox", "RobloxCrashHandler" };
+                var processNames = new[] { "Roblox", "RobloxCrashHandler", "RobloxPlayerBeta" };
 
                 foreach (var processName in processNames)
                 {

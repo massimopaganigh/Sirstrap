@@ -143,9 +143,16 @@ namespace Sirstrap.Core
                                 settings.MultiInstance = multiInstance;
                             }
                         }
+                        else if (string.Equals(key, "IncognitoMode", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (bool.TryParse(value, out bool incognitoMode))
+                            {
+                                settings.IncognitoMode = incognitoMode;
+                            }
+                        }
                     }
 
-                    if (!loadedKeys.Contains("RobloxCdnUrl") || !loadedKeys.Contains("SirstrapUpdateChannel") || !loadedKeys.Contains("SafeMode") || !loadedKeys.Contains("MultiInstance"))
+                    if (!loadedKeys.Contains("RobloxCdnUrl") || !loadedKeys.Contains("SirstrapUpdateChannel") || !loadedKeys.Contains("SafeMode") || !loadedKeys.Contains("MultiInstance") || !loadedKeys.Contains("Overwrite"))
                     {
                         needsUpdate = true;
                     }
@@ -197,7 +204,9 @@ namespace Sirstrap.Core
                     $"RobloxCdnUrl={settings.RobloxCdnUrl}",
                     $"SirstrapUpdateChannel={settings.SirstrapUpdateChannel}",
                     $"SafeMode={settings.SafeMode}",
-                    $"MultiInstance={settings.MultiInstance}"
+                    $"MultiInstance={settings.MultiInstance}",
+                    $"[WIP]",
+                    $"IncognitoMode={settings.IncognitoMode}"
                 };
 
                 File.WriteAllLines(filePath, lines);

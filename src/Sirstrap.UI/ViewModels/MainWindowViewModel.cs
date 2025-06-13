@@ -13,8 +13,14 @@ namespace Sirstrap.UI.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
+        private const int LOG_ACTIVITY_THRESHOLD_SECONDS = 30;
+        private const int MAX_POLLING_INTERVAL = 10000;
+        private const int MIN_POLLING_INTERVAL = 100;
+
         [ObservableProperty]
         private string _currentFullVersion = $"Sirstrap {SirstrapUpdateService.GetCurrentFullVersion()}";
+
+        private int _currentPollingInterval = MIN_POLLING_INTERVAL;
 
         [ObservableProperty]
         private bool _isRobloxRunning;
@@ -24,6 +30,8 @@ namespace Sirstrap.UI.ViewModels
 
         [ObservableProperty]
         private string _lastLogMessage = string.Empty;
+
+        private DateTimeOffset? _lastLogReceived;
 
         [ObservableProperty]
         private DateTimeOffset? _lastLogTimestamp;
@@ -35,7 +43,7 @@ namespace Sirstrap.UI.ViewModels
 
         public MainWindowViewModel()
         {
-            _logPollingTimer = new(100);
+            _logPollingTimer = new(_currentPollingInterval);
             _logPollingTimer.Elapsed += (s, e) => UpdateLastLogFromSink();
             _logPollingTimer.Start();
 
@@ -54,9 +62,9 @@ namespace Sirstrap.UI.ViewModels
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath).WriteTo.LastLog().CreateLogger();
 
-                RegistryManager.RegisterProtocolHandler("roblox-player");
+                string[] fixedArguments = arguments.Skip(1).ToArray();
 
-                string[] fixedArguments = [.. arguments.Skip(1)];
+                RegistryManager.RegisterProtocolHandler("roblox-player", fixedArguments);
 
                 await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
             }
@@ -70,14 +78,30 @@ namespace Sirstrap.UI.ViewModels
 
         private void UpdateLastLogFromSink()
         {
-            if (!LastLogMessage.Equals(LastLogSink.LastLog))
+            if (!string.Equals(LastLogMessage, LastLogSink.LastLog))
             {
                 LastLogMessage = LastLogSink.LastLog;
                 LastLogTimestamp = LastLogSink.LastLogTimestamp;
                 LastLogLevel = LastLogSink.LastLogLevel;
+
+                _lastLogReceived = DateTimeOffset.Now;
             }
 
             UpdateRobloxProcessCount();
+            UpdatePollingInterval();
+        }
+
+        private void UpdatePollingInterval()
+        {
+            bool hasRecentLogActivity = _lastLogReceived.HasValue && (DateTimeOffset.Now - _lastLogReceived.Value).TotalSeconds <= LOG_ACTIVITY_THRESHOLD_SECONDS;
+
+            int newInterval = hasRecentLogActivity ? MIN_POLLING_INTERVAL : MAX_POLLING_INTERVAL;
+
+            if (newInterval != _currentPollingInterval)
+            {
+                _currentPollingInterval = newInterval;
+                _logPollingTimer.Interval = _currentPollingInterval;
+            }
         }
 
         private void UpdateRobloxProcessCount()

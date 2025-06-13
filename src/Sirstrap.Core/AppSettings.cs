@@ -55,7 +55,7 @@
         /// - The SirHurt API is tried first, which may provide more up-to-date versions for exploits
         /// - Falls back to the official Roblox API if SirHurt API fails
         /// </remarks>
-        public bool SafeMode { get; set; } = true;
+        public bool SafeMode { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether multiple instances of the application can run simultaneously.
@@ -77,5 +77,7 @@
         /// - Attempting to launch another instance will activate the existing one
         /// </remarks>
         public bool MultiInstance { get; set; }
+
+        public bool IncognitoMode { get; set; }
     }
 }
