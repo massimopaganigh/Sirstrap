@@ -60,9 +60,9 @@ namespace Sirstrap.UI.ViewModels
 
                 string logsPath = Path.Combine(logsDirectory, "SirstrapLog.txt");
 
-                Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath).WriteTo.LastLog().CreateLogger();
+                Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024 /*5 MB*/, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
 
-                string[] fixedArguments = arguments.Skip(1).ToArray();
+                string[] fixedArguments = [.. arguments.Skip(1)];
 
                 RegistryManager.RegisterProtocolHandler("roblox-player", fixedArguments);
 
