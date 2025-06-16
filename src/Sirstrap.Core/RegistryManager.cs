@@ -1,7 +1,4 @@
-﻿using Microsoft.Win32;
-using Serilog;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Manages Windows registry operations for registering Sirstrap as a protocol handler.

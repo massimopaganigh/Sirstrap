@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public static class BetterHttpClient
     {

@@ -1,7 +1,4 @@
-﻿using Serilog.Core;
-using Serilog.Events;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public class LastLogSink : ILogEventSink
     {

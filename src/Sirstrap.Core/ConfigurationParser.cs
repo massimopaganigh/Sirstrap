@@ -1,10 +1,4 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="ConfigurationParser.cs" company="Sirstrap">
-//     Author: massimopaganigh
-//     Copyright (c) 2025. All rights reserved.
-// </copyright>
-//-----------------------------------------------------------------------
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public class ConfigurationParser
     {

@@ -1,7 +1,4 @@
-﻿using Serilog;
-using System.Diagnostics;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to ensure only one instance of the Roblox runs at a time

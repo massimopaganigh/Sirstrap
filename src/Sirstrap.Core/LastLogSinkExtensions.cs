@@ -1,7 +1,4 @@
-﻿using Serilog;
-using Serilog.Configuration;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public static class LastLogSinkExtensions
     {

@@ -1,7 +1,4 @@
-﻿using Serilog;
-using System.Text.Json;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public class RobloxVersionService(HttpClient httpClient)
     {

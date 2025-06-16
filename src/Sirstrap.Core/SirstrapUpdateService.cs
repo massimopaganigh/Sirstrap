@@ -1,9 +1,4 @@
-﻿using Serilog;
-using System.Diagnostics;
-using System.IO.Compression;
-using System.Text.Json;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public class SirstrapUpdateService
     {

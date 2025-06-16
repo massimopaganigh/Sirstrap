@@ -1,7 +1,4 @@
-﻿using Serilog;
-using System.IO.Compression;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public static class PackageExtractor
     {
