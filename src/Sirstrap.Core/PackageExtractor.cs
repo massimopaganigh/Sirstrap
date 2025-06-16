@@ -31,7 +31,7 @@ namespace Sirstrap.Core
             { "extracontent-textures.zip", "ExtraContent/textures/" },
             { "extracontent-places.zip", "ExtraContent/places/" }
         };
-        private static readonly Dictionary<string, string> _studioExtractionsRoots = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> _studioExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxStudio.zip", string.Empty },
             { "RibbonConfig.zip", "RibbonConfig/" },
@@ -69,6 +69,16 @@ namespace Sirstrap.Core
             { "extracontent-models.zip", "ExtraContent/models/" }
         };
 
+        private static Dictionary<string, string> GetExtractRoots(string package)
+        {
+            if (package.Equals("RobloxApp.zip", StringComparison.OrdinalIgnoreCase))
+                return _playerExtractionRoots;
+            else if (package.Equals("RobloxStudio.zip", StringComparison.OrdinalIgnoreCase))
+                return _studioExtractionRoots;
+
+            return _playerExtractionRoots;
+        }
+
         /// <summary>
         /// Extracts the contents of a package from the provided byte array and writes them to the specified <see cref="ZipArchive"/>.
         /// </summary>
@@ -90,8 +100,8 @@ namespace Sirstrap.Core
 
             try
             {
-                if (_playerExtractionRoots.TryGetValue(package, out string? value))
-                    foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(e => !string.IsNullOrEmpty(e.FullName)))
+                if (GetExtractRoots(package).TryGetValue(package, out string? value))
+                    foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(x => !string.IsNullOrEmpty(x.FullName)))
                     {
                         using MemoryStream stream = new();
 
@@ -131,11 +141,11 @@ namespace Sirstrap.Core
         /// <param name="content">The content to be written into the package entry.</param>
         /// <param name="package">The name of the package entry to create within the ZIP archive.</param>
         /// <param name="archive">The ZIP archive where the package entry will be created.</param>
-        public static async Task ExtractPackageContent(string content, string package, ZipArchive archive)
+        public static void ExtractPackageContent(string content, string package, ZipArchive archive)
         {
-            using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open(); 
+            using StreamWriter writer = new(archive.CreateEntry(package, CompressionLevel.Optimal).Open());
 
-            await new StreamWriter(entryStream).WriteAsync(content);
+            writer.Write(content);
         }
     }
 }
