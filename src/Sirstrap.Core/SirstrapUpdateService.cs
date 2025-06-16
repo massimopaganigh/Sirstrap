@@ -3,7 +3,7 @@
     public class SirstrapUpdateService
     {
         private const string SIRSTRAP_API = "https://api.github.com/repos/massimopaganigh/sirstrap/releases";
-        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.1";
+        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.2";
 
         private readonly HttpClient _httpClient;
 
