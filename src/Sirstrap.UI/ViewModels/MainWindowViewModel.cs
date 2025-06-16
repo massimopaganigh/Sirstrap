@@ -112,9 +112,9 @@ namespace Sirstrap.UI.ViewModels
                 int count = Process.GetProcesses().Count(x => commonRobloxNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
 
                 RobloxProcessCount = count;
-                IsRobloxRunning = count > 0;
+                IsRobloxRunning = count > 0 && SettingsManager.GetSettings().MultiInstance;
             }
-            catch (Exception) { } //ignore
+            catch (Exception) { }
         }
 
         public void Dispose()
