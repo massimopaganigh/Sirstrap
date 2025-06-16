@@ -19,10 +19,15 @@ namespace Sirstrap.UI
             {
                 DisableAvaloniaDataAnnotationValidation();
 
-                desktop.MainWindow = new MainWindow
+                MainWindowViewModel viewModel = new();
+                MainWindow mainWindow = new()
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = viewModel,
                 };
+
+                viewModel.SetMainWindow(mainWindow);
+
+                desktop.MainWindow = mainWindow;
             }
 
             base.OnFrameworkInitializationCompleted();

@@ -3,6 +3,8 @@ name: Main Branch Build
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -10,6 +12,12 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
+    permissions:
+      contents: write
+      discussions: write
+      id-token: write
+      security-events: write
 
     steps:
     - name: Checkout
@@ -32,14 +40,48 @@ jobs:
       run: cd build && build.bat
       shell: cmd
 
+    - name: Run Microsoft Security DevOps
+      uses: microsoft/security-devops-action@latest
+      id: msdo
+
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+
     - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4
       with:
         name: Sirstrap.CLI
         path: out/Sirstrap.CLI
 
+    - name: Upload artifact Sirstrap.CLI_fat
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap.CLI_fat
+        path: out/Sirstrap.CLI_fat
+
     - name: Upload artifact Sirstrap.UI
       uses: actions/upload-artifact@v4
       with:
         name: Sirstrap.UI
         path: out/Sirstrap.UI
+
+    - name: Upload artifact Sirstrap.UI_fat
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap.UI_fat
+        path: out/Sirstrap.UI_fat
+
+    - name: Upload artifact Sirstrap.CLI_test.log
+      uses: actions/upload-artifact@v4
+      with:
+        name: Sirstrap.CLI_test.log
+        path: out/Sirstrap.CLI_test.log
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      if: github.ref_type == 'tag'
+      with:
+        generate_release_notes: true
+        files: out/**/*

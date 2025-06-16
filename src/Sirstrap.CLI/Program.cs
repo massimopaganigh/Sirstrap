@@ -15,7 +15,7 @@ namespace Sirstrap.CLI
 
                 string logsPath = Path.Combine(logsDirectory, "SirstrapLog.txt");
 
-                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logsPath).CreateLogger();
+                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024 /*5 MB*/, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
 
                 Console.WriteLine(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 

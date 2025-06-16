@@ -1,13 +1,4 @@
-﻿//-----------------------------------------------------------------------
-// <copyright file="RobloxVersionService.cs" company="Sirstrap">
-//     Author: massimopaganigh
-//     Copyright (c) 2025. All rights reserved.
-// </copyright>
-//-----------------------------------------------------------------------
-using Serilog;
-using System.Text.Json;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public class RobloxVersionService(HttpClient httpClient)
     {
@@ -69,9 +60,16 @@ namespace Sirstrap.Core
             }
         }
 
+        /// <summary>
+        /// Asynchronously retrieves the latest version of the application from the appropriate API.
+        /// </summary>
+        /// <remarks>The method determines which API to use based on the current application settings.
+        /// If safe mode is enabled, the Roblox API is used to retrieve the version.
+        /// Otherwise, the SirHurt API is used as the primary source, with a fallback to the Roblox API if the SirHurt API fails to provide a valid version.</remarks>
+        /// <returns>A <see cref="string"/> representing the latest version of the application. Returns an empty string if the version could not be retrieved.</returns>
         public async Task<string> GetLatestVersionAsync()
         {
-            string version = string.Empty;
+            string version;
 
             if (SettingsManager.GetSettings().SafeMode)
             {

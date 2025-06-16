@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Encapsulates configuration settings for downloading and processing Roblox application

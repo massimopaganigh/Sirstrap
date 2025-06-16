@@ -1,7 +1,4 @@
-﻿using Serilog;
-using System.IO.Compression;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Coordinates the download and assembly of Roblox application packages, handling 
@@ -28,9 +25,9 @@ namespace Sirstrap.Core
 
             Log.Information("[*] Downloading ZIP archive for {0} ({1})...", downloadConfiguration.BinaryType, zipFileName);
 
-            var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetBinaryUrl(downloadConfiguration, zipFileName)).ConfigureAwait(false);
+            var bytes = await BetterHttpClient.GetByteArrayAsync(_httpClient, UrlBuilder.GetBinaryUrl(downloadConfiguration, zipFileName)).ConfigureAwait(false);
 
-            await File.WriteAllBytesAsync(downloadConfiguration.GetOutputFileName(), bytes).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(downloadConfiguration.GetOutputFileName(), bytes!).ConfigureAwait(false);
 
             Log.Information("[*] File downloaded: {0}", downloadConfiguration.GetOutputFileName());
         }
@@ -40,9 +37,9 @@ namespace Sirstrap.Core
         /// </summary>
         /// <param name="downloadConfiguration">Configuration specifying the version, channel, and other download parameters.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains the manifest content as a string.</returns>
-        public async Task<string> DownloadManifestAsync(DownloadConfiguration downloadConfiguration)
+        public async Task<string?> DownloadManifestAsync(DownloadConfiguration downloadConfiguration)
         {
-            return await HttpHelper.GetStringAsync(_httpClient, UrlBuilder.GetManifestUrl(downloadConfiguration)).ConfigureAwait(false);
+            return await BetterHttpClient.GetStringAsync(_httpClient, UrlBuilder.GetManifestUrl(downloadConfiguration)).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -106,7 +103,7 @@ namespace Sirstrap.Core
         {
             const string settings = """<?xml version="1.0" encoding="UTF-8"?><Settings><ContentFolder>content</ContentFolder><BaseUrl>http://www.roblox.com</BaseUrl></Settings>""";
 
-            PackageExtractor.AddTextFile(finalZip, "AppSettings.xml", settings);
+            PackageExtractor.ExtractPackageContent(settings, "AppSettings.xml", finalZip);
         }
 
         /// <summary>
@@ -142,9 +139,9 @@ namespace Sirstrap.Core
         {
             Log.Information("[*] Downloading package {0}...", package);
 
-            var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetPackageUrl(downloadConfiguration, package)).ConfigureAwait(false);
+            var bytes = await BetterHttpClient.GetByteArrayAsync(_httpClient, UrlBuilder.GetPackageUrl(downloadConfiguration, package)).ConfigureAwait(false);
 
-            await PackageExtractor.ProcessPackageAsync(bytes, package, finalZip).ConfigureAwait(false);
+            await PackageExtractor.ExtractPackageBytesAsync(bytes, package, finalZip).ConfigureAwait(false);
         }
     }
 }

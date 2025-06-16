@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Manages application settings, providing functionality to load and save

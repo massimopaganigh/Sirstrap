@@ -1,7 +1,3 @@
-using Serilog;
-using System.Diagnostics;
-using System.Security.Principal;
-
 namespace Sirstrap.Core
 {
     /// <summary>
