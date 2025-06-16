@@ -6,7 +6,7 @@ namespace Sirstrap.Core
     public static class PackageExtractor
     {
         private static readonly Lock _lock = new();
-        private static readonly Dictionary<string, string> PlayerExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> _playerExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxApp.zip", string.Empty },
             { "redist.zip", string.Empty },
@@ -31,7 +31,7 @@ namespace Sirstrap.Core
             { "extracontent-textures.zip", "ExtraContent/textures/" },
             { "extracontent-places.zip", "ExtraContent/places/" }
         };
-        private static readonly Dictionary<string, string> StudioExtractionsRoots = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> _studioExtractionsRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxStudio.zip", string.Empty },
             { "RibbonConfig.zip", "RibbonConfig/" },
@@ -90,7 +90,7 @@ namespace Sirstrap.Core
 
             try
             {
-                if (PlayerExtractionRoots.TryGetValue(package, out string? value))
+                if (_playerExtractionRoots.TryGetValue(package, out string? value))
                     foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(e => !string.IsNullOrEmpty(e.FullName)))
                     {
                         using MemoryStream stream = new();
@@ -100,11 +100,19 @@ namespace Sirstrap.Core
                         byte[] entryBytes = stream.ToArray();
 
                         lock (_lock) // Sybau 🥀
-                            archive.CreateEntry($"{value}{entry.FullName.Replace('\\', '/')}", CompressionLevel.Fastest).Open().Write(entryBytes, 0, entryBytes.Length);
+                        {
+                            using Stream entryStream = archive.CreateEntry($"{value}{entry.FullName.Replace('\\', '/')}", CompressionLevel.Fastest).Open();
+
+                            entryStream.Write(entryBytes, 0, entryBytes.Length);
+                        }
                     }
                 else
                     lock (_lock) // Sybau 🥀
-                        archive.CreateEntry(package, CompressionLevel.Fastest).Open().Write(bytes, 0, bytes.Length);
+                    {
+                        using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open();
+
+                        entryStream.Write(bytes, 0, bytes.Length);
+                    }
 
                 Log.Information("[*] Package {0} extraction completed.", package);
             }
