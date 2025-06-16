@@ -7,6 +7,7 @@ set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
 set "sirstrap_cli_fat_publish_dir=..\out\Sirstrap.CLI_fat"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
 set "sirstrap_ui_fat_publish_dir=..\out\Sirstrap.UI_fat"
+set "sirstrap_cli_test_log=..\out\Sirstrap.CLI_test.log"
 
 echo Cleaning directories...
 
@@ -135,5 +136,14 @@ if %ERRORLEVEL% neq 0 (
 )
 
 del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
+
+echo Testing Sirstrap.CLI...
+
+"%sirstrap_cli_publish_dir%\Sirstrap.exe" > "%sirstrap_cli_test_log%" 2>&1
+
+if %ERRORLEVEL% neq 0 (
+    echo Test of Sirstrap.CLI failed.
+    exit /b %ERRORLEVEL%
+)
 
 endlocal
