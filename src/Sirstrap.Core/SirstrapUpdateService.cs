@@ -21,11 +21,6 @@ namespace Sirstrap.Core
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "Sirstrap");
         }
 
-        /// <summary>
-        /// Downloads and applies the latest update for the specified Sirstrap type.
-        /// </summary>
-        /// <param name="sirstrapType">The type of Sirstrap to update.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<bool> DownloadAndApplyUpdateAsync(SirstrapType sirstrapType)
         {
             try
@@ -102,23 +97,10 @@ exit
             }
         }
 
-        /// <summary>
-        /// Gets the current channel of Sirstrap.
-        /// </summary>
-        /// <returns>The current channel of Sirstrap.</returns>
         private static string GetCurrentChannel() => SettingsManager.GetSettings().SirstrapUpdateChannel;
 
-        /// <summary>
-        /// Gets the current version of Sirstrap.
-        /// </summary>
-        /// <returns>The current version of Sirstrap.</returns>
         private static Version GetCurrentVersion() => new(SIRSTRAP_CURRENT_VERSION);
 
-        /// <summary>
-        /// Gets the latest version, channel, and download URI for the specified Sirstrap type.
-        /// </summary>
-        /// <param name="sirstrapType">The type of Sirstrap to check.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<(Version latestVersion, string latestChannel, string latestDownloadUri)> GetLatestVersionChannelAndDownloadUriAsync(SirstrapType sirstrapType)
         {
             try
@@ -210,11 +192,6 @@ exit
             }
         }
 
-        /// <summary>
-        /// Checks if the current Sirstrap version is up to date.
-        /// </summary>
-        /// <param name="sirstrapType">The type of Sirstrap to check.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         private async Task<bool> IsUpToDateAsync(SirstrapType sirstrapType)
         {
             try
@@ -237,6 +214,8 @@ exit
 
                     return false;
                 }
+
+                Log.Information("[*] Up to date: v{0}{1}.", currentVersion, currentChannel);
 
                 return true;
             }

@@ -69,7 +69,7 @@ namespace Sirstrap.Core
             { "extracontent-models.zip", "ExtraContent/models/" }
         };
 
-        private static Dictionary<string, string> GetExtractRoots(string package)
+        private static Dictionary<string, string> GetExtractionRoots(string package)
         {
             if (package.Equals("RobloxApp.zip", StringComparison.OrdinalIgnoreCase))
                 return _playerExtractionRoots;
@@ -89,7 +89,7 @@ namespace Sirstrap.Core
         /// <param name="package">The name of the package being extracted. Used to determine the extraction path or entry name.</param>
         /// <param name="archive">The <see cref="ZipArchive"/> where the extracted contents will be written.</param>
         /// <returns></returns>
-        public static async Task ExtractPackageBytesAsync(byte[] bytes, string package, ZipArchive archive)
+        public static async Task ExtractPackageBytesAsync(byte[]? bytes, string package, ZipArchive archive)
         {
             if (bytes == null)
             {
@@ -100,7 +100,7 @@ namespace Sirstrap.Core
 
             try
             {
-                if (GetExtractRoots(package).TryGetValue(package, out string? value))
+                if (GetExtractionRoots(package).TryGetValue(package, out string? value))
                     foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(x => !string.IsNullOrEmpty(x.FullName)))
                     {
                         using MemoryStream stream = new();
