@@ -1,4 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Serilog;
 using Serilog.Events;
 using Sirstrap.Core;
@@ -37,6 +39,8 @@ namespace Sirstrap.UI.ViewModels
         private DateTimeOffset? _lastLogTimestamp;
 
         private readonly Timer _logPollingTimer;
+
+        private Window? _mainWindow;
 
         [ObservableProperty]
         private int _robloxProcessCount;
@@ -113,6 +117,13 @@ namespace Sirstrap.UI.ViewModels
 
                 RobloxProcessCount = count;
                 IsRobloxRunning = count > 0 && SettingsManager.GetSettings().MultiInstance;
+
+                if (_mainWindow != null
+                    && IsRobloxRunning)
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        _mainWindow.WindowState = WindowState.Minimized;
+                    });
             }
             catch (Exception) { }
         }
@@ -122,5 +133,7 @@ namespace Sirstrap.UI.ViewModels
             _logPollingTimer?.Stop();
             _logPollingTimer?.Dispose();
         }
+
+        public void SetMainWindow(Window mainWindow) => _mainWindow = mainWindow;
     }
 }
