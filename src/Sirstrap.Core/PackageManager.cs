@@ -106,7 +106,7 @@ namespace Sirstrap.Core
         {
             const string settings = """<?xml version="1.0" encoding="UTF-8"?><Settings><ContentFolder>content</ContentFolder><BaseUrl>http://www.roblox.com</BaseUrl></Settings>""";
 
-            PackageExtractor.AddTextFile(finalZip, "AppSettings.xml", settings);
+            PackageExtractor.ExtractPackageContent(settings, "AppSettings.xml", finalZip);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Sirstrap.Core
 
             var bytes = await HttpHelper.GetBytesAsync(_httpClient, UrlBuilder.GetPackageUrl(downloadConfiguration, package)).ConfigureAwait(false);
 
-            await PackageExtractor.ProcessPackageAsync(bytes, package, finalZip).ConfigureAwait(false);
+            await PackageExtractor.ExtractPackageBytesAsync(bytes, package, finalZip).ConfigureAwait(false);
         }
     }
 }

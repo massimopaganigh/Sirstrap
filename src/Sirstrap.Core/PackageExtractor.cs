@@ -3,13 +3,10 @@ using System.IO.Compression;
 
 namespace Sirstrap.Core
 {
-    /// <summary>
-    /// Provides functionality to extract and integrate downloaded Roblox packages 
-    /// into a final ZIP archive, handling different extraction paths for Player and Studio components.
-    /// </summary>
     public static class PackageExtractor
     {
-        private static readonly Dictionary<string, string> ExtractRootsPlayer = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Lock _lock = new();
+        private static readonly Dictionary<string, string> PlayerExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxApp.zip", string.Empty },
             { "redist.zip", string.Empty },
@@ -34,8 +31,7 @@ namespace Sirstrap.Core
             { "extracontent-textures.zip", "ExtraContent/textures/" },
             { "extracontent-places.zip", "ExtraContent/places/" }
         };
-
-        private static readonly Dictionary<string, string> ExtractRootsStudio = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> StudioExtractionsRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxStudio.zip", string.Empty },
             { "RibbonConfig.zip", "RibbonConfig/" },
@@ -73,153 +69,60 @@ namespace Sirstrap.Core
             { "extracontent-models.zip", "ExtraContent/models/" }
         };
 
-        private static readonly Lock _zipLock = new();
-
         /// <summary>
-        /// Creates and adds a text file with the specified content to the final ZIP archive.
+        /// Extracts the contents of a package from the provided byte array and writes them to the specified <see cref="ZipArchive"/>.
         /// </summary>
-        /// <param name="finalZip">The target ZIP archive to add the file to.</param>
-        /// <param name="entryName">The name and path of the file within the archive.</param>
-        /// <param name="settings">The text content to write to the file.</param>
-        /// <remarks>
-        /// The file is compressed using the optimal compression level.
-        /// </remarks>
-        public static void AddTextFile(ZipArchive finalZip, string entryName, string settings)
-        {
-            using var writer = new StreamWriter(finalZip.CreateEntry(entryName, CompressionLevel.Optimal).Open());
-
-            writer.Write(settings);
-        }
-
-        /// <summary>
-        /// Processes a downloaded package by either extracting and integrating its contents
-        /// or adding it as a single file to the final ZIP archive.
-        /// </summary>
-        /// <param name="bytes">The raw binary content of the package.</param>
-        /// <param name="package">The package filename, which determines how it's processed.</param>
-        /// <param name="finalZip">The target ZIP archive where content will be added.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        /// <remarks>
-        /// The processing method is determined by the package name:
-        /// - If listed in the extract roots dictionaries, the package is extracted and its contents
-        ///   are integrated with appropriate directory paths.
-        /// - Otherwise, the package is added as a single file.
-        /// </remarks>
-        public static async Task ProcessPackageAsync(byte[] bytes, string package, ZipArchive finalZip)
+        /// <remarks>If the package name is found in the predefined extraction paths, the entries are extracted to the corresponding path.
+        /// Otherwise, the entire package is written as a single entry in the archive.
+        /// The method logs the extraction process and rethrows any exceptions encountered for higher-level handling. (Too lazy to handle it here uwu)</remarks>
+        /// <param name="bytes">The byte array containing the package data to be extracted. Cannot be <see langword="null"/>.</param>
+        /// <param name="package">The name of the package being extracted. Used to determine the extraction path or entry name.</param>
+        /// <param name="archive">The <see cref="ZipArchive"/> where the extracted contents will be written.</param>
+        /// <returns></returns>
+        public static async Task ExtractPackageBytesAsync(byte[] bytes, string package, ZipArchive archive)
         {
             if (bytes == null)
             {
-                Log.Error("[!] Failed to download package {0}: Received null data", package);
+                Log.Error("[!] Package {0} extraction failed: bytes are null.", package);
 
                 return;
             }
 
-            if (GetExtractRoots(package).TryGetValue(package, out string? value))
+            try
             {
-                await ExtractAndIntegratePackageAsync(bytes, package, finalZip, value).ConfigureAwait(false);
+                if (PlayerExtractionRoots.TryGetValue(package, out string? value))
+                    foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(e => !string.IsNullOrEmpty(e.FullName)))
+                    {
+                        using MemoryStream stream = new();
+
+                        await entry.Open().CopyToAsync(stream);
+
+                        byte[] entryBytes = stream.ToArray();
+
+                        lock (_lock) // Sybau 🥀
+                            archive.CreateEntry($"{value}{entry.FullName.Replace('\\', '/')}", CompressionLevel.Fastest).Open().Write(entryBytes, 0, entryBytes.Length);
+                    }
+                else
+                    lock (_lock) // Sybau 🥀
+                        archive.CreateEntry(package, CompressionLevel.Fastest).Open().Write(bytes, 0, bytes.Length);
+
+                Log.Information("[*] Package {0} extraction completed.", package);
             }
-            else
+            catch (Exception ex)
             {
-                AddPackageAsFile(bytes, package, finalZip);
+                Log.Error("[!] Package {0} extraction failed: {1}", package, ex.Message);
+
+                throw; // Rethrow to allow higher-level handling if necessary
             }
         }
 
         /// <summary>
-        /// Determines which extraction root dictionary to use based on the package name.
+        /// Extracts the specified content into a package entry within the provided ZIP archive.
         /// </summary>
-        /// <param name="package">The package filename.</param>
-        /// <returns>
-        /// The appropriate dictionary mapping package names to extraction root paths.
-        /// Returns the Player dictionary by default.
-        /// </returns>
-        private static Dictionary<string, string> GetExtractRoots(string package)
-        {
-            if (package.Equals("RobloxApp.zip", StringComparison.OrdinalIgnoreCase))
-            {
-                return ExtractRootsPlayer;
-            }
-            else if (package.Equals("RobloxStudio.zip", StringComparison.OrdinalIgnoreCase))
-            {
-                return ExtractRootsStudio;
-            }
-
-            return ExtractRootsPlayer;
-        }
-
-        /// <summary>
-        /// Extracts the contents of a package and integrates them into the final ZIP archive.
-        /// </summary>
-        /// <param name="bytes">The raw binary content of the package.</param>
-        /// <param name="package">The package filename, used for logging.</param>
-        /// <param name="finalZip">The target ZIP archive where content will be added.</param>
-        /// <param name="value">The base directory path for entries from this package.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        /// <remarks>
-        /// Each entry in the package is extracted and added to the final ZIP with
-        /// its path prefixed by the specified value.
-        /// </remarks>
-        private static async Task ExtractAndIntegratePackageAsync(byte[] bytes, string package, ZipArchive finalZip, string value)
-        {
-            foreach (var entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries)
-            {
-                if (string.IsNullOrEmpty(entry.Name))
-                {
-                    continue;
-                }
-
-                var targetValue = $"{value}{entry.FullName.Replace('\\', '/')}";
-
-                await IntegrateEntryAsync(entry, targetValue, finalZip).ConfigureAwait(false);
-            }
-
-            Log.Information("[*] Package {0} extracted and integrated.", package);
-        }
-
-        /// <summary>
-        /// Adds a package as a single file to the final ZIP archive.
-        /// </summary>
-        /// <param name="bytes">The raw binary content of the package.</param>
-        /// <param name="package">The package filename, which will be used as the entry name.</param>
-        /// <param name="finalZip">The target ZIP archive where the file will be added.</param>
-        /// <remarks>
-        /// This method is used for packages that are not defined in the extract roots dictionaries.
-        /// Access to the ZIP archive is synchronized to prevent concurrent modification issues.
-        /// </remarks>
-        private static void AddPackageAsFile(byte[] bytes, string package, ZipArchive finalZip)
-        {
-            lock (_zipLock)
-            {
-                finalZip.CreateEntry(package, CompressionLevel.Optimal).Open().Write(bytes, 0, bytes.Length);
-            }
-
-            Log.Warning("[*] {0} not defined in extract roots: added as single file.", package);
-        }
-
-        /// <summary>
-        /// Integrates a single entry from a package into the final ZIP archive.
-        /// </summary>
-        /// <param name="entry">The ZIP archive entry to integrate.</param>
-        /// <param name="targetValue">The destination path within the final ZIP archive.</param>
-        /// <param name="finalZip">The target ZIP archive where the entry will be added.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
-        /// <remarks>
-        /// Reads the entry content into memory and then writes it to the final ZIP.
-        /// Access to the ZIP archive is synchronized to prevent concurrent modification issues.
-        /// </remarks>
-        private static async Task IntegrateEntryAsync(ZipArchiveEntry entry, string targetValue, ZipArchive finalZip)
-        {
-            using var msEntry = new MemoryStream();
-
-            await entry.Open().CopyToAsync(msEntry).ConfigureAwait(false);
-
-            var fileData = msEntry.ToArray();
-
-            lock (_zipLock)
-            {
-                using var entryStream = finalZip.CreateEntry(targetValue, CompressionLevel.Optimal).Open();
-
-                entryStream.Write(fileData, 0, fileData.Length);
-            }
-        }
+        /// <remarks>The method creates a new entry in the specified <paramref name="archive"/> with the name specified by <paramref name="package"/> and writes the provided <paramref name="content"/> into it using the fastest compression level.</remarks>
+        /// <param name="content">The content to be written into the package entry.</param>
+        /// <param name="package">The name of the package entry to create within the ZIP archive.</param>
+        /// <param name="archive">The ZIP archive where the package entry will be created.</param>
+        public static void ExtractPackageContent(string content, string package, ZipArchive archive) => new StreamWriter(archive.CreateEntry(package, CompressionLevel.Fastest).Open()).Write(content);
     }
 }
