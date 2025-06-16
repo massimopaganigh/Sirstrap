@@ -131,6 +131,11 @@ namespace Sirstrap.Core
         /// <param name="content">The content to be written into the package entry.</param>
         /// <param name="package">The name of the package entry to create within the ZIP archive.</param>
         /// <param name="archive">The ZIP archive where the package entry will be created.</param>
-        public static void ExtractPackageContent(string content, string package, ZipArchive archive) => new StreamWriter(archive.CreateEntry(package, CompressionLevel.Fastest).Open()).Write(content);
+        public static async Task ExtractPackageContent(string content, string package, ZipArchive archive)
+        {
+            using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open(); 
+
+            await new StreamWriter(entryStream).WriteAsync(content);
+        }
     }
 }
