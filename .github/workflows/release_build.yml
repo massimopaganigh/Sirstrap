@@ -1,15 +1,13 @@
-name: Develop Branch Build
+name: Release Build
 
 on:
   push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
-  workflow_dispatch:
-  schedule:
-    - cron: '0 12,0 * * *'
+    tags:
+      - 'v*'
 
 permissions:
+  contents: write
+  discussions: write
   id-token: write
   security-events: write
 
@@ -76,3 +74,9 @@ jobs:
       with:
         name: Sirstrap.CLI_test.log
         path: out/Sirstrap.CLI_test.log
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        generate_release_notes: true
+        files: out/release/*
