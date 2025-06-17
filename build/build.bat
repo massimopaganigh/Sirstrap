@@ -195,6 +195,5 @@ move /y "%sirstrap_cli_publish_dir%.zip" "%release_dir%\Sirstrap.CLI.zip"
 move /y "%sirstrap_cli_fat_publish_dir%.zip" "%release_dir%\Sirstrap.CLI_fat.zip"
 move /y "%sirstrap_ui_publish_dir%.zip" "%release_dir%\Sirstrap.UI.zip"
 move /y "%sirstrap_ui_fat_publish_dir%.zip" "%release_dir%\Sirstrap.UI_fat.zip"
-copy /y "%sirstrap_cli_test_log%" "%release_dir%\Sirstrap.CLI_test.log"
 
 endlocal
