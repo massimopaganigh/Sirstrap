@@ -6,7 +6,7 @@
 
         public static bool Launch(Configuration configuration)
         {
-            string robloxPlayerBetaExePath = Path.Combine(PathManager.GetVersionInstallPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
+            string robloxPlayerBetaExePath = Path.Combine(PathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {

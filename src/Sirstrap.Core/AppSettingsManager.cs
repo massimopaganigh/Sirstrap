@@ -76,11 +76,7 @@
                     Log.Information("[*] Loaded settings with success from {0}.", settingsPath);
 
                     if (toUpdate)
-                    {
-                        Log.Information("[*] Updating settings...");
-
                         SaveSettings(appSettings);
-                    }
 
                     return appSettings;
                 }

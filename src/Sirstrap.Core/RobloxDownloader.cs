@@ -118,7 +118,7 @@
         /// </remarks>
         private static bool IsAlreadyInstalled(Configuration configuration)
         {
-            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(configuration.VersionHash));
+            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetExtractionPath(configuration.VersionHash));
         }
 
         /// <summary>

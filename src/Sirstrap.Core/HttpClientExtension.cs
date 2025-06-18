@@ -13,13 +13,13 @@
                 {
                     if (attempt < attempts)
                     {
-                        Log.Warning("[*] Failed to request byte array from {0}, retrying...", uri);
+                        Log.Warning("[*] Byte array request from {0} failed, trying again...", uri);
 
                         await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)));
                     }
                     else
                     {
-                        Log.Error(ex, "[!] Failed to request byte array from {0}: {1}.", uri, ex.Message);
+                        Log.Error(ex, "[!] Byte array request from {0} failed: {1}", uri, ex.Message);
 
                         return null;
                     }
@@ -39,13 +39,13 @@
                 {
                     if (attempt < attempts)
                     {
-                        Log.Warning("[*] Failed to request string from {0}, retrying...", uri);
+                        Log.Warning("[*] String request from {0} failed, trying again...", uri);
 
                         await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)));
                     }
                     else
                     {
-                        Log.Error(ex, "[!] Failed to request string from {0}: {1}.", uri, ex.Message);
+                        Log.Error(ex, "[!] String request from {0} failed: {1}", uri, ex.Message);
 
                         return null;
                     }

@@ -21,7 +21,7 @@
         /// </remarks>
         public static void Install(Configuration configuration)
         {
-            var targetPath = PathManager.GetVersionInstallPath(configuration.VersionHash);
+            var targetPath = PathManager.GetExtractionPath(configuration.VersionHash);
             var zipPath = configuration.GetOutputPath();
 
             try

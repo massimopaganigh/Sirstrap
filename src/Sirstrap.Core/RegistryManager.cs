@@ -60,7 +60,7 @@
                 string? currentCommand = commandKey.GetValue(string.Empty)?.ToString();
                 string expectedCommand = $"\"{expectedExePath}\" %1";
                 bool isRegistered = string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase);
-                
+
                 if (isRegistered)
                     Log.Information("[*] Protocol {0} is already correctly registered with Sirstrap ({1}).", protocol, expectedExePath);
                 else
@@ -149,7 +149,7 @@
             }
 
             Log.Information("[*] Protocol {0} requires registration. Requesting administrator privileges...", protocol);
-            
+
             return UacHelper.EnsureAdministratorPrivileges(() => PerformRegistration(protocol), arguments, $"Protocol registration for {protocol}");
         }
     }

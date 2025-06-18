@@ -69,7 +69,7 @@
 
                     arguments = " " + string.Join(" ", escapedArgs);
                 }
-                
+
                 var batchContent = $@"
 @echo off
 echo Updating Sirstrap...

@@ -78,15 +78,17 @@
 
         public async Task ExtractPackageBytesAsync(byte[]? bytes, string package, ZipArchive archive)
         {
-            if (bytes == null)
-            {
-                Log.Error("[!] Package {0} extraction failed: bytes are null.", package);
-
-                return;
-            }
+            Log.Information("[*] Starting package {0} extraction...", package);
 
             try
             {
+                if (bytes == null)
+                {
+                    Log.Error("[!] Package {0} extraction failed: bytes are null.", package);
+
+                    return;
+                }
+
                 if (GetExtractionRoots(package).TryGetValue(package, out string? value))
                     foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(x => !string.IsNullOrEmpty(x.FullName)))
                     {
@@ -111,7 +113,7 @@
                         entryStream.Write(bytes, 0, bytes.Length);
                     }
 
-                Log.Information("[*] Package {0} extraction completed.", package);
+                Log.Information("[*] Package {0} extraction ended.", package);
             }
             catch (Exception ex)
             {

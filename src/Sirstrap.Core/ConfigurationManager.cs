@@ -35,7 +35,7 @@
         private static void ValidateBinaryType(string binaryType)
         {
             if (!_binaryTypes.ContainsKey(binaryType))
-                throw new ArgumentException($"Unsupported binary type: {binaryType}");
+                throw new ArgumentException($"Unsupported binary type: {binaryType}.");
         }
 
         public static Configuration CreateConfigurationFromArguments(Dictionary<string, string> arguments)

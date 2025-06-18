@@ -3,13 +3,13 @@
     public class PackageManager(HttpClient httpClient)
     {
         private const string APP_SETTINGS_XML = """<?xml version="1.0" encoding="UTF-8"?><Settings><ContentFolder>content</ContentFolder><BaseUrl>http://www.roblox.com</BaseUrl></Settings>""";
-        
+
         private readonly HttpClient _httpClient = httpClient;
         private readonly PackageExtractor _packageExtractor = new();
 
         private async Task DownloadPackageAsync(Configuration configuration, string package, ZipArchive archive)
         {
-            Log.Information("[*] Package {0} download started.", package);
+            Log.Information("[*] Starting package {0} download...", package);
 
             try
             {
@@ -31,12 +31,12 @@
                 ? "RobloxPlayer.zip"
                 : "RobloxStudioApp.zip";
 
-            Log.Information("[*] Archive {0} download started.", archiveName);
+            Log.Information("[*] Starting archive {0} download...", archiveName);
 
             try
             {
                 await File.WriteAllBytesAsync(configuration.GetOutputPath(), (await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, archiveName)))!);
-            
+
                 Log.Information("[*] Archive {0} download ended.", archiveName);
             }
             catch (Exception ex)
@@ -49,7 +49,7 @@
 
         public async Task Download4WindowsAsync(Configuration configuration)
         {
-            Log.Information("[*] Packages download started.", configuration.BinaryType);
+            Log.Information("[*] Starting packages download...", configuration.BinaryType);
 
             try
             {
