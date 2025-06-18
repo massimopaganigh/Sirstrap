@@ -1,145 +1,59 @@
 ﻿namespace Sirstrap.Core
 {
-    /// <summary>
-    /// Provides functionality to create, validate, and normalize download configuration settings
-    /// for different Roblox binary types and deployment channels.
-    /// </summary>
     public static class ConfigurationManager
     {
-        /// <summary>
-        /// A dictionary mapping binary type identifiers to their associated metadata.
-        /// </summary>
-        /// <remarks>
-        /// Supports case-insensitive lookup for binary types including:
-        /// - WindowsPlayer: Standard Windows Roblox Player
-        /// - WindowsStudio64: Windows Roblox Studio (64-bit)
-        /// - MacPlayer: macOS Roblox Player
-        /// - MacStudio: macOS Roblox Studio
-        /// </remarks>
-        private static readonly Dictionary<string, BinaryTypeInfo> BinaryTypes = new(StringComparer.OrdinalIgnoreCase)
+        private static readonly Dictionary<string, string> _binaryTypes = new(StringComparer.OrdinalIgnoreCase)
         {
-            { "WindowsPlayer", new BinaryTypeInfo { VersionFile = "/version", DefaultBlobDir = "/" } },
-            { "WindowsStudio64", new BinaryTypeInfo { VersionFile = "/versionQTStudio", DefaultBlobDir = "/" } },
-            { "MacPlayer", new BinaryTypeInfo { VersionFile = "/mac/version", DefaultBlobDir = "/mac/" } },
-            { "MacStudio", new BinaryTypeInfo { VersionFile = "/mac/versionStudio", DefaultBlobDir = "/mac/" } }
+            { "WindowsPlayer", "/" },
+            { "WindowsStudio64", "/" },
+            { "MacPlayer", "/mac/" },
+            { "MacStudio", "/mac/" }
         };
 
-        /// <summary>
-        /// Creates a download configuration based on the provided command-line arguments.
-        /// </summary>
-        /// <param name="args">A dictionary of argument name-value pairs from the command line.</param>
-        /// <returns>
-        /// A fully initialized and validated DownloadConfiguration object.
-        /// </returns>
-        /// <exception cref="ArgumentException">
-        /// Thrown when an unsupported binary type is specified.
-        /// </exception>
-        /// <remarks>
-        /// Applies defaults for missing arguments:
-        /// - channel: "LIVE"
-        /// - binaryType: "WindowsPlayer"
-        /// - compressZip: false
-        /// - compressionLevel: 6
-        /// 
-        /// The blob directory is determined based on the binary type if not explicitly provided.
-        /// </remarks>
-        public static Configuration CreateDownloadConfiguration(Dictionary<string, string> args)
+        private static string GetBlobDirectory(Dictionary<string, string> arguments, string binaryType)
         {
-            var configuration = new Configuration
+            string? blobDirectory = arguments.GetValueOrDefault("blob-directory");
+
+            return string.IsNullOrEmpty(blobDirectory)
+                ? _binaryTypes[binaryType]
+                : NormalizeBlobDirectory(blobDirectory);
+        }
+
+        private static string NormalizeBlobDirectory(string blobDirectory)
+        {
+            string normalized = blobDirectory;
+
+            if (!normalized.StartsWith('/'))
+                normalized = $"/{normalized}";
+
+            if (!normalized.EndsWith('/'))
+                normalized += "/";
+
+            return normalized;
+        }
+
+        private static void ValidateBinaryType(string binaryType)
+        {
+            if (!_binaryTypes.ContainsKey(binaryType))
+                throw new ArgumentException($"Unsupported binary type: {binaryType}");
+        }
+
+        public static Configuration CreateConfigurationFromArguments(Dictionary<string, string> arguments)
+        {
+            string binaryType = arguments.GetValueOrDefault("binaryType", "WindowsPlayer");
+
+            ValidateBinaryType(binaryType);
+
+            Configuration configuration = new()
             {
-                ChannelName = args.GetValueOrDefault("channel", "LIVE"),
-                BinaryType = args.GetValueOrDefault("binaryType", "WindowsPlayer"),
-                VersionHash = args.GetValueOrDefault("version") ?? string.Empty,
-                BlobDirectory = GetBlobDirectory(args),
-                CompressOutputZip = args.GetValueOrDefault("compressZip", "false").Equals("true", StringComparison.OrdinalIgnoreCase),
-                ZipCompressionLevel = GetCompressionLevel(args),
-                LaunchUri = args.GetValueOrDefault("launchUrl") ?? string.Empty
+                BinaryType = binaryType,
+                ChannelName = arguments.GetValueOrDefault("channel-name", "LIVE"),
+                VersionHash = arguments.GetValueOrDefault("version-hash", string.Empty),
+                BlobDirectory = GetBlobDirectory(arguments, binaryType),
+                LaunchUri = arguments.GetValueOrDefault("launch-uri", string.Empty)
             };
 
-            ValidateConfiguration(configuration);
-
             return configuration;
-        }
-
-        /// <summary>
-        /// Determines the appropriate blob directory based on arguments or binary type defaults.
-        /// </summary>
-        /// <param name="arguments">The command-line arguments dictionary.</param>
-        /// <returns>
-        /// A normalized blob directory path, ensuring it starts and ends with a forward slash.
-        /// </returns>
-        /// <remarks>
-        /// If a blob directory is explicitly provided in the arguments, it is normalized.
-        /// Otherwise, the default blob directory for the specified binary type is used.
-        /// </remarks>
-        private static string GetBlobDirectory(Dictionary<string, string> arguments)
-        {
-            var blobDir = arguments.GetValueOrDefault("blobDir");
-
-            if (string.IsNullOrEmpty(blobDir))
-            {
-                return BinaryTypes.TryGetValue(arguments.GetValueOrDefault("binaryType", "WindowsPlayer"), out var bt) ? bt.DefaultBlobDir! : string.Empty;
-            }
-
-            return NormalizeBlobDirectory(blobDir);
-        }
-
-        /// <summary>
-        /// Parses and validates the compression level from the command-line arguments.
-        /// </summary>
-        /// <param name="args">The command-line arguments dictionary.</param>
-        /// <returns>
-        /// An integer compression level between 1 and 9, defaulting to 6 if not specified
-        /// or if the specified value is invalid.
-        /// </returns>
-        /// <remarks>
-        /// Valid compression levels are integers from 1 (least compression) to 9 (most compression).
-        /// </remarks>
-        private static int GetCompressionLevel(Dictionary<string, string> args)
-        {
-            if (args.TryGetValue("compressionLevel", out var value) && int.TryParse(value, out var level) && level is >= 1 and <= 9)
-            {
-                return level;
-            }
-
-            return 6;
-        }
-
-        /// <summary>
-        /// Validates that the download configuration contains supported settings.
-        /// </summary>
-        /// <param name="configuration">The configuration to validate.</param>
-        /// <exception cref="ArgumentException">
-        /// Thrown when the binary type specified in the configuration is not supported.
-        /// </exception>
-        private static void ValidateConfiguration(Configuration configuration)
-        {
-            if (!BinaryTypes.ContainsKey(configuration.BinaryType))
-            {
-                throw new ArgumentException($"Unsupported binary type: {configuration.BinaryType}");
-            }
-        }
-
-        /// <summary>
-        /// Ensures the blob directory path is properly formatted.
-        /// </summary>
-        /// <param name="blobDir">The blob directory path to normalize.</param>
-        /// <returns>
-        /// A normalized blob directory path that starts and ends with a forward slash.
-        /// </returns>
-        private static string NormalizeBlobDirectory(string blobDir)
-        {
-            if (!blobDir.StartsWith($"/"))
-            {
-                blobDir = $"/{blobDir}";
-            }
-
-            if (!blobDir.EndsWith($"/"))
-            {
-                blobDir += "/";
-            }
-
-            return blobDir;
         }
     }
 }

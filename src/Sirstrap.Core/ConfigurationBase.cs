@@ -8,10 +8,6 @@
 
         public string VersionHash { get; set; } = string.Empty;
 
-        public bool CompressOutputZip { get; set; }
-
-        public int ZipCompressionLevel { get; set; } = 5;
-
         public string BlobDirectory { get; set; } = "/";
     }
 }
