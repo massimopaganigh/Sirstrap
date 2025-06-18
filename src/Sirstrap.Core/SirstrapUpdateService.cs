@@ -102,7 +102,7 @@ exit
             }
         }
 
-        private static string GetCurrentChannel() => SettingsManager.GetSettings().SirstrapUpdateChannel;
+        private static string GetCurrentChannel() => AppSettingsManager.GetSettings().SirstrapUpdateChannel;
 
         private static Version GetCurrentVersion() => new(SIRSTRAP_CURRENT_VERSION);
 

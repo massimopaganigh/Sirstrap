@@ -14,7 +14,7 @@
         /// </returns>
         private static string GetHostPath()
         {
-            return SettingsManager.GetSettings().RobloxCdnUrl;
+            return AppSettingsManager.GetSettings().RobloxCdnUrl;
         }
 
         /// <summary>

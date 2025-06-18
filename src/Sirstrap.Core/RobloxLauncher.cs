@@ -15,7 +15,7 @@
                 return false;
             }
 
-            bool multiInstance = SettingsManager.GetSettings().MultiInstance;
+            bool multiInstance = AppSettingsManager.GetSettings().MultiInstance;
             bool singletonCaptured = false;
 
             try

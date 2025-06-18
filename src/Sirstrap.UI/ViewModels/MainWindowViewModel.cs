@@ -116,7 +116,7 @@ namespace Sirstrap.UI.ViewModels
                 int count = Process.GetProcesses().Count(x => commonRobloxNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
 
                 RobloxProcessCount = count;
-                IsRobloxRunning = count > 0 && SettingsManager.GetSettings().MultiInstance;
+                IsRobloxRunning = count > 0 && AppSettingsManager.GetSettings().MultiInstance;
 
                 if (_mainWindow != null
                     && IsRobloxRunning)

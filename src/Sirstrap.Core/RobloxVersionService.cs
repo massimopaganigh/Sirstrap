@@ -71,7 +71,7 @@
         {
             string version;
 
-            if (SettingsManager.GetSettings().SafeMode)
+            if (AppSettingsManager.GetSettings().SafeMode)
             {
                 Log.Information("[*] Safe mode is enabled, using Roblox API to retrieve version...");
 
