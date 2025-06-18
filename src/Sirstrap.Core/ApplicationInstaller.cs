@@ -10,7 +10,7 @@
         /// Installs the application by preparing the target directory, extracting the downloaded 
         /// ZIP archive, and cleaning up temporary files.
         /// </summary>
-        /// <param name="downloadConfiguration">Configuration containing version information 
+        /// <param name="configuration">Configuration containing version information 
         /// and file paths needed for installation.</param>
         /// <exception cref="Exception">Rethrows any exceptions that occur during the installation process.</exception>
         /// <remarks>
@@ -19,10 +19,10 @@
         /// - Extracting all files from the ZIP archive to the version-specific directory
         /// - Deleting the temporary ZIP file after successful extraction
         /// </remarks>
-        public static void Install(DownloadConfiguration downloadConfiguration)
+        public static void Install(Configuration configuration)
         {
-            var targetPath = PathManager.GetVersionInstallPath(downloadConfiguration.Version!);
-            var zipPath = downloadConfiguration.GetOutputFileName();
+            var targetPath = PathManager.GetExtractionPath(configuration.VersionHash);
+            var zipPath = configuration.GetOutputPath();
 
             try
             {

@@ -1,15 +1,14 @@
-name: Develop Branch Build
+name: Release Build
 
 on:
   push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ develop ]
+    tags:
+      - 'v*'
   workflow_dispatch:
-  schedule:
-    - cron: '0 12,0 * * *'
 
 permissions:
+  contents: write
+  discussions: write
   id-token: write
   security-events: write
 
@@ -76,3 +75,13 @@ jobs:
       with:
         name: Sirstrap.CLI_test.log
         path: out/Sirstrap.CLI_test.log
+
+    - name: GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        generate_release_notes: true
+        files: out/release/*
+
+    - name: Winget Release
+      run: cd build && release.bat ${{ github.token }}
+      shell: cmd

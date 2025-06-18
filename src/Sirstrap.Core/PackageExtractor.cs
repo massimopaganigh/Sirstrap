@@ -1,9 +1,9 @@
 ﻿namespace Sirstrap.Core
 {
-    public static class PackageExtractor
+    public class PackageExtractor
     {
-        private static readonly Lock _lock = new();
-        private static readonly Dictionary<string, string> _playerExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
+        private readonly Lock _lock = new();
+        private readonly Dictionary<string, string> _playerExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxApp.zip", string.Empty },
             { "redist.zip", string.Empty },
@@ -28,7 +28,7 @@
             { "extracontent-textures.zip", "ExtraContent/textures/" },
             { "extracontent-places.zip", "ExtraContent/places/" }
         };
-        private static readonly Dictionary<string, string> _studioExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
+        private readonly Dictionary<string, string> _studioExtractionRoots = new(StringComparer.OrdinalIgnoreCase)
         {
             { "RobloxStudio.zip", string.Empty },
             { "RibbonConfig.zip", "RibbonConfig/" },
@@ -66,7 +66,7 @@
             { "extracontent-models.zip", "ExtraContent/models/" }
         };
 
-        private static Dictionary<string, string> GetExtractionRoots(string package)
+        private Dictionary<string, string> GetExtractionRoots(string package)
         {
             if (package.Equals("RobloxApp.zip", StringComparison.OrdinalIgnoreCase))
                 return _playerExtractionRoots;
@@ -76,27 +76,19 @@
             return _playerExtractionRoots;
         }
 
-        /// <summary>
-        /// Extracts the contents of a package from the provided byte array and writes them to the specified <see cref="ZipArchive"/>.
-        /// </summary>
-        /// <remarks>If the package name is found in the predefined extraction paths, the entries are extracted to the corresponding path.
-        /// Otherwise, the entire package is written as a single entry in the archive.
-        /// The method logs the extraction process and rethrows any exceptions encountered for higher-level handling. (Too lazy to handle it here uwu)</remarks>
-        /// <param name="bytes">The byte array containing the package data to be extracted. Cannot be <see langword="null"/>.</param>
-        /// <param name="package">The name of the package being extracted. Used to determine the extraction path or entry name.</param>
-        /// <param name="archive">The <see cref="ZipArchive"/> where the extracted contents will be written.</param>
-        /// <returns></returns>
-        public static async Task ExtractPackageBytesAsync(byte[]? bytes, string package, ZipArchive archive)
+        public async Task ExtractPackageBytesAsync(byte[]? bytes, string package, ZipArchive archive)
         {
-            if (bytes == null)
-            {
-                Log.Error("[!] Package {0} extraction failed: bytes are null.", package);
-
-                return;
-            }
+            Log.Information("[*] Starting package {0} extraction...", package);
 
             try
             {
+                if (bytes == null)
+                {
+                    Log.Error("[!] Package {0} extraction failed: bytes are null.", package);
+
+                    return;
+                }
+
                 if (GetExtractionRoots(package).TryGetValue(package, out string? value))
                     foreach (ZipArchiveEntry entry in new ZipArchive(new MemoryStream(bytes), ZipArchiveMode.Read).Entries.Where(x => !string.IsNullOrEmpty(x.FullName)))
                     {
@@ -106,7 +98,7 @@
 
                         byte[] entryBytes = stream.ToArray();
 
-                        lock (_lock) // Sybau 🥀
+                        lock (_lock)
                         {
                             using Stream entryStream = archive.CreateEntry($"{value}{entry.FullName.Replace('\\', '/')}", CompressionLevel.Fastest).Open();
 
@@ -114,30 +106,23 @@
                         }
                     }
                 else
-                    lock (_lock) // Sybau 🥀
+                    lock (_lock)
                     {
                         using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open();
 
                         entryStream.Write(bytes, 0, bytes.Length);
                     }
 
-                Log.Information("[*] Package {0} extraction completed.", package);
+                Log.Information("[*] Package {0} extraction ended.", package);
             }
             catch (Exception ex)
             {
                 Log.Error("[!] Package {0} extraction failed: {1}", package, ex.Message);
 
-                throw; // Rethrow to allow higher-level handling if necessary
+                throw;
             }
         }
 
-        /// <summary>
-        /// Extracts the specified content into a package entry within the provided ZIP archive.
-        /// </summary>
-        /// <remarks>The method creates a new entry in the specified <paramref name="archive"/> with the name specified by <paramref name="package"/> and writes the provided <paramref name="content"/> into it using the fastest compression level.</remarks>
-        /// <param name="content">The content to be written into the package entry.</param>
-        /// <param name="package">The name of the package entry to create within the ZIP archive.</param>
-        /// <param name="archive">The ZIP archive where the package entry will be created.</param>
         public static void ExtractPackageContent(string content, string package, ZipArchive archive)
         {
             using StreamWriter writer = new(archive.CreateEntry(package, CompressionLevel.Optimal).Open());

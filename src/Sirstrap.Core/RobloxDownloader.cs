@@ -46,30 +46,30 @@
         {
             try
             {
-                await new SirstrapUpdateService().UpdateAsync(sirstrapType);
+                await new SirstrapUpdateService().UpdateAsync(sirstrapType, args);
 
-                var downloadConfiguration = ConfigurationManager.CreateDownloadConfiguration(new ConfigurationParser().ParseConfiguration(args));
+                var configuration = ConfigurationManager.CreateConfigurationFromArguments(ConfigurationParser.ParseConfiguration(args));
 
-                if (!await InitializeDownloadAsync(downloadConfiguration).ConfigureAwait(false))
+                if (!await InitializeDownloadAsync(configuration).ConfigureAwait(false))
                 {
                     return;
                 }
 
-                if (IsAlreadyInstalled(downloadConfiguration))
+                if (IsAlreadyInstalled(configuration))
                 {
-                    Log.Information("[*] Version {0} is already installed.", downloadConfiguration.Version);
+                    Log.Information("[*] Version {0} is already installed.", configuration.VersionHash);
 
-                    if (LaunchApplication(downloadConfiguration))
+                    if (LaunchApplication(configuration))
                     {
                         return;
                     }
                 }
 
-                DownloadConfiguration.ClearCacheDirectory();
+                Configuration.ClearCacheDirectory();
 
-                await DownloadAndProcessFilesAsync(downloadConfiguration).ConfigureAwait(false);
+                await DownloadAndProcessFilesAsync(configuration).ConfigureAwait(false);
 
-                InstallAndLaunchApplication(downloadConfiguration);
+                InstallAndLaunchApplication(configuration);
             }
             catch (Exception ex)
             {
@@ -80,7 +80,7 @@
         /// <summary>
         /// Initializes the download configuration by determining the appropriate version.
         /// </summary>
-        /// <param name="downloadConfiguration">The download configuration to initialize.</param>
+        /// <param name="configuration">The download configuration to initialize.</param>
         /// <returns>
         /// A task representing the asynchronous operation. The task result is <c>true</c> if
         /// initialization succeeded; otherwise, <c>false</c>.
@@ -90,13 +90,13 @@
         /// retrieve the latest version from the version manager. It also ensures the version
         /// string is in the normalized format.
         /// </remarks>
-        private async Task<bool> InitializeDownloadAsync(DownloadConfiguration downloadConfiguration)
+        private async Task<bool> InitializeDownloadAsync(Configuration configuration)
         {
-            if (string.IsNullOrEmpty(downloadConfiguration.Version))
+            if (string.IsNullOrEmpty(configuration.VersionHash))
             {
-                downloadConfiguration.Version = await _robloxVersionService.GetLatestVersionAsync();
+                configuration.VersionHash = await _robloxVersionService.GetLatestVersionAsync();
 
-                if (string.IsNullOrEmpty(downloadConfiguration.Version))
+                if (string.IsNullOrEmpty(configuration.VersionHash))
                 {
                     return false;
                 }
@@ -108,7 +108,7 @@
         /// <summary>
         /// Determines whether the specified version is already installed.
         /// </summary>
-        /// <param name="downloadConfiguration">The download configuration containing the version to check.</param>
+        /// <param name="configuration">The download configuration containing the version to check.</param>
         /// <returns>
         /// <c>true</c> if the version is already installed; otherwise, <c>false</c>.
         /// </returns>
@@ -116,15 +116,15 @@
         /// Currently only checks for Windows Player installations by verifying if the
         /// version directory exists.
         /// </remarks>
-        private static bool IsAlreadyInstalled(DownloadConfiguration downloadConfiguration)
+        private static bool IsAlreadyInstalled(Configuration configuration)
         {
-            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetVersionInstallPath(downloadConfiguration.Version!));
+            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetExtractionPath(configuration.VersionHash));
         }
 
         /// <summary>
         /// Attempts to launch the Roblox application.
         /// </summary>
-        /// <param name="downloadConfiguration">The download configuration containing the version to launch.</param>
+        /// <param name="configuration">The download configuration containing the version to launch.</param>
         /// <param name="waitForExit">Whether to wait for the Roblox process to exit.</param>
         /// <returns>
         /// <c>true</c> if the application was successfully launched; otherwise, <c>false</c>.
@@ -133,56 +133,51 @@
         /// Currently only supports launching the Windows Player version.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static bool LaunchApplication(DownloadConfiguration downloadConfiguration)
+        private static bool LaunchApplication(Configuration configuration)
         {
-            return downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && RobloxLauncher.Launch(downloadConfiguration);
+            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && RobloxLauncher.Launch(configuration);
         }
 
         /// <summary>
         /// Downloads and processes the necessary files based on the binary type.
         /// </summary>
-        /// <param name="downloadConfiguration">The download configuration specifying what to download.</param>
+        /// <param name="configuration">The download configuration specifying what to download.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         /// <remarks>
         /// For macOS binaries, downloads the complete ZIP archive directly.
         /// For other platforms, downloads the manifest and processes the individual packages.
         /// </remarks>
-        private async Task DownloadAndProcessFilesAsync(DownloadConfiguration downloadConfiguration)
+        private async Task DownloadAndProcessFilesAsync(Configuration configuration)
         {
-            if (downloadConfiguration.IsMacBinary())
+            if (configuration.IsMacBinary())
             {
-                await _packageManager.DownloadMacBinaryAsync(downloadConfiguration).ConfigureAwait(false);
+                await _packageManager.Download4MacAsync(configuration).ConfigureAwait(false);
             }
             else
             {
-                var manifest = await _packageManager.DownloadManifestAsync(downloadConfiguration).ConfigureAwait(false);
-
-                if (!string.IsNullOrEmpty(manifest))
-                {
-                    await _packageManager.ProcessManifestAsync(manifest, downloadConfiguration).ConfigureAwait(false);
-                }
+                await _packageManager.Download4WindowsAsync(configuration).ConfigureAwait(false);
             }
         }
 
         /// <summary>
         /// Installs and launches the Roblox application.
         /// </summary>
-        /// <param name="downloadConfiguration">The download configuration containing installation details.</param>
+        /// <param name="configuration">The download configuration containing installation details.</param>
         /// <remarks>
         /// Currently only installs and launches the Windows Player version.
         /// The application is installed from the downloaded ZIP archive and then launched.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static void InstallAndLaunchApplication(DownloadConfiguration downloadConfiguration)
+        private static void InstallAndLaunchApplication(Configuration configuration)
         {
-            if (!downloadConfiguration.BinaryType!.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
+            if (!configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            ApplicationInstaller.Install(downloadConfiguration);
+            ApplicationInstaller.Install(configuration);
 
-            LaunchApplication(downloadConfiguration);
+            LaunchApplication(configuration);
         }
     }
 }
