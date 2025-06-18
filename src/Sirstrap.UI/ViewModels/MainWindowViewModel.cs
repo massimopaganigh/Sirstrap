@@ -51,10 +51,10 @@ namespace Sirstrap.UI.ViewModels
             _logPollingTimer.Elapsed += (s, e) => UpdateLastLogFromSink();
             _logPollingTimer.Start();
 
-            Task.Run(() => Main(Environment.GetCommandLineArgs()));
+            Task.Run(() => InitializeAsync(Environment.GetCommandLineArgs()));
         }
 
-        private static async Task Main(string[] arguments)
+        private static async Task InitializeAsync(string[] arguments)
         {
             try
             {
