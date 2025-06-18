@@ -16,7 +16,7 @@
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "Sirstrap");
         }
 
-        private async Task<bool> DownloadAndApplyUpdateAsync(SirstrapType sirstrapType)
+        private async Task<bool> DownloadAndApplyUpdateAsync(SirstrapType sirstrapType, string[] args)
         {
             try
             {
@@ -60,12 +60,22 @@
                 var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Sirstrap.exe");
                 var exeDirectory = Path.GetDirectoryName(exePath) ?? AppDomain.CurrentDomain.BaseDirectory;
                 var batchPath = Path.Combine(updateDirectory, "update.bat");
+                string arguments = string.Empty;
+
+                if (args != null
+                    && args.Length > 0)
+                {
+                    var escapedArgs = args.Select(arg => arg.Contains(' ') ? $"\"{arg.Replace("\"", "\"\"")}\"" : arg);
+
+                    arguments = " " + string.Join(" ", escapedArgs);
+                }
+                
                 var batchContent = $@"
 @echo off
 echo Updating Sirstrap...
 timeout /t 2 /nobreak >nul
 xcopy ""{updateDirectory}\*"" ""{exeDirectory}"" /E /Y
-start """" ""{Path.Combine(exeDirectory, "Sirstrap.exe")}""
+start """" ""{Path.Combine(exeDirectory, "Sirstrap.exe")}""{arguments}
 exit
 ";
 
@@ -233,12 +243,12 @@ exit
         /// </summary>
         /// <param name="sirstrapType">The type of Sirstrap to update.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
-        public async Task UpdateAsync(SirstrapType sirstrapType)
+        public async Task UpdateAsync(SirstrapType sirstrapType, string[] args)
         {
             try
             {
                 if (!await IsUpToDateAsync(sirstrapType))
-                    await DownloadAndApplyUpdateAsync(sirstrapType);
+                    await DownloadAndApplyUpdateAsync(sirstrapType, args);
             }
             catch (Exception ex)
             {

@@ -46,7 +46,7 @@
         {
             try
             {
-                await new SirstrapUpdateService().UpdateAsync(sirstrapType);
+                await new SirstrapUpdateService().UpdateAsync(sirstrapType, args);
 
                 var configuration = ConfigurationManager.CreateDownloadConfiguration(new ConfigurationParser().ParseConfiguration(args));
 
