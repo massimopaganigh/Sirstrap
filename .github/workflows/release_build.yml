@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -75,8 +76,12 @@ jobs:
         name: Sirstrap.CLI_test.log
         path: out/Sirstrap.CLI_test.log
 
-    - name: Release
+    - name: GitHub Release
       uses: softprops/action-gh-release@v2
       with:
         generate_release_notes: true
         files: out/release/*
+
+    - name: Winget Release
+      run: cd build && release.bat ${{ github.token }}
+      shell: cmd
