@@ -151,16 +151,11 @@
         {
             if (configuration.IsMacBinary())
             {
-                await _packageManager.DownloadMacBinaryAsync(configuration).ConfigureAwait(false);
+                await _packageManager.Download4MacAsync(configuration).ConfigureAwait(false);
             }
             else
             {
-                var manifest = await _packageManager.DownloadManifestAsync(configuration).ConfigureAwait(false);
-
-                if (!string.IsNullOrEmpty(manifest))
-                {
-                    await _packageManager.ProcessManifestAsync(manifest, configuration).ConfigureAwait(false);
-                }
+                await _packageManager.Download4WindowsAsync(configuration).ConfigureAwait(false);
             }
         }
 
