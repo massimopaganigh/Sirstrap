@@ -23,7 +23,8 @@
 
                 string key = RemoveOptionPrefix(arguments[i]);
 
-                if (i + 1 < arguments.Length && !IsOption(arguments[i + 1]))
+                if (i + 1 < arguments.Length
+                    && !IsOption(arguments[i + 1]))
                 {
                     string value = arguments[i + 1];
 
@@ -33,10 +34,6 @@
                         configuration[key] = value;
                         i++;
                     }
-                }
-                else if (!string.IsNullOrEmpty(key))
-                {
-                    configuration[key] = "true";
                 }
             }
         }

@@ -40,7 +40,7 @@
 
         public static Configuration CreateConfigurationFromArguments(Dictionary<string, string> arguments)
         {
-            string binaryType = arguments.GetValueOrDefault("binaryType", "WindowsPlayer");
+            string binaryType = arguments.GetValueOrDefault("binary-type", "WindowsPlayer");
 
             ValidateBinaryType(binaryType);
 
