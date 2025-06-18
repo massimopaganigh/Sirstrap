@@ -10,7 +10,6 @@
 
             try
             {
-
                 foreach (string file in Directory.GetFiles(cacheDirectory))
                 {
                     try
