@@ -2,6 +2,12 @@
 
 setlocal enabledelayedexpansion
 
+set "should_test=true"
+
+if "%1" == "--no-test" (
+    set "should_test=false"
+)
+
 set "release_dir=..\out\release"
 set "upx_path=..\src\ext\upx-5.0.1-win64\upx.exe"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
@@ -180,13 +186,15 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
-echo Testing Sirstrap.CLI...
+if "%should_test%" == "true" (
+    echo Testing Sirstrap.CLI...
 
-"%sirstrap_cli_publish_dir%\Sirstrap.exe" > "%sirstrap_cli_test_log%" 2>&1
+    "%sirstrap_cli_publish_dir%\Sirstrap.exe" > "%sirstrap_cli_test_log%" 2>&1
 
-if %ERRORLEVEL% neq 0 (
-    echo Test of Sirstrap.CLI failed.
-    exit /b %ERRORLEVEL%
+    if %ERRORLEVEL% neq 0 (
+        echo Test of Sirstrap.CLI failed.
+        exit /b %ERRORLEVEL%
+    )
 )
 
 mkdir "%release_dir%"
