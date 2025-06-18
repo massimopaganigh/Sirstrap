@@ -43,22 +43,22 @@
         /// 
         /// The blob directory is determined based on the binary type if not explicitly provided.
         /// </remarks>
-        public static DownloadConfiguration CreateDownloadConfiguration(Dictionary<string, string> args)
+        public static Configuration CreateDownloadConfiguration(Dictionary<string, string> args)
         {
-            var downloadConfiguration = new DownloadConfiguration
+            var configuration = new Configuration
             {
-                Channel = args.GetValueOrDefault("channel", "LIVE"),
+                ChannelName = args.GetValueOrDefault("channel", "LIVE"),
                 BinaryType = args.GetValueOrDefault("binaryType", "WindowsPlayer"),
-                Version = args.GetValueOrDefault("version") ?? string.Empty,
-                BlobDir = GetBlobDirectory(args),
-                CompressZip = args.GetValueOrDefault("compressZip", "false").Equals("true", StringComparison.OrdinalIgnoreCase),
-                CompressionLevel = GetCompressionLevel(args),
-                LaunchUrl = args.GetValueOrDefault("launchUrl") ?? string.Empty
+                VersionHash = args.GetValueOrDefault("version") ?? string.Empty,
+                BlobDirectory = GetBlobDirectory(args),
+                CompressOutputZip = args.GetValueOrDefault("compressZip", "false").Equals("true", StringComparison.OrdinalIgnoreCase),
+                ZipCompressionLevel = GetCompressionLevel(args),
+                LaunchUri = args.GetValueOrDefault("launchUrl") ?? string.Empty
             };
 
-            ValidateConfiguration(downloadConfiguration);
+            ValidateConfiguration(configuration);
 
-            return downloadConfiguration;
+            return configuration;
         }
 
         /// <summary>
@@ -108,15 +108,15 @@
         /// <summary>
         /// Validates that the download configuration contains supported settings.
         /// </summary>
-        /// <param name="downloadConfiguration">The configuration to validate.</param>
+        /// <param name="configuration">The configuration to validate.</param>
         /// <exception cref="ArgumentException">
         /// Thrown when the binary type specified in the configuration is not supported.
         /// </exception>
-        private static void ValidateConfiguration(DownloadConfiguration downloadConfiguration)
+        private static void ValidateConfiguration(Configuration configuration)
         {
-            if (!BinaryTypes.ContainsKey(downloadConfiguration.BinaryType!))
+            if (!BinaryTypes.ContainsKey(configuration.BinaryType))
             {
-                throw new ArgumentException($"Unsupported binary type: {downloadConfiguration.BinaryType}");
+                throw new ArgumentException($"Unsupported binary type: {configuration.BinaryType}");
             }
         }
 

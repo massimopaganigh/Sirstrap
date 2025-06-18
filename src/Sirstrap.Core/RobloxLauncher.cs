@@ -4,9 +4,9 @@
     {
         private const string ROBLOX_PLAYER_BETA_EXE = "RobloxPlayerBeta.exe";
 
-        public static bool Launch(DownloadConfiguration downloadConfiguration)
+        public static bool Launch(Configuration configuration)
         {
-            string robloxPlayerBetaExePath = Path.Combine(PathManager.GetVersionInstallPath(downloadConfiguration.Version!), ROBLOX_PLAYER_BETA_EXE);
+            string robloxPlayerBetaExePath = Path.Combine(PathManager.GetVersionInstallPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {
@@ -30,7 +30,7 @@
                     UseShellExecute = true
                 };
 
-                string? launchUri = downloadConfiguration.LaunchUrl;
+                string launchUri = configuration.LaunchUri;
 
                 if (!string.IsNullOrEmpty(launchUri))
                 {

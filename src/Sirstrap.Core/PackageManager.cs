@@ -11,7 +11,7 @@
         /// <summary>
         /// Downloads a macOS binary as a single ZIP archive file.
         /// </summary>
-        /// <param name="downloadConfiguration">Configuration specifying the binary type, version, and other download parameters.</param>
+        /// <param name="configuration">Configuration specifying the binary type, version, and other download parameters.</param>
         /// <returns>A task representing the asynchronous download operation.</returns>
         /// <remarks>
         /// The binary type determines which file is downloaded:
@@ -19,34 +19,34 @@
         /// - Other types download RobloxStudioApp.zip
         /// The file is saved directly to the configured output location.
         /// </remarks>
-        public async Task DownloadMacBinaryAsync(DownloadConfiguration downloadConfiguration)
+        public async Task DownloadMacBinaryAsync(Configuration configuration)
         {
-            var zipFileName = downloadConfiguration.BinaryType!.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
+            var zipFileName = configuration.BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
 
-            Log.Information("[*] Downloading ZIP archive for {0} ({1})...", downloadConfiguration.BinaryType, zipFileName);
+            Log.Information("[*] Downloading ZIP archive for {0} ({1})...", configuration.BinaryType, zipFileName);
 
-            var bytes = await BetterHttpClient.GetByteArrayAsync(_httpClient, UrlBuilder.GetBinaryUrl(downloadConfiguration, zipFileName)).ConfigureAwait(false);
+            var bytes = await BetterHttpClient.GetByteArrayAsync(_httpClient, UrlBuilder.GetBinaryUrl(configuration, zipFileName)).ConfigureAwait(false);
 
-            await File.WriteAllBytesAsync(downloadConfiguration.GetOutputFileName(), bytes!).ConfigureAwait(false);
+            await File.WriteAllBytesAsync(configuration.GetOutputPath(), bytes!).ConfigureAwait(false);
 
-            Log.Information("[*] File downloaded: {0}", downloadConfiguration.GetOutputFileName());
+            Log.Information("[*] File downloaded: {0}", configuration.GetOutputPath());
         }
 
         /// <summary>
         /// Downloads the package manifest file for the specified version.
         /// </summary>
-        /// <param name="downloadConfiguration">Configuration specifying the version, channel, and other download parameters.</param>
+        /// <param name="configuration">Configuration specifying the version, channel, and other download parameters.</param>
         /// <returns>A task representing the asynchronous operation. The task result contains the manifest content as a string.</returns>
-        public async Task<string?> DownloadManifestAsync(DownloadConfiguration downloadConfiguration)
+        public async Task<string?> DownloadManifestAsync(Configuration configuration)
         {
-            return await BetterHttpClient.GetStringAsync(_httpClient, UrlBuilder.GetManifestUrl(downloadConfiguration)).ConfigureAwait(false);
+            return await BetterHttpClient.GetStringAsync(_httpClient, UrlBuilder.GetManifestUrl(configuration)).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Processes the manifest content to download and assemble all required packages.
         /// </summary>
         /// <param name="manifestContent">The raw manifest content as a string.</param>
-        /// <param name="downloadConfiguration">Configuration specifying the version, channel, and other download parameters.</param>
+        /// <param name="configuration">Configuration specifying the version, channel, and other download parameters.</param>
         /// <returns>A task representing the asynchronous processing operation.</returns>
         /// <remarks>
         /// This method:
@@ -56,7 +56,7 @@
         /// 
         /// The operation will terminate early if the manifest is invalid.
         /// </remarks>
-        public async Task ProcessManifestAsync(string manifestContent, DownloadConfiguration downloadConfiguration)
+        public async Task ProcessManifestAsync(string manifestContent, Configuration configuration)
         {
             var manifest = ManifestParser.Parse(manifestContent);
 
@@ -66,29 +66,29 @@
                 return;
             }
 
-            await AssemblePackagesAsync(manifest, downloadConfiguration).ConfigureAwait(false);
+            await AssemblePackagesAsync(manifest, configuration).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Assembles the final ZIP archive by processing all packages from the manifest.
         /// </summary>
         /// <param name="manifest">The parsed manifest containing the list of packages to process.</param>
-        /// <param name="downloadConfiguration">Configuration specifying the version and output file parameters.</param>
+        /// <param name="configuration">Configuration specifying the version and output file parameters.</param>
         /// <returns>A task representing the asynchronous assembly operation.</returns>
         /// <remarks>
         /// Creates a new ZIP archive at the specified output location, adds default settings,
         /// then downloads and processes all packages specified in the manifest.
         /// </remarks>
-        private async Task AssemblePackagesAsync(Manifest manifest, DownloadConfiguration downloadConfiguration)
+        private async Task AssemblePackagesAsync(Manifest manifest, Configuration configuration)
         {
-            using (var finalZip = ZipFile.Open(downloadConfiguration.GetOutputFileName(), ZipArchiveMode.Create))
+            using (var finalZip = ZipFile.Open(configuration.GetOutputPath(), ZipArchiveMode.Create))
             {
                 AddDefaultSettings(finalZip);
 
-                await DownloadAndProcessPackagesAsync(manifest, finalZip, downloadConfiguration).ConfigureAwait(false);
+                await DownloadAndProcessPackagesAsync(manifest, finalZip, configuration).ConfigureAwait(false);
             }
 
-            Log.Information("[*] Archive assembled: {0}", downloadConfiguration.GetOutputFileName());
+            Log.Information("[*] Archive assembled: {0}", configuration.GetOutputPath());
         }
 
         /// <summary>
@@ -111,15 +111,15 @@
         /// </summary>
         /// <param name="manifest">The parsed manifest containing the list of packages to process.</param>
         /// <param name="finalZip">The ZIP archive where processed packages will be integrated.</param>
-        /// <param name="downloadConfiguration">Configuration specifying download parameters.</param>
+        /// <param name="configuration">Configuration specifying download parameters.</param>
         /// <returns>A task representing the parallel download and processing operations.</returns>
         /// <remarks>
         /// Uses Task.WhenAll to download and process multiple packages concurrently,
         /// improving overall download performance.
         /// </remarks>
-        private async Task DownloadAndProcessPackagesAsync(Manifest manifest, ZipArchive finalZip, DownloadConfiguration downloadConfiguration)
+        private async Task DownloadAndProcessPackagesAsync(Manifest manifest, ZipArchive finalZip, Configuration configuration)
         {
-            await Task.WhenAll(manifest.Packages!.Select(package => DownloadAndProcessPackageAsync(package, finalZip, downloadConfiguration)).ToList()).ConfigureAwait(false);
+            await Task.WhenAll(manifest.Packages!.Select(package => DownloadAndProcessPackageAsync(package, finalZip, configuration)).ToList()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -127,7 +127,7 @@
         /// </summary>
         /// <param name="package">The name of the package to download and process.</param>
         /// <param name="finalZip">The ZIP archive where the processed package will be integrated.</param>
-        /// <param name="downloadConfiguration">Configuration specifying download parameters.</param>
+        /// <param name="configuration">Configuration specifying download parameters.</param>
         /// <returns>A task representing the asynchronous download and processing operation.</returns>
         /// <remarks>
         /// For each package, this method:
@@ -135,11 +135,11 @@
         /// 2. Delegates to PackageExtractor to extract and integrate the package contents
         ///    into the final ZIP archive
         /// </remarks>
-        private async Task DownloadAndProcessPackageAsync(string package, ZipArchive finalZip, DownloadConfiguration downloadConfiguration)
+        private async Task DownloadAndProcessPackageAsync(string package, ZipArchive finalZip, Configuration configuration)
         {
             Log.Information("[*] Downloading package {0}...", package);
 
-            var bytes = await BetterHttpClient.GetByteArrayAsync(_httpClient, UrlBuilder.GetPackageUrl(downloadConfiguration, package)).ConfigureAwait(false);
+            var bytes = await BetterHttpClient.GetByteArrayAsync(_httpClient, UrlBuilder.GetPackageUrl(configuration, package)).ConfigureAwait(false);
 
             await PackageExtractor.ExtractPackageBytesAsync(bytes, package, finalZip).ConfigureAwait(false);
         }
