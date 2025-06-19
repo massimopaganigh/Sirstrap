@@ -84,5 +84,6 @@ jobs:
         files: out/release/*
 
     - name: Winget Release
+      if: startsWith(github.ref, 'refs/tags/')
       run: cd build && release.bat ${{ secrets.GHP }}
       shell: cmd
