@@ -12,6 +12,6 @@
 
 An alternative bootstrapper for Roblox with a bunch of extra features.
 
-<image src="images/Sirstrap_Demo.png">
+<image src="images/Sirstrap_Demo.png" height="540">
 
 </div>
