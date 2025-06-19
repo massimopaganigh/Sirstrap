@@ -83,5 +83,5 @@ jobs:
         files: out/release/*
 
     - name: Winget Release
-      run: cd build && release.bat ${{ github.token }}
+      run: cd build && release.bat ${{ secrets.GHP }}
       shell: cmd
