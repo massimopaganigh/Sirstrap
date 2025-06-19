@@ -4,7 +4,7 @@
     {
         public static string ChannelName { get; set; } = "-beta";
 
-        public static bool MultiInstance { get; set; }
+        public static bool MultiInstance { get; set; } = true;
 
         public static bool RobloxApi { get; set; }
 
