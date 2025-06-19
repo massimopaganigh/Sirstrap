@@ -1,6 +1,6 @@
 <div align="center">
 
-# <image src="images/Sirstrap.png" height="24"> Sirstrap
+# <image src="images/Sirstrap.png" max-height="24"> Sirstrap
 
 [![Release](https://img.shields.io/github/v/tag/massimopaganigh/sirstrap?label=Release)](https://github.com/massimopaganigh/sirstrap/releases/latest)
 [![License](https://img.shields.io/github/license/massimopaganigh/sirstrap?label=License)](https://github.com/massimopaganigh/sirstrap/blob/main/LICENSE)
@@ -12,6 +12,6 @@
 
 An alternative bootstrapper for Roblox with a bunch of extra features.
 
-<image src="images/Sirstrap_Demo.png" height="540">
+<image src="images/Sirstrap_Demo.png" max-height="540">
 
 </div>
