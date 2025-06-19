@@ -75,7 +75,7 @@
 echo Updating Sirstrap...
 timeout /t 2 /nobreak >nul
 xcopy ""{updateDirectory}\*"" ""{exeDirectory}"" /E /Y
-start """" ""{Path.Combine(exeDirectory, "Sirstrap.exe")}""{arguments}
+start """" ""{Path.Combine(exeDirectory, "Sirstrap.exe")}""
 exit
 ";
 
