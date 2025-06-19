@@ -78,10 +78,12 @@ jobs:
 
     - name: GitHub Release
       uses: softprops/action-gh-release@v2
+      if: startsWith(github.ref, 'refs/tags/')
       with:
         generate_release_notes: true
         files: out/release/*
 
     - name: Winget Release
-      run: cd build && release.bat ${{ github.token }}
+      if: startsWith(github.ref, 'refs/tags/')
+      run: cd build && release.bat ${{ secrets.GHP }}
       shell: cmd
