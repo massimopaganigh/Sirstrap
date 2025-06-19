@@ -15,7 +15,7 @@
                 return false;
             }
 
-            bool multiInstance = AppSettingsManager.GetSettings().MultiInstance;
+            bool multiInstance = SirstrapConfiguration.MultiInstance;
             bool singletonCaptured = false;
 
             try

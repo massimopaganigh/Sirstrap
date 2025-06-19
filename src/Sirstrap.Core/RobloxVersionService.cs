@@ -64,9 +64,9 @@
         {
             string version;
 
-            if (AppSettingsManager.GetSettings().SafeMode)
+            if (SirstrapConfiguration.RobloxApi)
             {
-                Log.Information("[*] Safe mode is enabled, using Roblox API to retrieve version...");
+                Log.Information("[*] Roblox API is enabled, using Roblox API to retrieve version...");
 
                 version = await GetRobloxVersionAsync();
 
@@ -79,7 +79,7 @@
             }
             else
             {
-                Log.Information("[*] Safe mode is disabled, using SirHurt API to retrieve version.");
+                Log.Information("[*] Roblox API is disabled, using SirHurt API to retrieve version.");
 
                 version = await GetSirhurtVersionAsync();
 

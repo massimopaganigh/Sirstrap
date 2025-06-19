@@ -4,7 +4,7 @@
     {
         private static string GetBaseUri(Configuration configuration)
         {
-            string robloxCdnUrl = AppSettingsManager.GetSettings().RobloxCdnUrl;
+            string robloxCdnUrl = SirstrapConfiguration.RobloxCdnUri;
 
             string rawBaseUri = configuration.ChannelName.Equals("LIVE", StringComparison.OrdinalIgnoreCase)
                 ? robloxCdnUrl
