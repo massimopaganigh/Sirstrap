@@ -25,9 +25,9 @@ for %%d in ("%release_dir%" "%sirstrap_cli_publish_dir%" "%sirstrap_cli_fat_publ
     )
 )
 
-echo Cleaning bin and obj directories...
+echo Cleaning .cr, .vs, bin and obj directories...
 
-for /r "..\src" %%p in (bin obj) do (
+for /r "..\src" %%p in (.cr .vs bin obj) do (
     if exist "%%~p" (
         echo Cleaning "%%~p"...
         rd /s /q "%%~p"

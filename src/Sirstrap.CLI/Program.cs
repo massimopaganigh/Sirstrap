@@ -28,7 +28,7 @@ namespace Sirstrap.CLI
  ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀      
                     ███    ███                            ███    ███                           
 ");
-
+                SirstrapConfigurationService.LoadConfiguration();
                 RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
 
                 await new RobloxDownloader().ExecuteAsync(arguments, SirstrapType.CLI);

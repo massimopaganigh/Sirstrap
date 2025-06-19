@@ -51,10 +51,10 @@ namespace Sirstrap.UI.ViewModels
             _logPollingTimer.Elapsed += (s, e) => UpdateLastLogFromSink();
             _logPollingTimer.Start();
 
-            Task.Run(() => Main(Environment.GetCommandLineArgs()));
+            Task.Run(() => InitializeAsync(Environment.GetCommandLineArgs()));
         }
 
-        private static async Task Main(string[] arguments)
+        private static async Task InitializeAsync(string[] arguments)
         {
             try
             {
@@ -68,6 +68,7 @@ namespace Sirstrap.UI.ViewModels
 
                 string[] fixedArguments = [.. arguments.Skip(1)];
 
+                SirstrapConfigurationService.LoadConfiguration();
                 RegistryManager.RegisterProtocolHandler("roblox-player", fixedArguments);
 
                 await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
@@ -116,7 +117,7 @@ namespace Sirstrap.UI.ViewModels
                 int count = Process.GetProcesses().Count(x => commonRobloxNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
 
                 RobloxProcessCount = count;
-                IsRobloxRunning = count > 0 && AppSettingsManager.GetSettings().MultiInstance;
+                IsRobloxRunning = count > 0 && SirstrapConfiguration.MultiInstance;
 
                 if (_mainWindow != null
                     && IsRobloxRunning)

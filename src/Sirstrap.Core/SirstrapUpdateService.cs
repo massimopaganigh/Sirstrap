@@ -3,7 +3,7 @@
     public class SirstrapUpdateService
     {
         private const string SIRSTRAP_API = "https://api.github.com/repos/massimopaganigh/sirstrap/releases";
-        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.3";
+        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.4";
 
         private readonly HttpClient _httpClient;
 
@@ -102,7 +102,7 @@ exit
             }
         }
 
-        private static string GetCurrentChannel() => AppSettingsManager.GetSettings().SirstrapUpdateChannel;
+        private static string GetCurrentChannel() => SirstrapConfiguration.ChannelName;
 
         private static Version GetCurrentVersion() => new(SIRSTRAP_CURRENT_VERSION);
 
