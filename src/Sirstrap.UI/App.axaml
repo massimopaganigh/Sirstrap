@@ -9,5 +9,8 @@
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="TextBlock">
+            <Setter Property="FontFamily" Value="Verdana" />
+        </Style>
     </Application.Styles>
 </Application>

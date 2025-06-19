@@ -53,12 +53,11 @@
                 Grid.Row="0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Background="#4EA2FF"
+                Background="#454EE6"
                 CornerRadius="0,10,10,0"
                 ZIndex="100">
                 <!--Background="Orange"-->
                 <TextBlock
-                    FontFamily="Verdana"
                     FontSize="10"
                     Padding="10"
                     Text="{Binding CurrentFullVersion}" />
@@ -87,7 +86,6 @@
                         Source="avares://Sirstrap/Assets/Icon2022.ico"
                         ZIndex="99" />
                     <TextBlock
-                        FontFamily="Verdana"
                         FontSize="10"
                         Padding="10"
                         Text="{Binding RobloxProcessCount}" />
@@ -98,7 +96,6 @@
             Grid.Row="2"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
-            FontFamily="Verdana"
             FontSize="10"
             Padding="10"
             Text="{Binding LastLogMessage}"
