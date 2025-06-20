@@ -20,7 +20,7 @@ namespace Sirstrap.UI.ViewModels
         private const int MIN_POLLING_INTERVAL = 100;
 
         [ObservableProperty]
-        private string _currentFullVersion = $"Sirstrap {SirstrapUpdateService.GetCurrentFullVersion()}";
+        private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
 
         private int _currentPollingInterval = MIN_POLLING_INTERVAL;
 
@@ -31,7 +31,7 @@ namespace Sirstrap.UI.ViewModels
         private LogEventLevel? _lastLogLevel;
 
         [ObservableProperty]
-        private string _lastLogMessage = string.Empty;
+        private string _lastLogMessage = "...";
 
         private DateTimeOffset? _lastLogReceived;
 
