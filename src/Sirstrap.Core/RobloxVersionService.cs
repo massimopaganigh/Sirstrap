@@ -91,6 +91,8 @@
 
                     if (string.IsNullOrEmpty(version))
                         Log.Error("[!] Failed to retrieve version.");
+                    else
+                        Log.Information("[*] Using version: {0}.", version);
                 }
                 else
                     Log.Information("[*] Using version: {0}.", version);

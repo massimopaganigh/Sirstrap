@@ -3,7 +3,7 @@
     public class SirstrapUpdateService
     {
         private const string SIRSTRAP_API = "https://api.github.com/repos/massimopaganigh/sirstrap/releases";
-        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.4";
+        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.5";
 
         private readonly HttpClient _httpClient;
 
@@ -75,7 +75,7 @@
 echo Updating Sirstrap...
 timeout /t 2 /nobreak >nul
 xcopy ""{updateDirectory}\*"" ""{exeDirectory}"" /E /Y
-start """" ""{Path.Combine(exeDirectory, "Sirstrap.exe")}""{arguments}
+start """" ""{Path.Combine(exeDirectory, "Sirstrap.exe")}""
 exit
 ";
 
