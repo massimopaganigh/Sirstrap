@@ -78,122 +78,133 @@
                 </Style>
             </Image.Styles>
         </Image>
-        <StackPanel VerticalAlignment="Bottom">
-            <StackPanel
-                Margin="0,0,5,5"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Orientation="Horizontal">
-                <Border
-                    Margin="5,0,0,0"
-                    BorderBrush="#40FFFFFF"
-                    BorderThickness="1"
-                    Classes="glassBorder"
-                    CornerRadius="5"
-                    Opacity="0.9">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Offset="0" Color="#80454EE6" />
-                            <GradientStop Offset="0.5" Color="#60454EE6" />
-                            <GradientStop Offset="1" Color="#40454EE6" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <Border.Effect>
-                        <DropShadowEffect
-                            Color="Black"
-                            BlurRadius="8"
-                            OffsetX="0"
-                            OffsetY="2"
-                            Opacity="0.3" />
-                    </Border.Effect>
-                    <TextBlock
-                        MaxWidth="390"
-                        FontSize="10"
-                        Padding="10"
-                        Text="{Binding LastLogMessage}"
-                        TextTrimming="CharacterEllipsis"
-                        TextWrapping="NoWrap" />
-                </Border>
-            </StackPanel>
-            <StackPanel
-                Margin="0,0,5,5"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Orientation="Horizontal">
-                <Border
-                    Margin="5,0,0,0"
-                    BorderBrush="#40FFFFFF"
-                    BorderThickness="1"
-                    Classes="glassBorder"
-                    CornerRadius="5"
-                    IsVisible="{Binding IsRobloxRunning}"
-                    Opacity="0.9">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock
-                            FontSize="10"
-                            Padding="10"
-                            Text="{Binding RobloxProcessCount}" />
-                        <Image
-                            Height="14"
-                            Margin="0,0,10,0"
-                            Source="avares://Sirstrap/Assets/Icon2022.ico" />
-                    </StackPanel>
-                </Border>
-                <Border
-                    Margin="5,0,0,0"
-                    BorderBrush="#40FFFFFF"
-                    BorderThickness="1"
-                    Classes="glassBorder"
-                    CornerRadius="5"
-                    Opacity="0.9">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Offset="0" Color="#80454EE6" />
-                            <GradientStop Offset="0.5" Color="#60454EE6" />
-                            <GradientStop Offset="1" Color="#40454EE6" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <Border.Effect>
-                        <DropShadowEffect
-                            Color="Black"
-                            BlurRadius="8"
-                            OffsetX="0"
-                            OffsetY="2"
-                            Opacity="0.3" />
-                    </Border.Effect>
+        <Border
+            MaxWidth="150"
+            MaxHeight="150"
+            Margin="5,0,0,5"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Bottom"
+            BorderBrush="#40FFFFFF"
+            BorderThickness="1"
+            Classes="glassBorder"
+            CornerRadius="5"
+            IsVisible="{Binding IsRobloxRunning}"
+            Opacity="0.9">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#80454EE6" />
+                    <GradientStop Offset="0.5" Color="#60454EE6" />
+                    <GradientStop Offset="1" Color="#40454EE6" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect
+                    Color="Black"
+                    BlurRadius="8"
+                    OffsetX="0"
+                    OffsetY="2"
+                    Opacity="0.3" />
+            </Border.Effect>
+            <TextBlock
+                FontSize="10"
+                Padding="10"
+                Text="{Binding LastLogMessage}"
+                TextTrimming="CharacterEllipsis"
+                TextWrapping="Wrap" />
+        </Border>
+        <StackPanel
+            Margin="0,0,5,5"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
+            <Border
+                Margin="5,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="5"
+                IsVisible="{Binding IsRobloxRunning}"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <StackPanel Orientation="Horizontal">
                     <TextBlock
                         FontSize="10"
                         Padding="10"
-                        Text="{Binding CurrentFullVersion}" />
-                </Border>
-                <Border
-                    Margin="5,0,0,0"
-                    BorderBrush="#40FFFFFF"
-                    BorderThickness="1"
-                    Classes="glassBorder"
-                    CornerRadius="5"
-                    Opacity="0.9">
-                    <Border.Background>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                            <GradientStop Offset="0" Color="#80454EE6" />
-                            <GradientStop Offset="0.5" Color="#60454EE6" />
-                            <GradientStop Offset="1" Color="#40454EE6" />
-                        </LinearGradientBrush>
-                    </Border.Background>
-                    <Border.Effect>
-                        <DropShadowEffect
-                            Color="Black"
-                            BlurRadius="8"
-                            OffsetX="0"
-                            OffsetY="2"
-                            Opacity="0.3" />
-                    </Border.Effect>
-                    <TextBlock
-                        FontSize="10"
-                        Padding="10"
-                        Text="Sirstrap" />
-                </Border>
-            </StackPanel>
+                        Text="{Binding RobloxProcessCount}" />
+                    <Image
+                        Height="14"
+                        Margin="0,0,10,0"
+                        Source="avares://Sirstrap/Assets/Icon2022.ico" />
+                </StackPanel>
+            </Border>
+            <Border
+                Margin="5,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="5"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding CurrentFullVersion}" />
+            </Border>
+            <Border
+                Margin="5,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="5"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock
+                    FontSize="10"
+                    Padding="10"
+                    Text="Sirstrap" />
+            </Border>
         </StackPanel>
     </Grid>
 </Window>
