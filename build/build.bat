@@ -15,6 +15,7 @@ set "sirstrap_cli_fat_publish_dir=..\out\Sirstrap.CLI_fat"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
 set "sirstrap_ui_fat_publish_dir=..\out\Sirstrap.UI_fat"
 set "sirstrap_cli_test_log=..\out\Sirstrap.CLI_test.log"
+set "build_log=..\out\build.log"
 
 echo Cleaning directories...
 
@@ -40,6 +41,10 @@ if exist "%sirstrap_cli_test_log%" (
     del /f /q "%sirstrap_cli_test_log%"
 )
 
+if exist "%build_log%" (
+    del /f /q "%build_log%"
+)
+
 echo Restoring Sirstrap.sln...
 
 dotnet restore ..\src\Sirstrap.sln
@@ -50,6 +55,8 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo Checking for outdated packages...
+
+dotnet list ..\src\Sirstrap.sln package --outdated
 
 powershell -command "$output = dotnet list ..\src\Sirstrap.sln package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($output.projects.frameworks.topLevelPackages.Count -gt 0) { Write-Host 'Outdated packages found.' -ForegroundColor Red; exit 1 } else { Write-Host 'No outdated packages found.' -ForegroundColor Green }"
 

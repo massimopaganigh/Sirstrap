@@ -35,7 +35,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: cd build && build.bat
+      run: cd build && build_with_log.bat
       shell: cmd
 
     - name: Run Microsoft Security DevOps
@@ -70,6 +70,12 @@ jobs:
       with:
         name: Sirstrap.UI_fat
         path: out/Sirstrap.UI_fat
+
+    - name: Upload artifact build.log
+      uses: actions/upload-artifact@v4
+      with:
+        name: build.log
+        path: out/build.log
 
     - name: Upload artifact Sirstrap.CLI_test.log
       uses: actions/upload-artifact@v4
