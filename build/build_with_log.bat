@@ -2,9 +2,15 @@
 
 setlocal enabledelayedexpansion
 
-set "build_log=..\out\build.log"
+set "build_log=build.log"
 
-"build.bat" > "%build_log%" 2>&1
+echo Cleaning files...
+
+if exist "%build_log%" (
+    del /f /q "%build_log%"
+)
+
+"build.bat" >> "%build_log%" 2>&1
 
 if %ERRORLEVEL% neq 0 (
     echo Build failed.
