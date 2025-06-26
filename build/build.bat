@@ -51,6 +51,8 @@ if %ERRORLEVEL% neq 0 (
 
 echo Checking for outdated packages...
 
+dotnet list ..\src\Sirstrap.sln package --outdated
+
 powershell -command "$output = dotnet list ..\src\Sirstrap.sln package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($output.projects.frameworks.topLevelPackages.Count -gt 0) { Write-Host 'Outdated packages found.' -ForegroundColor Red; exit 1 } else { Write-Host 'No outdated packages found.' -ForegroundColor Green }"
 
 if %ERRORLEVEL% neq 0 (
