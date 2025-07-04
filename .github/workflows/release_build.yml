@@ -1,24 +1,31 @@
 name: Release Build
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
-
+    inputs:
+      source_branch:
+        description: 'The source branch or ref to build from'
+        default: 'main'
+        required: true
+      release_name:
+        description: 'The name for the release'
+        required: true
+            
 permissions:
   contents: write
-  discussions: write
-  id-token: write
-  security-events: write
-
+  
 jobs:
   build:
+    environment: OSSign
     runs-on: windows-latest
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        repository: 'massimopaganigh/Sirstrap'
+        ref: ${{ github.event.inputs.source_branch }}
+        fetch-depth: 1
 
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
@@ -36,19 +43,23 @@ jobs:
     - name: Build
       run: cd build && build_with_log.bat
       shell: cmd
-
+    
+    - name: Sign files
+      uses: ossign/gha-sign-azuresigntool@main
+      with:
+        certificateName: ${{ secrets.AST_CERT }}
+        clientId: ${{ secrets.AST_IDENT }}
+        clientSecret: ${{ secrets.AST_SECRET }}
+        hashAlgorithm: ${{ secrets.AST_TD }}
+        tenantId: ${{ secrets.AST_TENANT }}
+        timestampUrl: ${{ secrets.AST_TIMESTAMP }}
+        vaultUrl: ${{ secrets.AST_VAULT }}
+        files: out/Sirstrap**/**
+        extensions: exe;msi;appx
+      
     - name: Post build
       run: cd build && post_build.bat
       shell: cmd
-
-    - name: Run Microsoft Security DevOps
-      uses: microsoft/security-devops-action@latest
-      id: msdo
-
-    - name: Upload results to Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
     - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4
@@ -74,26 +85,22 @@ jobs:
         name: Sirstrap.UI_fat
         path: out/Sirstrap.UI_fat
 
-    - name: Upload artifact build.log
-      uses: actions/upload-artifact@v4
-      with:
-        name: build.log
-        path: build/build.log
-
-    - name: Upload artifact Sirstrap.CLI_test.log
-      uses: actions/upload-artifact@v4
-      with:
-        name: Sirstrap.CLI_test.log
-        path: out/Sirstrap.CLI_test.log
-
-    - name: GitHub Release
+    - name: Release
       uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
       with:
-        generate_release_notes: true
-        files: out/release/*
+        files: |
+          out/Sirstrap.CLI/*
+          out/Sirstrap.CLI_fat/*
+          out/Sirstrap.UI/*
+          out/Sirstrap.UI_fat/*
+          README.md
+        name: ${{ github.event.inputs.release_name }}
+        tag_name: ${{ github.run_id }}
+        body: |
+          # Signed Release ${{ github.event.inputs.release_name }}
+          
+          These are the distributable files for the signed release of Beaver-Notes ${{ github.event.inputs.release_name }}
 
-    - name: Winget Release
-      if: startsWith(github.ref, 'refs/tags/')
-      run: cd build && release.bat ${{ secrets.GHP }}
-      shell: cmd
+          The source code was fetched from https://github.com/Beaver-Notes/Beaver-Notes@${{ github.event.inputs.source_branch }}
+            
+
