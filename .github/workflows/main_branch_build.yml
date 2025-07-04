@@ -38,6 +38,10 @@ jobs:
       run: cd build && build_with_log.bat
       shell: cmd
 
+    - name: Post build
+      run: cd build && post_build.bat
+      shell: cmd
+
     - name: Run Microsoft Security DevOps
       uses: microsoft/security-devops-action@latest
       id: msdo
