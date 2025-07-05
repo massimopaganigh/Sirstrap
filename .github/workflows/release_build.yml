@@ -89,10 +89,7 @@ jobs:
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          out/Sirstrap.CLI/*
-          out/Sirstrap.CLI_fat/*
-          out/Sirstrap.UI/*
-          out/Sirstrap.UI_fat/*
+          out/release/*
           README.md
         name: ${{ github.event.inputs.release_name }}
         tag_name: ${{ github.run_id }}
