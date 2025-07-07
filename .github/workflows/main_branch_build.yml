@@ -42,14 +42,14 @@ jobs:
       run: cd build && post_build.bat
       shell: cmd
 
-    - name: Run Microsoft Security DevOps
-      uses: microsoft/security-devops-action@latest
-      id: msdo
+    # - name: Run Microsoft Security DevOps
+    #   uses: microsoft/security-devops-action@latest
+    #   id: msdo
 
-    - name: Upload results to Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      with:
-        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+    # - name: Upload results to Security tab
+    #   uses: github/codeql-action/upload-sarif@v3
+    #   with:
+    #     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
     - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4
