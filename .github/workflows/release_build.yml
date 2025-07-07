@@ -86,14 +86,14 @@ jobs:
         name: Sirstrap.CLI_test.log
         path: out/Sirstrap.CLI_test.log
 
-    - name: GitHub Release
-      uses: softprops/action-gh-release@v2
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        generate_release_notes: true
-        files: out/release/*
+    # - name: GitHub Release
+    #   uses: softprops/action-gh-release@v2
+    #   if: startsWith(github.ref, 'refs/tags/')
+    #   with:
+    #     generate_release_notes: true
+    #     files: out/release/*
 
-    - name: Winget Release
-      if: startsWith(github.ref, 'refs/tags/')
-      run: cd build && release.bat ${{ secrets.GHP }}
-      shell: cmd
+    # - name: Winget Release
+    #   if: startsWith(github.ref, 'refs/tags/')
+    #   run: cd build && release.bat ${{ secrets.GHP }}
+    #   shell: cmd
