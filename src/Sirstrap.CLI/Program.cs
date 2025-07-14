@@ -1,5 +1,6 @@
 ﻿using Serilog;
 using Sirstrap.Core;
+using System.Reflection;
 
 namespace Sirstrap.CLI
 {
@@ -18,15 +19,20 @@ namespace Sirstrap.CLI
 
                 Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
 
-                Console.WriteLine(@"
+                Version? version = Assembly.GetExecutingAssembly().GetName().Version;
+                string? targetFrameworkName = AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
+                DateTime creationTime = File.GetCreationTime(AppContext.BaseDirectory);
+                OperatingSystem oSVersion = Environment.OSVersion;
+
+                Console.WriteLine($@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
   ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
 ▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {version} - {targetFrameworkName}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {creationTime}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {oSVersion}
                     ███    ███                            ███    ███ by SirHurt CSR Team
 ");
                 SirstrapConfigurationService.LoadConfiguration();
