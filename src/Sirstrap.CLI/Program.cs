@@ -17,16 +17,20 @@ namespace Sirstrap.CLI
 
                 Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024 /*5 MB*/, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
 
-                Console.WriteLine(@"
-   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
-  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
-  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███ 
-  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███ 
-▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀  
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███        
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███        
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀      
-                    ███    ███                            ███    ███                           
+                string? targetFrameworkName = AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
+                DateTime creationTime = File.GetCreationTime(AppContext.BaseDirectory);
+                OperatingSystem oSVersion = Environment.OSVersion;
+
+                Console.WriteLine($@"
+   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
+  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
+  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
+  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
+▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {targetFrameworkName}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {creationTime}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {oSVersion}
+                    ███    ███                            ███    ███ by SirHurt CSR Team
 ");
                 SirstrapConfigurationService.LoadConfiguration();
                 RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
