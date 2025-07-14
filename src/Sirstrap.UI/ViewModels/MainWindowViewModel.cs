@@ -24,6 +24,8 @@ namespace Sirstrap.UI.ViewModels
 
         private int _currentPollingInterval = MIN_POLLING_INTERVAL;
 
+        private bool _flag = false;
+
         [ObservableProperty]
         private bool _isRobloxRunning;
 
@@ -121,11 +123,16 @@ namespace Sirstrap.UI.ViewModels
                 IsRobloxRunning = count > 0 && SirstrapConfiguration.MultiInstance;
 
                 if (_mainWindow != null
-                    && IsRobloxRunning)
+                    && IsRobloxRunning
+                    && _flag == false)
+                {
                     Dispatcher.UIThread.InvokeAsync(() =>
                     {
                         _mainWindow.WindowState = WindowState.Minimized;
                     });
+
+                    _flag = true;
+                }
             }
             catch (Exception) { }
         }
