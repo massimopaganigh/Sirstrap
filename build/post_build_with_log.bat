@@ -2,11 +2,11 @@
 
 setlocal enabledelayedexpansion
 
-set "post_build_log=post_build.log"
+set "post_build_log=..\out\post_build.log"
 
 echo Cleaning files...
 
-if exist "%build_log%" (
+if exist "%post_build_log%" (
     del /f /q "%post_build_log%"
 )
 
