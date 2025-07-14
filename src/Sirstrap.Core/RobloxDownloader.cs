@@ -74,6 +74,8 @@
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Error: {0}", ex.Message);
+
+                Environment.ExitCode = 1;
             }
         }
 

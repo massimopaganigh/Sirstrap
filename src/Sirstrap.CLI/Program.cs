@@ -3,35 +3,40 @@ using Sirstrap.Core;
 
 namespace Sirstrap.CLI
 {
-    public static class Program
+    internal class Program
     {
-        private static async Task Main(string[] arguments)
+        public static async Task Main(string[] args)
         {
             try
             {
                 string logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
 
-                Directory.CreateDirectory(logsDirectory);
+                if (!Directory.Exists(logsDirectory))
+                    Directory.CreateDirectory(logsDirectory);
 
-                string logsPath = Path.Combine(logsDirectory, "SirstrapLog.txt");
+                string logFilePath = Path.Combine(logsDirectory, "SirstrapLog.txt");
 
-                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024 /*5 MB*/, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
+                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
 
-                Console.WriteLine(@"
-   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄ 
-  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███ 
-  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███ 
-  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███ 
-▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀  
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███        
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███        
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀      
-                    ███    ███                            ███    ███                           
+                string? targetFrameworkName = AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
+                DateTime creationTime = File.GetCreationTime(AppContext.BaseDirectory);
+                OperatingSystem oSVersion = Environment.OSVersion;
+
+                Console.WriteLine($@"
+   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
+  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
+  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
+  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
+▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {targetFrameworkName}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {creationTime}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {oSVersion}
+                    ███    ███                            ███    ███ by SirHurt CSR Team
 ");
                 SirstrapConfigurationService.LoadConfiguration();
-                RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
+                RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
-                await new RobloxDownloader().ExecuteAsync(arguments, SirstrapType.CLI);
+                await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
             }
             finally
             {

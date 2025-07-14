@@ -88,15 +88,6 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
-echo Archiving Sirstrap.CLI_fat...
-
-powershell Compress-Archive -Path "%sirstrap_cli_fat_publish_dir%\*" -DestinationPath "%sirstrap_cli_fat_publish_dir%.zip" -Force
-
-if %ERRORLEVEL% neq 0 (
-    echo Archiving of Sirstrap.CLI_fat failed.
-    exit /b %ERRORLEVEL%
-)
-
 echo Compressing Sirstrap.CLI...
 
 ren "%sirstrap_cli_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
@@ -116,15 +107,6 @@ if %ERRORLEVEL% neq 0 (
 )
 
 del /f /q "%sirstrap_cli_publish_dir%\_Sirstrap.exe"
-
-echo Archiving Sirstrap.CLI...
-
-powershell Compress-Archive -Path "%sirstrap_cli_publish_dir%\*" -DestinationPath "%sirstrap_cli_publish_dir%.zip" -Force
-
-if %ERRORLEVEL% neq 0 (
-    echo Archiving of Sirstrap.CLI failed.
-    exit /b %ERRORLEVEL%
-)
 
 echo Building Sirstrap.UI...
 
@@ -148,15 +130,6 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
-echo Archiving Sirstrap.UI_fat...
-
-powershell Compress-Archive -Path "%sirstrap_ui_fat_publish_dir%\*" -DestinationPath "%sirstrap_ui_fat_publish_dir%.zip" -Force
-
-if %ERRORLEVEL% neq 0 (
-    echo Archiving of Sirstrap.UI_fat failed.
-    exit /b %ERRORLEVEL%
-)
-
 echo Compressing Sirstrap.UI...
 
 ren "%sirstrap_ui_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
@@ -177,15 +150,6 @@ if %ERRORLEVEL% neq 0 (
 
 del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
 
-echo Archiving Sirstrap.UI...
-
-powershell Compress-Archive -Path "%sirstrap_ui_publish_dir%\*" -DestinationPath "%sirstrap_ui_publish_dir%.zip" -Force
-
-if %ERRORLEVEL% neq 0 (
-    echo Archiving of Sirstrap.UI failed.
-    exit /b %ERRORLEVEL%
-)
-
 if "%should_test%" == "true" (
     echo Testing Sirstrap.CLI...
 
@@ -196,12 +160,5 @@ if "%should_test%" == "true" (
         exit /b %ERRORLEVEL%
     )
 )
-
-mkdir "%release_dir%"
-
-move /y "%sirstrap_cli_publish_dir%.zip" "%release_dir%\Sirstrap.CLI.zip"
-move /y "%sirstrap_cli_fat_publish_dir%.zip" "%release_dir%\Sirstrap.CLI_fat.zip"
-move /y "%sirstrap_ui_publish_dir%.zip" "%release_dir%\Sirstrap.UI.zip"
-move /y "%sirstrap_ui_fat_publish_dir%.zip" "%release_dir%\Sirstrap.UI_fat.zip"
 
 endlocal
