@@ -3,20 +3,19 @@ using Sirstrap.Core;
 
 namespace Sirstrap.CLI
 {
-    internal class Program
+    public static class Program
     {
-        public static async Task Main(string[] args)
+        private static async Task Main(string[] arguments)
         {
             try
             {
                 string logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
 
-                if (!Directory.Exists(logsDirectory))
-                    Directory.CreateDirectory(logsDirectory);
+                Directory.CreateDirectory(logsDirectory);
 
-                string logFilePath = Path.Combine(logsDirectory, "SirstrapLog.txt");
+                string logsPath = Path.Combine(logsDirectory, "SirstrapLog.txt");
 
-                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
+                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024 /*5 MB*/, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
 
                 string? targetFrameworkName = AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
                 DateTime creationTime = File.GetCreationTime(AppContext.BaseDirectory);
@@ -34,9 +33,9 @@ namespace Sirstrap.CLI
                     ███    ███                            ███    ███ by SirHurt CSR Team
 ");
                 SirstrapConfigurationService.LoadConfiguration();
-                RegistryManager.RegisterProtocolHandler("roblox-player", args);
+                RegistryManager.RegisterProtocolHandler("roblox-player", arguments);
 
-                await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
+                await new RobloxDownloader().ExecuteAsync(arguments, SirstrapType.CLI);
             }
             finally
             {

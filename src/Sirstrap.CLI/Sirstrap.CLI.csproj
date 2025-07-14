@@ -14,6 +14,27 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="docs\**" />
+    <Compile Remove="out\**" />
+    <Compile Remove="Sirstrap.Core\**" />
+    <Compile Remove="Sirstrap.UI\**" />
+    <EmbeddedResource Remove="docs\**" />
+    <EmbeddedResource Remove="out\**" />
+    <EmbeddedResource Remove="Sirstrap.Core\**" />
+    <EmbeddedResource Remove="Sirstrap.UI\**" />
+    <None Remove="docs\**" />
+    <None Remove="out\**" />
+    <None Remove="Sirstrap.Core\**" />
+    <None Remove="Sirstrap.UI\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove=".gitattributes" />
+    <None Remove=".gitignore" />
+    <None Remove="LICENSE" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="favicon.ico" />
   </ItemGroup>
 
