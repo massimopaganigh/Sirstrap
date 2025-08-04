@@ -38,34 +38,43 @@
 
                 using JsonDocument jsonDocument = JsonDocument.Parse(response);
 
-                if (jsonDocument.RootElement.TryGetProperty("SirHurt V5", out var sirhurt))
+                if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array && jsonDocument.RootElement.GetArrayLength() > 0)
                 {
-                    string version = string.Empty;
-                    bool isOutdated = false;
-
-                    if (sirhurt.TryGetProperty("roblox_version", out var versionElement))
-                        version = versionElement.GetString() ?? string.Empty;
-
-                    if (sirhurt.TryGetProperty("last_update_unix", out var lastUpdateElement))
+                    JsonElement firstElement = jsonDocument.RootElement[0];
+                    
+                    if (firstElement.TryGetProperty("SirHurt V5", out var sirhurt))
                     {
-                        long lastUpdateUnix = lastUpdateElement.GetInt64();
-                        DateTimeOffset lastUpdate = DateTimeOffset.FromUnixTimeSeconds(lastUpdateUnix);
-                        TimeSpan timeSinceUpdate = DateTimeOffset.UtcNow - lastUpdate;
+                        string version = string.Empty;
+                        bool isOutdated = false;
 
-                        isOutdated = timeSinceUpdate.TotalDays > 10;
+                        if (sirhurt.TryGetProperty("roblox_version", out var versionElement))
+                            version = versionElement.GetString() ?? string.Empty;
+
+                        if (sirhurt.TryGetProperty("last_update_unix", out var lastUpdateElement))
+                        {
+                            long lastUpdateUnix = lastUpdateElement.GetInt64();
+                            DateTimeOffset lastUpdate = DateTimeOffset.FromUnixTimeSeconds(lastUpdateUnix);
+                            TimeSpan timeSinceUpdate = DateTimeOffset.UtcNow - lastUpdate;
+
+                            isOutdated = timeSinceUpdate.TotalDays > 10;
+                        }
+
+                        if (string.IsNullOrEmpty(version))
+                        {
+                            Log.Error("[!] roblox_version field not found in JSON response.");
+
+                            return (string.Empty, false);
+                        }
+
+                        return (version, isOutdated);
                     }
 
-                    if (string.IsNullOrEmpty(version))
-                    {
-                        Log.Error("[!] roblox_version field not found in JSON response.");
-
-                        return (string.Empty, false);
-                    }
-
-                    return (version, isOutdated);
+                    Log.Error("[!] SirHurt V5 field not found in JSON response.");
                 }
-
-                Log.Error("[!] SirHurt V5 field not found in JSON response.");
+                else
+                {
+                    Log.Error("[!] API returned unexpected JSON structure (expected array).");
+                }
 
                 return (string.Empty, false);
             }
