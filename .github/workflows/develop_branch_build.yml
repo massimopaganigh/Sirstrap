@@ -22,7 +22,7 @@ jobs:
     - name: Setup dotnet
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Cache NuGet packages
       uses: actions/cache@v4
@@ -40,14 +40,14 @@ jobs:
       run: cd build && post_build_with_log.bat
       shell: cmd
 
-    # - name: Run Microsoft Security DevOps
-    #   uses: microsoft/security-devops-action@latest
-    #   id: msdo
+    - name: Run Microsoft Security DevOps
+      uses: microsoft/security-devops-action@latest
+      id: msdo
 
-    # - name: Upload results to Security tab
-    #   uses: github/codeql-action/upload-sarif@v3
-    #   with:
-    #     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+    - name: Upload results to Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
     - name: Upload artifact Sirstrap.CLI
       uses: actions/upload-artifact@v4

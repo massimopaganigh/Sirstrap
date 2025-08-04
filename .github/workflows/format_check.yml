@@ -1,0 +1,26 @@
+name: Format Check
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  format:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Format check
+        run: cd src && dotnet format --verify-no-changes
+        shell: cmd

@@ -1,0 +1,3 @@
+[issuetracker "GitHub ISSUE"]
+	regex = "#(\\d+)"
+	url = https://github.com/massimopaganigh/Sirstrap/issues/$1
