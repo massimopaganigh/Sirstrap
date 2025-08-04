@@ -41,7 +41,7 @@
                 if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array && jsonDocument.RootElement.GetArrayLength() > 0)
                 {
                     JsonElement firstElement = jsonDocument.RootElement[0];
-                    
+
                     if (firstElement.TryGetProperty("SirHurt V5", out var sirhurt))
                     {
                         string version = string.Empty;
