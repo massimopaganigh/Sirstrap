@@ -40,20 +40,20 @@ if exist "%sirstrap_cli_test_log%" (
     del /f /q "%sirstrap_cli_test_log%"
 )
 
-echo Restoring Sirstrap.sln...
+echo Restoring Sirstrap.slnx...
 
-dotnet restore ..\src\Sirstrap.sln
+dotnet restore ..\src\Sirstrap.slnx
 
 if %ERRORLEVEL% neq 0 (
-    echo Restore of Sirstrap.sln failed.
+    echo Restore of Sirstrap.slnx failed.
     exit /b %ERRORLEVEL%
 )
 
 echo Checking for outdated packages...
 
-dotnet list ..\src\Sirstrap.sln package --outdated
+dotnet list ..\src\Sirstrap.slnx package --outdated
 
-powershell -command "$output = dotnet list ..\src\Sirstrap.sln package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($output.projects.frameworks.topLevelPackages.Count -gt 0) { Write-Host 'Outdated packages found.' -ForegroundColor Red; exit 1 } else { Write-Host 'No outdated packages found.' -ForegroundColor Green }"
+powershell -command "$output = dotnet list ..\src\Sirstrap.slnx package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue; if ($output.projects.frameworks.topLevelPackages.Count -gt 0) { Write-Host 'Outdated packages found.' -ForegroundColor Red; exit 1 } else { Write-Host 'No outdated packages found.' -ForegroundColor Green }"
 
 if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%

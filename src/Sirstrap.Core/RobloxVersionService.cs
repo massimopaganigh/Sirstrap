@@ -30,7 +30,7 @@
             }
         }
 
-        private async Task<string> GetSirhurtVersionAsync()
+        private async Task<(string version, bool isOutdated)> GetSirhurtVersionAsync()
         {
             try
             {
@@ -38,25 +38,51 @@
 
                 using JsonDocument jsonDocument = JsonDocument.Parse(response);
 
-                if (jsonDocument.RootElement.EnumerateArray().FirstOrDefault().TryGetProperty("SirHurt V5", out var sirhurt))
+                if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array && jsonDocument.RootElement.GetArrayLength() > 0)
                 {
-                    if (sirhurt.TryGetProperty("roblox_version", out var version))
-                        return version.GetString() ?? string.Empty;
+                    JsonElement firstElement = jsonDocument.RootElement[0];
 
-                    Log.Error("[!] roblox_version field not found in JSON response.");
+                    if (firstElement.TryGetProperty("SirHurt V5", out var sirhurt))
+                    {
+                        string version = string.Empty;
+                        bool isOutdated = false;
 
-                    return string.Empty;
+                        if (sirhurt.TryGetProperty("roblox_version", out var versionElement))
+                            version = versionElement.GetString() ?? string.Empty;
+
+                        if (sirhurt.TryGetProperty("last_update_unix", out var lastUpdateElement))
+                        {
+                            long lastUpdateUnix = lastUpdateElement.GetInt64();
+                            DateTimeOffset lastUpdate = DateTimeOffset.FromUnixTimeSeconds(lastUpdateUnix);
+                            TimeSpan timeSinceUpdate = DateTimeOffset.UtcNow - lastUpdate;
+
+                            isOutdated = timeSinceUpdate.TotalDays > 10;
+                        }
+
+                        if (string.IsNullOrEmpty(version))
+                        {
+                            Log.Error("[!] roblox_version field not found in JSON response.");
+
+                            return (string.Empty, false);
+                        }
+
+                        return (version, isOutdated);
+                    }
+
+                    Log.Error("[!] SirHurt V5 field not found in JSON response.");
+                }
+                else
+                {
+                    Log.Error("[!] API returned unexpected JSON structure (expected array).");
                 }
 
-                Log.Error("[!] SirHurt V5 field not found in JSON response.");
-
-                return string.Empty;
+                return (string.Empty, false);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Error getting SirHurt version from API: {0}", ex.Message);
 
-                return string.Empty;
+                return (string.Empty, false);
             }
         }
 
@@ -81,11 +107,11 @@
             {
                 Log.Information("[*] Roblox API is disabled, using SirHurt API to retrieve version.");
 
-                version = await GetSirhurtVersionAsync();
+                var (sirhurtVersion, isOutdated) = await GetSirhurtVersionAsync();
 
-                if (string.IsNullOrEmpty(version))
+                if (string.IsNullOrEmpty(sirhurtVersion))
                 {
-                    Log.Error("[!] Failed to retrieve version, using Roblox API to retrieve version...");
+                    Log.Error("[!] Failed to retrieve version from SirHurt API, using Roblox API to retrieve version...");
 
                     version = await GetRobloxVersionAsync();
 
@@ -94,8 +120,29 @@
                     else
                         Log.Information("[*] Using version: {0}.", version);
                 }
+                else if (isOutdated)
+                {
+                    Log.Warning("[!] SirHurt hasn't updated in more than 3 days, falling back to Roblox API...");
+
+                    version = await GetRobloxVersionAsync();
+
+                    if (string.IsNullOrEmpty(version))
+                    {
+                        Log.Error("[!] Failed to retrieve version from Roblox API, using outdated SirHurt version...");
+
+                        version = sirhurtVersion;
+
+                        Log.Information("[*] Using version: {0}.", version);
+                    }
+                    else
+                        Log.Information("[*] Using version: {0}.", version);
+                }
                 else
+                {
+                    version = sirhurtVersion;
+
                     Log.Information("[*] Using version: {0}.", version);
+                }
             }
 
             return version;
