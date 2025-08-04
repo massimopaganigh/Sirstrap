@@ -52,7 +52,7 @@
                         DateTimeOffset lastUpdate = DateTimeOffset.FromUnixTimeSeconds(lastUpdateUnix);
                         TimeSpan timeSinceUpdate = DateTimeOffset.UtcNow - lastUpdate;
 
-                        isOutdated = timeSinceUpdate.TotalDays > 14;
+                        isOutdated = timeSinceUpdate.TotalDays > 10;
                     }
 
                     if (string.IsNullOrEmpty(version))
