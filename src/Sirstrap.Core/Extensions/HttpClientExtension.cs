@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core
+﻿namespace Sirstrap.Core.Extensions
 {
     public static class HttpClientExtension
     {
@@ -19,7 +19,7 @@
                     }
                     else
                     {
-                        Log.Error(ex, "[!] Byte array request from {0} failed: {1}", uri, ex.Message);
+                        Log.Error(ex, "[!] Byte array request from {0} failed.", uri);
 
                         return null;
                     }
@@ -45,7 +45,7 @@
                     }
                     else
                     {
-                        Log.Error(ex, "[!] String request from {0} failed: {1}", uri, ex.Message);
+                        Log.Error(ex, "[!] String request from {0} failed.", uri);
 
                         return null;
                     }

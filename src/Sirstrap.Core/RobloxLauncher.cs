@@ -1,10 +1,12 @@
-﻿namespace Sirstrap.Core
+﻿using Sirstrap.Core.Models;
+
+namespace Sirstrap.Core
 {
     public static class RobloxLauncher
     {
         private const string ROBLOX_PLAYER_BETA_EXE = "RobloxPlayerBeta.exe";
 
-        public static bool Launch(Configuration configuration)
+        public static bool Launch(RobloxDownloadConfiguration configuration)
         {
             string robloxPlayerBetaExePath = Path.Combine(PathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
 

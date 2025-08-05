@@ -1,4 +1,8 @@
-﻿namespace Sirstrap.Core
+﻿using Sirstrap.Core.Interfaces;
+using Sirstrap.Core.Models;
+using Sirstrap.Core.Services;
+
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Orchestrates the complete Roblox application deployment process, including 
@@ -7,7 +11,8 @@
     public class RobloxDownloader
     {
         private readonly RobloxVersionService _robloxVersionService;
-        private readonly PackageManager _packageManager;
+        private RobloxDownloadService _robloxDownloadService;
+        private readonly IRobloxDownloadConfigurationService _robloxDownloadConfigurationService = new RobloxDownloadConfigurationService();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobloxDownloader"/> class.
@@ -23,7 +28,6 @@
             };
 
             _robloxVersionService = new RobloxVersionService(httpClient);
-            _packageManager = new PackageManager(httpClient);
         }
 
         /// <summary>
@@ -48,7 +52,7 @@
             {
                 await new SirstrapUpdateService().UpdateAsync(sirstrapType, args);
 
-                var configuration = ConfigurationManager.CreateConfigurationFromArguments(ConfigurationParser.ParseConfiguration(args));
+                var configuration = _robloxDownloadConfigurationService.ParseConfiguration(args);
 
                 if (!await InitializeDownloadAsync(configuration).ConfigureAwait(false))
                 {
@@ -65,7 +69,7 @@
                     }
                 }
 
-                Configuration.ClearCacheDirectory();
+                _robloxDownloadConfigurationService.ClearCacheDirectory();
 
                 await DownloadAndProcessFilesAsync(configuration).ConfigureAwait(false);
 
@@ -92,7 +96,7 @@
         /// retrieve the latest version from the version manager. It also ensures the version
         /// string is in the normalized format.
         /// </remarks>
-        private async Task<bool> InitializeDownloadAsync(Configuration configuration)
+        private async Task<bool> InitializeDownloadAsync(RobloxDownloadConfiguration configuration)
         {
             if (string.IsNullOrEmpty(configuration.VersionHash))
             {
@@ -118,7 +122,7 @@
         /// Currently only checks for Windows Player installations by verifying if the
         /// version directory exists.
         /// </remarks>
-        private static bool IsAlreadyInstalled(Configuration configuration)
+        private static bool IsAlreadyInstalled(RobloxDownloadConfiguration configuration)
         {
             return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetExtractionPath(configuration.VersionHash));
         }
@@ -135,7 +139,7 @@
         /// Currently only supports launching the Windows Player version.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static bool LaunchApplication(Configuration configuration)
+        private static bool LaunchApplication(RobloxDownloadConfiguration configuration)
         {
             return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && RobloxLauncher.Launch(configuration);
         }
@@ -149,15 +153,17 @@
         /// For macOS binaries, downloads the complete ZIP archive directly.
         /// For other platforms, downloads the manifest and processes the individual packages.
         /// </remarks>
-        private async Task DownloadAndProcessFilesAsync(Configuration configuration)
+        private async Task DownloadAndProcessFilesAsync(RobloxDownloadConfiguration configuration)
         {
-            if (configuration.IsMacBinary())
+            _robloxDownloadService = new RobloxDownloadService(configuration);
+
+            if (configuration.IsMacBinary)
             {
-                await _packageManager.Download4MacAsync(configuration).ConfigureAwait(false);
+                await _robloxDownloadService.DownloadForMacAsync().ConfigureAwait(false);
             }
             else
             {
-                await _packageManager.Download4WindowsAsync(configuration).ConfigureAwait(false);
+                await _robloxDownloadService.DownloadForWindowsAsync().ConfigureAwait(false);
             }
         }
 
@@ -170,7 +176,7 @@
         /// The application is installed from the downloaded ZIP archive and then launched.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static void InstallAndLaunchApplication(Configuration configuration)
+        private static void InstallAndLaunchApplication(RobloxDownloadConfiguration configuration)
         {
             if (!configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
             {

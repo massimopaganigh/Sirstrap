@@ -1,4 +1,6 @@
-﻿namespace Sirstrap.Core
+﻿using Sirstrap.Core.Models;
+
+namespace Sirstrap.Core
 {
     /// <summary>
     /// Provides functionality to install the Roblox application by extracting the 
@@ -19,10 +21,10 @@
         /// - Extracting all files from the ZIP archive to the version-specific directory
         /// - Deleting the temporary ZIP file after successful extraction
         /// </remarks>
-        public static void Install(Configuration configuration)
+        public static void Install(RobloxDownloadConfiguration configuration)
         {
             var targetPath = PathManager.GetExtractionPath(configuration.VersionHash);
-            var zipPath = configuration.GetOutputPath();
+            var zipPath = configuration.OutputPath;
 
             try
             {
