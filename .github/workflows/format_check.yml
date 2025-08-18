@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
   workflow_call:
 
+permissions:
+    contents: write
+
 jobs:
   format:
     runs-on: windows-latest
