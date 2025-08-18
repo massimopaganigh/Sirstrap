@@ -8,6 +8,9 @@ on:
   workflow_dispatch:
   workflow_call:
 
+permissions:
+    contents: write
+
 jobs:
   format:
     runs-on: windows-latest
@@ -22,5 +25,22 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Format check
+        id: format_check
         run: cd src && dotnet format --verify-no-changes
+        shell: cmd
+        continue-on-error: true
+
+      - name: Format
+        if: steps.format_check.outcome == 'failure'
+        run: cd src && dotnet format
+        shell: cmd
+
+      - name: Commit
+        if: steps.format_check.outcome == 'failure'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git diff --staged --quiet || git commit -m "chore: auto-format code"
+          git push
         shell: cmd
