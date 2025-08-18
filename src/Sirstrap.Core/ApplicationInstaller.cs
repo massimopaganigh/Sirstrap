@@ -23,7 +23,7 @@
         {
             var targetPath = PathManager.GetExtractionPath(configuration.VersionHash);
             var zipPath = configuration.GetOutputPath();
-
+                      
             try
             {
                 PrepareInstallDirectory(targetPath);
