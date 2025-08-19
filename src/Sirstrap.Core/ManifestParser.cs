@@ -13,7 +13,7 @@
             if (string.IsNullOrEmpty(manifestContext))
                 return new Manifest();
 
-            var lines = manifestContext.Split(['\n', '\r'], StringSplitOptions.RemoveEmptyEntries);
+            var lines = manifestContext.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
             return new Manifest
             {
