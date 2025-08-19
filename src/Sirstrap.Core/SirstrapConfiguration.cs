@@ -2,7 +2,7 @@
 {
     public static class SirstrapConfiguration
     {
-        public static string ChannelName { get; set; } = "-beta";
+        public static string ChannelName { get; set; } = "-alpha";
 
         public static bool MultiInstance { get; set; } = true;
 
