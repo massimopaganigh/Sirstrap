@@ -90,8 +90,8 @@
             BorderThickness="1"
             CornerRadius="1000"
             Opacity="0.9">
-			<!--Classes="glassBorder"-->
-			<Border.Background>
+            <!--Classes="glassBorder"-->
+            <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                     <GradientStop Offset="0" Color="#80454EE6" />
                     <GradientStop Offset="0.5" Color="#60454EE6" />
