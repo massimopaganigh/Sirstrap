@@ -124,6 +124,7 @@
                 BorderThickness="1"
                 Classes="glassBorder"
                 CornerRadius="1000"
+                IsVisible="{Binding IsRobloxRunning}"
                 Opacity="0.9">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
