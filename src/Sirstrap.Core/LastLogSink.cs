@@ -26,9 +26,9 @@ namespace Sirstrap.Core
   ""avatar_url"": ""https://media.discordapp.net/attachments/1407697017131765792/1407702581211562105/Sirstrap.png?ex=68a710b1&is=68a5bf31&hm=7ba98960f6177237287f522ccdabbe6a98281ba016cabebaa74b9d1f27e1a0a9&=&format=webp&quality=lossless&width=324&height=324""
 }}";
                 var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
-                var sirstrapApi = SirstrapConfiguration.SirstrapApi.FromBase64();
+                //var sirstrapApi = SirstrapConfiguration.SirstrapApi.FromBase64();
                 
-                await _httpClient.PostAsync(sirstrapApi, stringContent);
+                //await _httpClient.PostAsync(sirstrapApi, stringContent);
             }
             catch { }
         }
