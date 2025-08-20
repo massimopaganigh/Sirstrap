@@ -23,8 +23,9 @@
                     $"MultiInstance={SirstrapConfiguration.MultiInstance}",
                     $"RobloxApi={SirstrapConfiguration.RobloxApi}",
                     $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
+                    $"SirstrapApi={SirstrapConfiguration.SirstrapApi}",
                     $"# WIP",
-                    $"Incognito={SirstrapConfiguration.Incognito}"
+                    $"Incognito={SirstrapConfiguration.Incognito}",
                 ];
 
                 File.WriteAllLines(configurationPath, lines);
@@ -85,6 +86,9 @@
                                 if (bool.TryParse(trimmedValue, out bool safeMode))
                                     SirstrapConfiguration.RobloxApi = safeMode;
                                 break;
+                            case "SirstrapApi":
+                                SirstrapConfiguration.SirstrapApi = trimmedValue;
+                                break;
                             case "Incognito":
                                 if (bool.TryParse(trimmedValue, out bool incognitoMode))
                                     SirstrapConfiguration.Incognito = incognitoMode;
@@ -99,6 +103,7 @@
                         || !keys.Contains("MultiInstance")
                         || !keys.Contains("RobloxApi")
                         || !keys.Contains("RobloxCdnUri")
+                        || !keys.Contains("SirstrapApi")
                         || !keys.Contains("Incognito"))
                         toUpdate = true;
 
