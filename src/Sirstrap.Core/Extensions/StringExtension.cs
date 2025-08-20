@@ -85,11 +85,5 @@
                 throw;
             }
         }
-
-        public static string FromBase64(this string encodedString)
-        {
-            var bytes = Convert.FromBase64String(encodedString);
-            return Encoding.UTF8.GetString(bytes);
-        }
     }
 }
