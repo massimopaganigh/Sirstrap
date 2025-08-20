@@ -16,7 +16,7 @@ namespace Sirstrap.CLI
 
                 string logFilePath = Path.Combine(logsDirectory, "SirstrapLog.txt");
 
-                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).CreateLogger();
+                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).WriteTo.LastLog().CreateLogger();
 
                 string? targetFrameworkName = AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
                 DateTime creationTime = File.GetCreationTime(AppContext.BaseDirectory);

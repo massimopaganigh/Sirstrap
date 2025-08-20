@@ -4,59 +4,92 @@
     {
         public static void BetterDirectoryCreate(this string directoryPath, int attempts = 5)
         {
-            foreach (int attempt in Enumerable.Range(1, attempts))
-                try
-                {
-                    if (!Directory.Exists(directoryPath))
-                        Directory.CreateDirectory(directoryPath);
+            try
+            {
+                foreach (int attempt in Enumerable.Range(1, attempts))
+                    try
+                    {
+                        if (!Directory.Exists(directoryPath))
+                            Directory.CreateDirectory(directoryPath);
 
-                    return;
-                }
-                catch (IOException)
-                {
-                    if (attempt == attempts)
-                        throw;
+                        return;
+                    }
+                    catch (IOException)
+                    {
+                        if (attempt == attempts)
+                            throw;
 
-                    Thread.Sleep(100 * attempt);
-                }
+                        Thread.Sleep(100 * attempt);
+                    }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Error creating directory: {0}", ex.Message);
+
+                throw;
+            }
         }
 
         public static void BetterDirectoryDelete(this string directoryPath, int attempts = 5)
         {
-            foreach (int attempt in Enumerable.Range(1, attempts))
-                try
-                {
-                    if (Directory.Exists(directoryPath))
-                        Directory.Delete(directoryPath, true);
+            try
+            {
+                foreach (int attempt in Enumerable.Range(1, attempts))
+                    try
+                    {
+                        if (Directory.Exists(directoryPath))
+                            Directory.Delete(directoryPath, true);
 
-                    return;
-                }
-                catch (IOException)
-                {
-                    if (attempt == attempts)
-                        throw;
+                        return;
+                    }
+                    catch (IOException)
+                    {
+                        if (attempt == attempts)
+                            throw;
 
-                    Thread.Sleep(100 * attempt);
-                }
+                        Thread.Sleep(100 * attempt);
+                    }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Error deleting directory: {0}", ex.Message);
+
+                throw;
+            }
         }
 
         public static void BetterFileDelete(this string filePath, int attempts = 5)
         {
-            foreach (int attempt in Enumerable.Range(1, attempts))
-                try
-                {
-                    if (File.Exists(filePath))
-                        File.Delete(filePath);
+            try
+            {
+                foreach (int attempt in Enumerable.Range(1, attempts))
+                    try
+                    {
+                        if (File.Exists(filePath))
+                            File.Delete(filePath);
 
-                    return;
-                }
-                catch (IOException)
-                {
-                    if (attempt == attempts)
-                        throw;
+                        return;
+                    }
+                    catch (IOException)
+                    {
+                        if (attempt == attempts)
+                            throw;
 
-                    Thread.Sleep(100 * attempt);
-                }
+                        Thread.Sleep(100 * attempt);
+                    }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Error deleting file: {0}", ex.Message);
+
+                throw;
+            }
+        }
+
+        public static string FromBase64(this string encodedString)
+        {
+            var bytes = Convert.FromBase64String(encodedString);
+            return Encoding.UTF8.GetString(bytes);
         }
     }
 }
