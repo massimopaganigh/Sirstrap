@@ -33,11 +33,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
-    - name: Install cosign
-      uses: sigstore/cosign-installer@v3.7.0
-      with:
-        cosign-release: 'v2.4.1'
-
     - name: Build
       run: cd build && build_with_log.bat
       shell: cmd
@@ -45,6 +40,9 @@ jobs:
     - name: Post build
       run: cd build && post_build_with_log.bat
       shell: cmd
+
+    - name: Install cosign
+      uses: sigstore/cosign-installer@v3.9.2
 
     - name: Sign release files with cosign
       run: |

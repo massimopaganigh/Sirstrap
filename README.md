@@ -19,25 +19,3 @@ An alternative bootstrapper for Roblox with a bunch of extra features. Created b
 <image src="images/Sirstrap_Demo.png">
 
 </div>
-
-## Signature Verification
-
-Starting from release versions, all release files are signed using [cosign](https://github.com/sigstore/cosign) for enhanced security and authenticity verification.
-
-### Verifying Signatures
-
-To verify the authenticity of a downloaded file, you can use cosign to check its signature:
-
-1. **Install cosign**: Download from [cosign releases](https://github.com/sigstore/cosign/releases)
-
-2. **Verify a file signature**:
-   ```bash
-   # Example: Verify Sirstrap.CLI.zip
-   cosign verify-blob Sirstrap.CLI.zip \
-     --signature Sirstrap.CLI.zip.sig \
-     --certificate Sirstrap.CLI.zip.pem \
-     --certificate-identity-regexp "https://github.com/massimopaganigh/Sirstrap/.*" \
-     --certificate-oidc-issuer "https://token.actions.githubusercontent.com"
-   ```
-
-Each release file will have corresponding `.sig` (signature) and `.pem` (certificate) files that can be used for verification.
