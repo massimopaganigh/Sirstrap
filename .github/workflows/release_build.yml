@@ -33,6 +33,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
+    - name: Install cosign
+      uses: sigstore/cosign-installer@v3.7.0
+      with:
+        cosign-release: 'v2.4.1'
+
     - name: Build
       run: cd build && build_with_log.bat
       shell: cmd
@@ -40,6 +45,17 @@ jobs:
     - name: Post build
       run: cd build && post_build_with_log.bat
       shell: cmd
+
+    - name: Sign release files with cosign
+      run: |
+        echo "Signing all files in out/release/ directory..."
+        for file in out/release/*; do
+          if [ -f "$file" ]; then
+            echo "Signing $file"
+            cosign sign-blob --yes "$file" --output-signature="${file}.sig" --output-certificate="${file}.pem"
+          fi
+        done
+      shell: bash
 
     # - name: Run Microsoft Security DevOps
     #   uses: microsoft/security-devops-action@latest
