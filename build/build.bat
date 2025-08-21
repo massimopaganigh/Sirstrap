@@ -155,9 +155,11 @@ del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
 if "%should_test%" == "true" (
     echo Testing Sirstrap.CLI...
 
-    powershell -NoProfile -ExecutionPolicy Bypass -Command "^$p = Start-Process -FilePath '%sirstrap_cli_publish_dir%\Sirstrap.exe' -PassThru -WindowStyle Hidden -RedirectStandardOutput '%sirstrap_cli_test_log%' -RedirectStandardError '%sirstrap_cli_test_log%'; if (-not ^$p.WaitForExit(60000)) { try { ^$p.Kill() } catch {} ; Write-Host 'Sirstrap.CLI timed out after 60 seconds.' ; exit 0 } else { exit ^$p.ExitCode }"
+    powershell -command "try { $process = Start-Process -FilePath '%sirstrap_cli_publish_dir%\Sirstrap.exe' -RedirectStandardOutput '%sirstrap_cli_test_log%' -RedirectStandardError '%sirstrap_cli_test_log%' -NoNewWindow -PassThru; $process.WaitForExit(60000); if (!$process.HasExited) { Write-Host 'Sirstrap.exe timed out after 60 seconds, forcing exit...' -ForegroundColor Yellow; $process.Kill(); $process.WaitForExit(); exit 124 } else { exit $process.ExitCode } } catch { Write-Host 'Error running Sirstrap.exe: ' $_.Exception.Message -ForegroundColor Red; exit 1 }"
 
-    if %ERRORLEVEL% neq 0 (
+    if %ERRORLEVEL% equ 124 (
+        echo Test of Sirtrap.CLI timed out after 60 seconds.
+    ) else if %ERRORLEVEL% neq 0 (
         echo Test of Sirstrap.CLI failed.
         exit /b %ERRORLEVEL%
     )
