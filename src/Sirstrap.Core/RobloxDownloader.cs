@@ -179,7 +179,7 @@
                 return;
             }
 
-            ApplicationInstaller.Install(configuration);
+            Installer.Install(configuration);
 
             LaunchApplication(configuration);
         }

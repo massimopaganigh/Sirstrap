@@ -37,9 +37,34 @@ jobs:
       run: cd build && build_with_log.bat
       shell: cmd
 
+    - name: Cosign installer
+      uses: sigstore/cosign-installer@v3.9.2
+
+    - name: Sign
+      run: |
+        echo "Signing..."
+        for file in out/Sirstrap.CLI/Sirstrap.exe out/Sirstrap.CLI_fat/Sirstrap.exe out/Sirstrap.UI/Sirstrap.exe out/Sirstrap.UI_fat/Sirstrap.exe; do
+          if [ -f "$file" ]; then
+            echo "Signing $file..."
+            cosign sign-blob --yes "$file" --output-signature="${file}.sig" --output-certificate="${file}.pem"
+          fi
+        done
+      shell: bash
+
     - name: Post build
       run: cd build && post_build_with_log.bat
       shell: cmd
+
+    - name: Sign
+      run: |
+        echo "Signing..."
+        for file in out/release/*; do
+          if [ -f "$file" ]; then
+            echo "Signing $file..."
+            cosign sign-blob --yes "$file" --output-signature="${file}.sig" --output-certificate="${file}.pem"
+          fi
+        done
+      shell: bash
 
     # - name: Run Microsoft Security DevOps
     #   uses: microsoft/security-devops-action@latest
