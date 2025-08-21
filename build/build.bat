@@ -155,7 +155,7 @@ del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
 if "%should_test%" == "true" (
     echo Testing Sirstrap.CLI...
 
-    "%sirstrap_cli_publish_dir%\Sirstrap.exe" > "%sirstrap_cli_test_log%" 2>&1
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "^$p = Start-Process -FilePath '%sirstrap_cli_publish_dir%\Sirstrap.exe' -PassThru -WindowStyle Hidden -RedirectStandardOutput '%sirstrap_cli_test_log%' -RedirectStandardError '%sirstrap_cli_test_log%'; if (-not ^$p.WaitForExit(60000)) { try { ^$p.Kill() } catch {} ; Write-Host 'Sirstrap.CLI timed out after 60 seconds.' ; exit 124 } else { exit ^$p.ExitCode }"
 
     if %ERRORLEVEL% neq 0 (
         echo Test of Sirstrap.CLI failed.

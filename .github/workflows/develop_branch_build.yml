@@ -33,7 +33,7 @@ jobs:
           ${{ runner.os }}-nuget-
 
     - name: Build
-      run: cd build && build.bat
+      run: cd build && build_with_log.bat
       shell: cmd
 
     - name: Post build
