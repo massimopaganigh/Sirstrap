@@ -44,6 +44,17 @@ jobs:
     - name: Install cosign
       uses: sigstore/cosign-installer@v3.9.2
 
+    - name: Sign executable files with cosign
+      run: |
+        echo "Signing executable files..."
+        for exe_file in out/Sirstrap.CLI/Sirstrap.exe out/Sirstrap.CLI_fat/Sirstrap.exe out/Sirstrap.UI/Sirstrap.exe out/Sirstrap.UI_fat/Sirstrap.exe; do
+          if [ -f "$exe_file" ]; then
+            echo "Signing $exe_file"
+            cosign sign-blob --yes "$exe_file" --output-signature="${exe_file}.sig" --output-certificate="${exe_file}.pem"
+          fi
+        done
+      shell: bash
+
     - name: Sign release files with cosign
       run: |
         echo "Signing all files in out/release/ directory..."
