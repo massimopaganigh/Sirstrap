@@ -88,7 +88,7 @@
             VerticalAlignment="Bottom"
             BorderBrush="#40FFFFFF"
             BorderThickness="1"
-            CornerRadius="1000"
+            CornerRadius="5"
             Opacity="0.9">
             <!--Classes="glassBorder"-->
             <Border.Background>
