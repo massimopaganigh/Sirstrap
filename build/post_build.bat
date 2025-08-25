@@ -18,6 +18,15 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
+echo Archiving Sirstrap.CLI_fat - SirCab...
+
+"%sircab_path%" "%sirstrap_cli_fat_publish_dir%" "%release_dir%" "Sirstrap.CLI_fat" "Cab" "LZX" "False"
+
+if %ERRORLEVEL% neq 0 (
+    echo Archiving of Sirstrap.CLI_fat failed - SirCab.
+    exit /b %ERRORLEVEL%
+)
+
 echo Archiving Sirstrap.CLI...
 
 powershell Compress-Archive -Path "%sirstrap_cli_publish_dir%\*" -DestinationPath "%sirstrap_cli_publish_dir%.zip" -Force
@@ -29,7 +38,7 @@ if %ERRORLEVEL% neq 0 (
 
 echo Archiving Sirstrap.CLI - SirCab...
 
-"%sircab_path%" "%sirstrap_cli_publish_dir%" "%release_dir%" "Sirstrap.CLI" "LZX"
+"%sircab_path%" "%sirstrap_cli_publish_dir%" "%release_dir%" "Sirstrap.CLI" "Cab" "LZX" "False"
 
 if %ERRORLEVEL% neq 0 (
     echo Archiving of Sirstrap.CLI failed - SirCab.
@@ -45,6 +54,15 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
+echo Archiving Sirstrap.UI_fat - SirCab...
+
+"%sircab_path%" "%sirstrap_ui_fat_publish_dir%" "%release_dir%" "Sirstrap.UI_fat" "Cab" "LZX" "False"
+
+if %ERRORLEVEL% neq 0 (
+    echo Archiving of Sirstrap.UI_fat failed - SirCab.
+    exit /b %ERRORLEVEL%
+)
+
 echo Archiving Sirstrap.UI...
 
 powershell Compress-Archive -Path "%sirstrap_ui_publish_dir%\*" -DestinationPath "%sirstrap_ui_publish_dir%.zip" -Force
@@ -56,7 +74,7 @@ if %ERRORLEVEL% neq 0 (
 
 echo Archiving Sirstrap.UI - SirCab...
 
-"%sircab_path%" "%sirstrap_ui_publish_dir%" "%release_dir%" "Sirstrap.UI" "LZX"
+"%sircab_path%" "%sirstrap_ui_publish_dir%" "%release_dir%" "Sirstrap.UI" "Cab" "LZX" "False"
 
 if %ERRORLEVEL% neq 0 (
     echo Archiving of Sirstrap.UI failed - SirCab.
