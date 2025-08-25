@@ -50,7 +50,9 @@ namespace Sirstrap.Core
         {
             try
             {
-                await new SirstrapUpdateService().UpdateAsync(sirstrapType, args);
+                using var updateService = new SirstrapUpdateService();
+
+                await updateService.UpdateAsync(sirstrapType, args);
 
                 var configuration = _robloxDownloadConfigurationService.ParseConfiguration(args);
 
@@ -183,7 +185,7 @@ namespace Sirstrap.Core
                 return;
             }
 
-            ApplicationInstaller.Install(configuration);
+            Installer.Install(configuration);
 
             LaunchApplication(configuration);
         }
