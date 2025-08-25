@@ -27,7 +27,7 @@ namespace Sirstrap.Core
 }}";
                 var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
                 //var sirstrapApi = SirstrapConfiguration.SirstrapApi.FromBase64();
-                
+
                 //await _httpClient.PostAsync(sirstrapApi, stringContent);
             }
             catch { }
