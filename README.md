@@ -4,7 +4,7 @@
 
 An alternative bootstrapper for Roblox with a bunch of extra features. Created by exploiters for exploiters.
 
-[![Release](https://img.shields.io/github/v/tag/massimopaganigh/sirstrap?label=Release)](https://github.com/massimopaganigh/sirstrap/releases/latest)
+[![Release](https://img.shields.io/github/v/release/massimopaganigh/sirstrap?label=Release)](https://github.com/massimopaganigh/sirstrap/releases/latest)
 [![License](https://img.shields.io/github/license/massimopaganigh/sirstrap?label=License)](https://github.com/massimopaganigh/sirstrap/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/massimopaganigh/sirstrap/total?label=Downloads)](https://github.com/massimopaganigh/sirstrap/releases)
 [![Release Build](https://github.com/massimopaganigh/sirstrap/actions/workflows/release_build.yml/badge.svg)](https://github.com/massimopaganigh/sirstrap/actions/workflows/release_build.yml)
