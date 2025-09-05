@@ -81,7 +81,7 @@
             </Image.Styles>
         </Image>
         <Border
-            MaxWidth="140"
+            MaxWidth="145"
             MaxHeight="180"
             Margin="10,0,0,10"
             HorizontalAlignment="Left"
