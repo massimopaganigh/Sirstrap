@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Serilog;
 using Serilog.Events;
 using Sirstrap.Core;
@@ -80,6 +81,43 @@ namespace Sirstrap.UI.ViewModels
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(0);
+            }
+        }
+
+        [RelayCommand]
+        private static void OpenGitHub()
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://github.com/massimopaganigh/Sirstrap",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Unable to open GitHub page: {0}.", ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        private static void OpenSettings()
+        {
+            try
+            {
+                string settingsPath = SirstrapConfigurationService.GetConfigurationPath();
+
+                if (File.Exists(settingsPath))
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = settingsPath,
+                        UseShellExecute = true
+                    });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Unable to open settings file: {0}.", ex.Message);
             }
         }
 

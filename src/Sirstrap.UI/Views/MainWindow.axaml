@@ -234,7 +234,10 @@
                         OffsetY="2"
                         Opacity="0.3" />
                 </Border.Effect>
-                <Button Background="Transparent" CornerRadius="1000">
+                <Button
+                    Background="Transparent"
+                    Command="{Binding OpenGitHubCommand}"
+                    CornerRadius="1000">
                     <Image
                         Width="19"
                         Height="19"
@@ -264,7 +267,10 @@
                         OffsetY="2"
                         Opacity="0.3" />
                 </Border.Effect>
-                <Button Background="Transparent" CornerRadius="1000">
+                <Button
+                    Background="Transparent"
+                    Command="{Binding OpenSettingsCommand}"
+                    CornerRadius="1000">
                     <Image
                         Width="19"
                         Height="19"

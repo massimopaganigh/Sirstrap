@@ -2,15 +2,6 @@
 {
     public static class SirstrapConfigurationService
     {
-        private static string GetConfigurationPath()
-        {
-            string configurationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
-
-            Directory.CreateDirectory(configurationPath);
-
-            return Path.Combine(configurationPath, "settings.ini");
-        }
-
         private static void SaveConfiguration()
         {
             string configurationPath = GetConfigurationPath();
@@ -33,6 +24,15 @@
             {
                 Log.Error(ex, "[!] Configuration saving exception: {0}", ex.Message);
             }
+        }
+
+        public static string GetConfigurationPath()
+        {
+            string configurationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
+
+            Directory.CreateDirectory(configurationPath);
+
+            return Path.Combine(configurationPath, "settings.ini");
         }
 
         public static void LoadConfiguration()
