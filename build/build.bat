@@ -9,7 +9,7 @@ if "%1" == "--no-test" (
 )
 
 set "release_dir=..\out\release"
-set "upx_path=..\src\ext\upx-5.0.1-win64\upx.exe"
+set "upx_path=..\src\ext\upx-5.0.2-win64\upx.exe"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
 set "sirstrap_cli_fat_publish_dir=..\out\Sirstrap.CLI_fat"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
@@ -112,7 +112,11 @@ del /f /q "%sirstrap_cli_publish_dir%\_Sirstrap.exe"
 
 echo Building Sirstrap.UI...
 
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
+
 dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -c Release
+
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
 
 if %ERRORLEVEL% neq 0 (
     echo Build of Sirstrap.UI failed.
