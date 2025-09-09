@@ -3,7 +3,7 @@
 setlocal enabledelayedexpansion
 
 set "sybau=%1"
-set "wingetcreate_path=..\src\ext\Microsoft.WindowsPackageManagerManifestCreator_1.9.14.0\wingetcreate.exe"
+set "wingetcreate_path=..\src\ext\Microsoft.WindowsPackageManagerManifestCreator_1.10.3.0\wingetcreate.exe"
 
 for /f "usebackq delims=" %%i in ("..\VERSION") do set "version_raw=%%i"
 

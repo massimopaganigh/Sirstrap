@@ -1,8 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Controls.Templates;
-using Sirstrap.UI.ViewModels;
-using System;
-
 namespace Sirstrap.UI
 {
     public class ViewLocator : IDataTemplate
@@ -12,17 +7,13 @@ namespace Sirstrap.UI
             if (param is null)
                 return null;
 
-            var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
-#pragma warning disable IL2057 // Unrecognized value passed to the parameter of method. It's not possible to guarantee the availability of the target type.
-            var type = Type.GetType(name);
-#pragma warning restore IL2057 // Unrecognized value passed to the parameter of method. It's not possible to guarantee the availability of the target type.
-
-            if (type != null)
-                return (Control)Activator.CreateInstance(type)!;
-
-            return new TextBlock
+            return param switch
             {
-                Text = $"Not Found: {name}"
+                MainWindowViewModel => new MainWindow(),
+                _ => new TextBlock
+                {
+                    Text = "Not Found: " + param.GetType().Name
+                }
             };
         }
 
