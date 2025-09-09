@@ -112,7 +112,11 @@ del /f /q "%sirstrap_cli_publish_dir%\_Sirstrap.exe"
 
 echo Building Sirstrap.UI...
 
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
+
 dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -c Release
+
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
 
 if %ERRORLEVEL% neq 0 (
     echo Build of Sirstrap.UI failed.

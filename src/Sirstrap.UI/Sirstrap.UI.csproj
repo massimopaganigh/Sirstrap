@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<PublishAot>True</PublishAot>
+		<PublishAot>False</PublishAot>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<ApplicationIcon>favicon.ico</ApplicationIcon>

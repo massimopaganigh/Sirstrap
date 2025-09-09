@@ -237,7 +237,8 @@
                 <Button
                     Background="Transparent"
                     Command="{Binding OpenGitHubCommand}"
-                    CornerRadius="1000">
+                    CornerRadius="1000"
+                    ToolTip.Tip="Open GitHub">
                     <Image
                         Width="19"
                         Height="19"
@@ -270,7 +271,8 @@
                 <Button
                     Background="Transparent"
                     Command="{Binding OpenSettingsCommand}"
-                    CornerRadius="1000">
+                    CornerRadius="1000"
+                    ToolTip.Tip="Open settings">
                     <Image
                         Width="19"
                         Height="19"
