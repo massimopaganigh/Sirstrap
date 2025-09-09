@@ -25,7 +25,7 @@ namespace Sirstrap.UI.ViewModels
 
         private int _currentPollingInterval = MIN_POLLING_INTERVAL;
 
-        private bool _flag = false;
+        private bool _isMinimized = false;
 
         [ObservableProperty]
         private bool _isRobloxRunning;
@@ -43,7 +43,7 @@ namespace Sirstrap.UI.ViewModels
 
         private readonly Timer _logPollingTimer;
 
-        private Window? _mainWindow;
+        private Window? _mw;
 
         [ObservableProperty]
         private int _robloxProcessCount;
@@ -51,36 +51,126 @@ namespace Sirstrap.UI.ViewModels
         public MainWindowViewModel()
         {
             _logPollingTimer = new(_currentPollingInterval);
-            _logPollingTimer.Elapsed += (s, e) => UpdateLastLogFromSink();
+            _logPollingTimer.Elapsed += (s, e) => GetLastLogFromSink();
             _logPollingTimer.Start();
 
-            Task.Run(() => InitializeAsync(Environment.GetCommandLineArgs()));
+            Task.Run(InitializeAsync);
         }
 
-        private static async Task InitializeAsync(string[] arguments)
+        #region PRIVATE METHODS
+        private void GetLastLogFromSink()
         {
             try
             {
-                string logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+                if (!string.Equals(LastLogMessage, LastLogSink.LastLog)
+                    && !string.IsNullOrWhiteSpace(LastLogSink.LastLog))
+                {
+                    LastLogMessage = LastLogSink.LastLog;
+                    LastLogTimestamp = LastLogSink.LastLogTimestamp;
+                    LastLogLevel = LastLogSink.LastLogLevel;
 
-                Directory.CreateDirectory(logsDirectory);
+                    _lastLogReceived = DateTimeOffset.Now;
+                }
 
-                string logsPath = Path.Combine(logsDirectory, "SirstrapLog.txt");
+                GetRobloxProcessCount();
+                GetPollingInterval();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(GetLastLogFromSink));
 
-                Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024 /*5 MB*/, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
+                //Environment.ExitCode = 1;
+            }
+        }
 
-                string[] fixedArguments = [.. arguments.Skip(1)];
+        private void GetPollingInterval()
+        {
+            try
+            {
+                bool hasRecentLogActivity = _lastLogReceived.HasValue && (DateTimeOffset.Now - _lastLogReceived.Value).TotalSeconds <= LOG_ACTIVITY_THRESHOLD_SECONDS;
+                int newInterval = hasRecentLogActivity ? MIN_POLLING_INTERVAL : MAX_POLLING_INTERVAL;
+
+                if (newInterval != _currentPollingInterval)
+                {
+                    _currentPollingInterval = newInterval;
+                    _logPollingTimer.Interval = _currentPollingInterval;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(GetPollingInterval));
+
+                //Environment.ExitCode = 1;
+            }
+        }
+
+        private void GetRobloxProcessCount()
+        {
+            try
+            {
+                string[] robloxProcessNames =
+                [
+                    "RobloxPlayerBeta"
+                ];
+                int count = Process.GetProcesses().Count(x => robloxProcessNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
+
+                RobloxProcessCount = count;
+                IsRobloxRunning = count > 0 && SirstrapConfiguration.MultiInstance;
+
+                if (_mw != null
+                    && IsRobloxRunning
+                    && _isMinimized == false)
+                {
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        _mw.WindowState = WindowState.Minimized;
+                    });
+
+                    _isMinimized = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(GetRobloxProcessCount));
+
+                //Environment.ExitCode = 1;
+            }
+        }
+
+        private async Task InitializeAsync()
+        {
+            try
+            {
+                string logsDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+
+                if (!Directory.Exists(logsDir))
+                    Directory.CreateDirectory(logsDir);
+
+                string logsPath = Path.Combine(logsDir, "SirstrapLog.txt");
+
+                Log.Logger = new LoggerConfiguration().WriteTo.File(logsPath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
 
                 SirstrapConfigurationService.LoadConfiguration();
-                RegistryManager.RegisterProtocolHandler("roblox-player", fixedArguments);
 
-                await new RobloxDownloader().ExecuteAsync(fixedArguments, SirstrapType.UI);
+                string[] args = Program.Args ?? [];
+
+                RegistryManager.RegisterProtocolHandler("roblox-player", args);
+
+                await new RobloxDownloader().ExecuteAsync(args, SirstrapType.UI);
+
+                Environment.ExitCode = 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(InitializeAsync));
+
+                Environment.ExitCode = 1;
             }
             finally
             {
                 await Log.CloseAndFlushAsync();
 
-                Environment.Exit(0);
+                Environment.Exit(Environment.ExitCode);
             }
         }
 
@@ -97,7 +187,9 @@ namespace Sirstrap.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Unable to open GitHub page: {0}.", ex.Message);
+                Log.Error(ex, nameof(OpenGitHub));
+
+                //Environment.ExitCode = 1;
             }
         }
 
@@ -117,63 +209,12 @@ namespace Sirstrap.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Unable to open settings file: {0}.", ex.Message);
+                Log.Error(ex, nameof(OpenSettings));
+
+                //Environment.ExitCode = 1;
             }
         }
-
-        private void UpdateLastLogFromSink()
-        {
-            if (!string.Equals(LastLogMessage, LastLogSink.LastLog)
-                && !string.IsNullOrWhiteSpace(LastLogSink.LastLog))
-            {
-                LastLogMessage = LastLogSink.LastLog;
-                LastLogTimestamp = LastLogSink.LastLogTimestamp;
-                LastLogLevel = LastLogSink.LastLogLevel;
-
-                _lastLogReceived = DateTimeOffset.Now;
-            }
-
-            UpdateRobloxProcessCount();
-            UpdatePollingInterval();
-        }
-
-        private void UpdatePollingInterval()
-        {
-            bool hasRecentLogActivity = _lastLogReceived.HasValue && (DateTimeOffset.Now - _lastLogReceived.Value).TotalSeconds <= LOG_ACTIVITY_THRESHOLD_SECONDS;
-
-            int newInterval = hasRecentLogActivity ? MIN_POLLING_INTERVAL : MAX_POLLING_INTERVAL;
-
-            if (newInterval != _currentPollingInterval)
-            {
-                _currentPollingInterval = newInterval;
-                _logPollingTimer.Interval = _currentPollingInterval;
-            }
-        }
-
-        private void UpdateRobloxProcessCount()
-        {
-            try
-            {
-                string[] commonRobloxNames = ["RobloxPlayerBeta"];
-                int count = Process.GetProcesses().Count(x => commonRobloxNames.Any(y => string.Equals(x.ProcessName, y, StringComparison.OrdinalIgnoreCase)));
-
-                RobloxProcessCount = count;
-                IsRobloxRunning = count > 0 && SirstrapConfiguration.MultiInstance;
-
-                if (_mainWindow != null
-                    && IsRobloxRunning
-                    && _flag == false)
-                {
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        _mainWindow.WindowState = WindowState.Minimized;
-                    });
-
-                    _flag = true;
-                }
-            }
-            catch (Exception) { }
-        }
+        #endregion
 
         public void Dispose()
         {
@@ -181,6 +222,6 @@ namespace Sirstrap.UI.ViewModels
             _logPollingTimer?.Dispose();
         }
 
-        public void SetMainWindow(Window mainWindow) => _mainWindow = mainWindow;
+        public void SetMainWindow(Window mw) => _mw = mw;
     }
 }
