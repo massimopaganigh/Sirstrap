@@ -1,5 +1,3 @@
-using Avalonia.Controls;
-
 namespace Sirstrap.UI.Views
 {
     public partial class MainWindow : Window

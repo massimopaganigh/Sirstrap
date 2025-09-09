@@ -1,8 +1,3 @@
-using Avalonia.Controls;
-using Avalonia.Controls.Templates;
-using Sirstrap.UI.ViewModels;
-using Sirstrap.UI.Views;
-
 namespace Sirstrap.UI
 {
     public class ViewLocator : IDataTemplate

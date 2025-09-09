@@ -1,18 +1,4 @@
-﻿using Avalonia.Controls;
-using Avalonia.Threading;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Serilog;
-using Serilog.Events;
-using Sirstrap.Core;
-using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
-
-namespace Sirstrap.UI.ViewModels
+﻿namespace Sirstrap.UI.ViewModels
 {
     public partial class MainWindowViewModel : ObservableObject
     {
@@ -54,7 +40,9 @@ namespace Sirstrap.UI.ViewModels
             _logPollingTimer.Elapsed += (s, e) => GetLastLogFromSink();
             _logPollingTimer.Start();
 
+#if !DEBUG
             Task.Run(InitializeAsync);
+#endif
         }
 
         #region PRIVATE METHODS
@@ -175,7 +163,7 @@ namespace Sirstrap.UI.ViewModels
         }
 
         [RelayCommand]
-        private static void OpenGitHub()
+        private void OpenGitHub()
         {
             try
             {
@@ -194,7 +182,7 @@ namespace Sirstrap.UI.ViewModels
         }
 
         [RelayCommand]
-        private static void OpenSettings()
+        private void OpenSettings()
         {
             try
             {

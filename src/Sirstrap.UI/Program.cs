@@ -1,9 +1,4 @@
-﻿using Avalonia;
-using System;
-using System.IO;
-using System.Runtime.InteropServices;
-
-namespace Sirstrap.UI
+﻿namespace Sirstrap.UI
 {
     internal sealed class Program
     {
