@@ -259,7 +259,16 @@ exit
         /// Gets the current full version of Sirstrap.
         /// </summary>
         /// <returns>The current full version of Sirstrap.</returns>
-        public static string GetCurrentFullVersion() => $"v{GetCurrentVersion()}{GetCurrentChannel()}";
+        public static string GetCurrentFullVersion()
+        {
+#if DEBUG
+            return $"v{Guid.NewGuid()}";
+#endif
+
+#pragma warning disable CS0162
+            return $"v{GetCurrentVersion()}{GetCurrentChannel()}";
+#pragma warning restore CS0162
+        }
 
         /// <summary>
         /// Updates the Sirstrap application to the latest version.
