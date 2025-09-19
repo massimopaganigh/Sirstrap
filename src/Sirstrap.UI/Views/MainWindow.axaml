@@ -236,6 +236,40 @@
                 </Border.Effect>
                 <Button
                     Background="Transparent"
+                    Command="{Binding OpenIssueCommand}"
+                    CornerRadius="1000"
+                    ToolTip.Tip="Open an issue">
+                    <Image
+                        Width="19"
+                        Height="19"
+                        Margin="0,0,0,0"
+                        Source="avares://Sirstrap/Assets/issue.png" />
+                </Button>
+            </Border>
+            <Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <Button
+                    Background="Transparent"
                     Command="{Binding OpenGitHubCommand}"
                     CornerRadius="1000"
                     ToolTip.Tip="Open GitHub">

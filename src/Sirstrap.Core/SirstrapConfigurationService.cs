@@ -17,6 +17,7 @@
                     $"SirstrapApi={SirstrapConfiguration.SirstrapApi}",
                     $"# WIP",
                     $"Incognito={SirstrapConfiguration.Incognito}",
+                    $"AutoUpdate={SirstrapConfiguration.AutoUpdate}"
                 ];
 
                 File.WriteAllLines(configurationPath, lines);
@@ -93,6 +94,10 @@
                                 if (bool.TryParse(trimmedValue, out bool incognitoMode))
                                     SirstrapConfiguration.Incognito = incognitoMode;
                                 break;
+                            case "AutoUpdate":
+                                if (bool.TryParse(trimmedValue, out bool autoUpdate))
+                                    SirstrapConfiguration.AutoUpdate = autoUpdate;
+                                break;
                             default:
                                 Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedKey, trimmedValue);
                                 break;
@@ -104,7 +109,8 @@
                         || !keys.Contains("RobloxApi")
                         || !keys.Contains("RobloxCdnUri")
                         || !keys.Contains("SirstrapApi")
-                        || !keys.Contains("Incognito"))
+                        || !keys.Contains("Incognito")
+                        || !keys.Contains("AutoUpdate"))
                         toUpdate = true;
 
                     if (toUpdate)

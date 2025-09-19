@@ -45,6 +45,14 @@
 #endif
         }
 
+        public void Dispose()
+        {
+            _logPollingTimer?.Stop();
+            _logPollingTimer?.Dispose();
+        }
+
+        public void SetMainWindow(Window mw) => _mw = mw;
+
         #region PRIVATE METHODS
         private void GetLastLogFromSink()
         {
@@ -202,14 +210,25 @@
                 //Environment.ExitCode = 1;
             }
         }
-        #endregion
 
-        public void Dispose()
+        [RelayCommand]
+        private void OpenIssue()
         {
-            _logPollingTimer?.Stop();
-            _logPollingTimer?.Dispose();
-        }
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "https://github.com/massimopaganigh/Sirstrap/issues/new",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(OpenIssue));
 
-        public void SetMainWindow(Window mw) => _mw = mw;
+                //Environment.ExitCode = 1;
+            }
+        }
+        #endregion
     }
 }
