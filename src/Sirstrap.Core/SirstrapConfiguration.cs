@@ -14,5 +14,7 @@
         /// WIP
         /// </summary>
         public static bool Incognito { get; set; }
+
+        public static bool AutoUpdate { get; set; } = true;
     }
 }

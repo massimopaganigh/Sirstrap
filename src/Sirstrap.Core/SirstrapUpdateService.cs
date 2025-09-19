@@ -270,6 +270,13 @@ exit
         {
             try
             {
+                if (!SirstrapConfiguration.AutoUpdate)
+                {
+                    Log.Information("[*] AutoUpdate is disabled. Skipping...");
+
+                    return;
+                }
+
                 if (!await IsUpToDateAsync(sirstrapType))
                     await DownloadAndApplyUpdateAsync(sirstrapType, args);
             }
