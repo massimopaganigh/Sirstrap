@@ -262,7 +262,7 @@ exit
         public static string GetCurrentFullVersion()
         {
 #if DEBUG
-            return $"v{Guid.NewGuid()}";
+            return $"v{Guid.NewGuid().ToString().ToUpperInvariant()}";
 #endif
 
 #pragma warning disable CS0162
