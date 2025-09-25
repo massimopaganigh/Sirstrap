@@ -7,7 +7,6 @@
         private static extern bool SetBinDirectory(string binDirectoryPath);
 
         public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().LogToTrace();
-#pragma warning restore IDE0079 // Rimuovere l'eliminazione non necessaria
 
         [STAThread]
         public static void Main(string[] args)
