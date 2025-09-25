@@ -157,14 +157,16 @@
         {
             try
             {
-                var settingsFilePath = SirstrapConfigurationService.GetConfigurationPath();
+                //var settingsFilePath = SirstrapConfigurationService.GetConfigurationPath();
 
-                if (File.Exists(settingsFilePath))
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = settingsFilePath,
-                        UseShellExecute = true
-                    });
+                //if (File.Exists(settingsFilePath))
+                //    Process.Start(new ProcessStartInfo
+                //    {
+                //        FileName = settingsFilePath,
+                //        UseShellExecute = true
+                //    });
+
+                new SettingsWindow { DataContext = new SettingsWindowViewModel() }.ShowDialog(GetMainWindow()!);
             }
             catch (Exception ex)
             {

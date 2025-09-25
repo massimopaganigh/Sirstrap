@@ -16,7 +16,7 @@
     Opacity="0.5"
     Title="Sirstrap"
     TransparencyLevelHint="AcrylicBlur"
-    WindowStartupLocation="CenterScreen"
+    WindowStartupLocation="CenterOwner"
     x:DataType="vm:MainWindowViewModel">
     <Design.DataContext>
         <vm:MainWindowViewModel />
