@@ -4,20 +4,18 @@
     {
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetDllDirectory(string lpPathName);
+        private static extern bool SetBinDirectory(string binDirectoryPath);
 
         public static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>().UsePlatformDetect().WithInterFont().LogToTrace();
+#pragma warning restore IDE0079 // Rimuovere l'eliminazione non necessaria
 
         [STAThread]
         public static void Main(string[] args)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var binPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+            var binDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
 
-                if (Directory.Exists(binPath))
-                    SetDllDirectory(binPath);
-            }
+            if (Directory.Exists(binDirectoryPath))
+                SetBinDirectory(binDirectoryPath);
 
             Args = args.Length > 0 ? args : null;
 
