@@ -15,5 +15,11 @@
         <Style Selector="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource Minecraft}" />
         </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="FontFamily" Value="{StaticResource Minecraft}" />
+        </Style>
+        <Style Selector="TextBox">
+            <Setter Property="FontFamily" Value="{StaticResource Minecraft}" />
+        </Style>
     </Application.Styles>
 </Application>

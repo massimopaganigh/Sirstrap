@@ -11,13 +11,10 @@
         [STAThread]
         public static void Main(string[] args)
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var binPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
+            var binDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bin");
 
-                if (Directory.Exists(binPath))
-                    SetDllDirectory(binPath);
-            }
+            if (Directory.Exists(binDirectoryPath))
+                SetDllDirectory(binDirectoryPath);
 
             Args = args.Length > 0 ? args : null;
 
