@@ -2,7 +2,7 @@
 {
     public static class SirstrapConfigurationService
     {
-        private static void SaveConfiguration()
+        public static void SaveConfiguration()
         {
             string configurationPath = GetConfigurationPath();
 
@@ -20,6 +20,8 @@
                 ];
 
                 File.WriteAllLines(configurationPath, lines);
+
+                LoadConfiguration();
             }
             catch (Exception ex)
             {

@@ -39,6 +39,7 @@
             SirstrapConfiguration.RobloxApi = RobloxApi;
             SirstrapConfiguration.RobloxCdnUri = RobloxCdnUri;
 
+            SirstrapConfigurationService.SaveConfiguration();
             SirstrapConfigurationService.LoadConfiguration();
         }
     }
