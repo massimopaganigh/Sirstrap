@@ -104,13 +104,10 @@ namespace Sirstrap.Core
             {
                 settingsPath ??= GetSettingsPath();
 
-                if (string.IsNullOrEmpty(SirstrapConfiguration.SirHurtPath))
-                {
-                    var (result, sirHurtPath) = SirHurtService.GetSirHurtPath();
+                var (result, sirHurtPath) = SirHurtService.GetSirHurtPath();
 
-                    if (result)
-                        SirstrapConfiguration.SirHurtPath = sirHurtPath;
-                }
+                if (result)
+                    SirstrapConfiguration.SirHurtPath = sirHurtPath;
 
                 File.WriteAllLines(settingsPath, new List<string>
                 {

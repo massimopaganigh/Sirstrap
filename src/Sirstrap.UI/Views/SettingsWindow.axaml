@@ -6,10 +6,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
     Width="400"
-    Height="230"
+    Height="270"
     mc:Ignorable="d"
     CanResize="False"
-    d:DesignHeight="230"
+    d:DesignHeight="270"
     d:DesignWidth="400"
     ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/favicon.ico"
@@ -57,6 +57,7 @@
     </Window.Styles>
     <Grid Margin="10">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -143,8 +144,24 @@
             CornerRadius="999"
             DataContext="{Binding Settings}"
             Text="{Binding RobloxCdnUri}" />
-        <Border
+        <TextBlock
             Grid.Row="5"
+            Grid.Column="0"
+            Margin="0,10,10,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="SirHurt Path:" />
+        <TextBox
+            Grid.Row="5"
+            Grid.Column="1"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            Text="{Binding SirHurtPath}" />
+        <Border
+            Grid.Row="6"
             Grid.Column="1"
             Margin="0,10,0,0"
             BorderBrush="#40FFFFFF"
