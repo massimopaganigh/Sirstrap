@@ -186,7 +186,7 @@
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(Path.Combine(logsDirectoryPath, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
 
-                SirstrapConfigurationService.LoadConfiguration();
+                SirstrapConfigurationService.LoadSettings();
 
                 var args = Program.Args ?? [];
 
