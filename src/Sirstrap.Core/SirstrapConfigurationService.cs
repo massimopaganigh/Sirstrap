@@ -1,6 +1,4 @@
-﻿using Sirstrap.Core.Services;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     public static class SirstrapConfigurationService
     {
@@ -49,11 +47,13 @@ namespace Sirstrap.Core
                     string trimmedTrimmedLineKey = trimmedLineParts[0].Trim();
                     string trimmedTrimmedLineValue = trimmedLineParts[1].Trim();
 
-                    if (string.IsNullOrEmpty(trimmedTrimmedLineKey)
-                        || string.IsNullOrEmpty(trimmedTrimmedLineValue))
+                    if (string.IsNullOrEmpty(trimmedTrimmedLineKey))
                         continue;
 
                     keys.Add(trimmedTrimmedLineKey);
+
+                    if (string.IsNullOrEmpty(trimmedTrimmedLineValue))
+                        continue;
 
                     _ = trimmedTrimmedLineKey switch
                     {
