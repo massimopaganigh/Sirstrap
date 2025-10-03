@@ -2,126 +2,130 @@
 {
     public static class SirstrapConfigurationService
     {
-        public static void SaveConfiguration()
+        private static object? Set(Action action)
         {
-            string configurationPath = GetConfigurationPath();
+            action();
 
-            try
-            {
-                List<string> lines =
-                [
-                    $"ChannelName={SirstrapConfiguration.ChannelName}",
-                    $"MultiInstance={SirstrapConfiguration.MultiInstance}",
-                    $"RobloxApi={SirstrapConfiguration.RobloxApi}",
-                    $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
-                    $"# WIP",
-                    $"Incognito={SirstrapConfiguration.Incognito}",
-                    $"AutoUpdate={SirstrapConfiguration.AutoUpdate}"
-                ];
-
-                File.WriteAllLines(configurationPath, lines);
-
-                LoadConfiguration();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[!] Configuration saving exception: {0}", ex.Message);
-            }
+            return null;
         }
 
-        public static string GetConfigurationPath()
+        public static string GetSettingsPath()
         {
-            string configurationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
+            var settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
 
-            Directory.CreateDirectory(configurationPath);
+            if (!Directory.Exists(settingsPath))
+                Directory.CreateDirectory(settingsPath);
 
-            return Path.Combine(configurationPath, "settings.ini");
+            return Path.Combine(settingsPath, "settings.ini");
         }
 
-        public static void LoadConfiguration()
+        public static void LoadSettings(string? settingsPath = null)
         {
-            string configurationPath = GetConfigurationPath();
-            HashSet<string> keys = new(StringComparer.OrdinalIgnoreCase);
-            bool toUpdate = false;
-
             try
             {
-                if (File.Exists(configurationPath))
+                settingsPath ??= GetSettingsPath();
+
+                if (!File.Exists(settingsPath))
+                    SaveSettings();
+
+                var lines = File.ReadAllLines(settingsPath);
+                var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var line in lines)
                 {
-                    string[] lines = File.ReadAllLines(configurationPath);
+                    var trimmedLine = line.Trim();
 
-                    foreach (string line in lines)
+                    if (string.IsNullOrEmpty(trimmedLine)
+                        || trimmedLine.StartsWith('#'))
+                        continue;
+
+                    var trimmedLineParts = trimmedLine.Split('=', 2);
+
+                    if (trimmedLineParts.Length != 2)
+                        continue;
+
+                    string trimmedTrimmedLineKey = trimmedLineParts[0].Trim();
+                    string trimmedTrimmedLineValue = trimmedLineParts[1].Trim();
+
+                    if (string.IsNullOrEmpty(trimmedTrimmedLineKey))
+                        continue;
+
+                    keys.Add(trimmedTrimmedLineKey);
+
+                    if (string.IsNullOrEmpty(trimmedTrimmedLineValue))
+                        continue;
+
+                    _ = trimmedTrimmedLineKey switch
                     {
-                        string trimmedLine = line.Trim();
-
-                        if (string.IsNullOrEmpty(trimmedLine)
-                            || trimmedLine.StartsWith('#'))
-                            continue;
-
-                        string[] parts = trimmedLine.Split('=', 2);
-
-                        if (parts.Length != 2)
-                            continue;
-
-                        string trimmedKey = parts[0].Trim();
-                        string trimmedValue = parts[1].Trim();
-
-                        if (string.IsNullOrEmpty(trimmedKey)
-                            || string.IsNullOrEmpty(trimmedValue))
-                            continue;
-
-                        keys.Add(trimmedKey);
-
-                        switch (trimmedKey)
+                        "AutoUpdate" => Set(() =>
                         {
-                            case "ChannelName":
-                                SirstrapConfiguration.ChannelName = trimmedValue;
-                                break;
-                            case "MultiInstance":
-                                if (bool.TryParse(trimmedValue, out bool multiInstance))
-                                    SirstrapConfiguration.MultiInstance = multiInstance;
-                                break;
-                            case "RobloxCdnUri":
-                                SirstrapConfiguration.RobloxCdnUri = trimmedValue;
-                                break;
-                            case "RobloxApi":
-                                if (bool.TryParse(trimmedValue, out bool safeMode))
-                                    SirstrapConfiguration.RobloxApi = safeMode;
-                                break;
-                            case "Incognito":
-                                if (bool.TryParse(trimmedValue, out bool incognitoMode))
-                                    SirstrapConfiguration.Incognito = incognitoMode;
-                                break;
-                            case "AutoUpdate":
-                                if (bool.TryParse(trimmedValue, out bool autoUpdate))
-                                    SirstrapConfiguration.AutoUpdate = autoUpdate;
-                                break;
-                            default:
-                                Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedKey, trimmedValue);
-                                break;
-                        }
-                    }
+                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
+                                SirstrapConfiguration.AutoUpdate = v;
+                        }),
+                        "MultiInstance" => Set(() =>
+                        {
+                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
+                                SirstrapConfiguration.MultiInstance = v;
+                        }),
+                        "Incognito" => Set(() =>
+                        {
+                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
+                                SirstrapConfiguration.Incognito = v;
+                        }),
+                        "RobloxApi" => Set(() =>
+                        {
+                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
+                                SirstrapConfiguration.RobloxApi = v;
+                        }),
+                        "ChannelName" => Set(() => SirstrapConfiguration.ChannelName = trimmedTrimmedLineValue),
+                        "RobloxCdnUri" => Set(() => SirstrapConfiguration.RobloxCdnUri = trimmedTrimmedLineValue),
+                        "SirHurtPath" => Set(() => SirstrapConfiguration.SirHurtPath = trimmedTrimmedLineValue),
+                        _ => Set(() => Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedTrimmedLineKey, trimmedTrimmedLineValue))
+                    };
+                }
 
-                    if (!keys.Contains("ChannelName")
-                        || !keys.Contains("MultiInstance")
-                        || !keys.Contains("RobloxApi")
-                        || !keys.Contains("RobloxCdnUri")
-                        || !keys.Contains("Incognito")
-                        || !keys.Contains("AutoUpdate"))
-                        toUpdate = true;
-
-                    if (toUpdate)
-                        SaveConfiguration();
+                if (keys.Count != 7)
+                {
+                    SaveSettings();
 
                     return;
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "[*] Configuration loading exception: {0}", ex.Message);
+                Log.Error(ex, "An error occurred while trying to load the settings: {0}.", ex.Message);
             }
+        }
 
-            SaveConfiguration();
+        public static void SaveSettings(string? settingsPath = null)
+        {
+
+            try
+            {
+                settingsPath ??= GetSettingsPath();
+
+                var (result, sirHurtPath) = SirHurtService.GetSirHurtPath();
+
+                if (result)
+                    SirstrapConfiguration.SirHurtPath = sirHurtPath;
+
+                File.WriteAllLines(settingsPath, new List<string>
+                {
+                    $"AutoUpdate={SirstrapConfiguration.AutoUpdate}",
+                    $"MultiInstance={SirstrapConfiguration.MultiInstance}",
+                    $"Incognito={SirstrapConfiguration.Incognito}",
+                    $"RobloxApi={SirstrapConfiguration.RobloxApi}",
+                    $"ChannelName={SirstrapConfiguration.ChannelName}",
+                    $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
+                    $"SirHurtPath={SirstrapConfiguration.SirHurtPath}"
+                });
+
+                LoadSettings();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "An error occurred while trying to save the settings: {0}.", ex.Message);
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ global using Serilog.Configuration;
 global using Serilog.Core;
 global using Serilog.Events;
 global using Sirstrap.Core.Extensions;
+global using Sirstrap.Core.Services;
 global using System.Diagnostics;
 global using System.IO.Compression;
 global using System.Security.Principal;
