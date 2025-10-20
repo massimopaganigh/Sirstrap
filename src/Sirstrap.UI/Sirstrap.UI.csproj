@@ -31,11 +31,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
 	</ItemGroup>
-	<ItemGroup>
-	  <Compile Update="Views\SettingsWindow.axaml.cs">
-	    <DependentUpon>SettingsWindow.axaml</DependentUpon>
-	  </Compile>
-	</ItemGroup>
 	<Target Name="MoveAvaloniaLibsToBindir" AfterTargets="Publish">
 		<ItemGroup>
 			<AvaloniaLibs Include="$(PublishDir)av_libglesv2.dll" />

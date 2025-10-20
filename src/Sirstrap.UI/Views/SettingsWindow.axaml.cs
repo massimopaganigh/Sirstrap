@@ -1,6 +1,6 @@
 namespace Sirstrap.UI.Views
 {
-    public partial class SettingsWindow : Window
+    public partial class SettingsWindow : ViewBase
     {
         public SettingsWindow() => InitializeComponent();
     }

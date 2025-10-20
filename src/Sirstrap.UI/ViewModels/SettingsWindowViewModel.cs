@@ -1,6 +1,4 @@
-﻿using Sirstrap.UI.Models;
-
-namespace Sirstrap.UI.ViewModels
+﻿namespace Sirstrap.UI.ViewModels
 {
     public partial class SettingsWindowViewModel : ViewModelBase
     {
@@ -12,7 +10,7 @@ namespace Sirstrap.UI.ViewModels
         {
             Settings.Set();
 
-            GetWindow<SettingsWindow>()?.Close();
+            CloseSpecificWindow<SettingsWindow>();
         }
     }
 }
