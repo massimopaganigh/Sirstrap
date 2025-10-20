@@ -271,6 +271,54 @@ exit
         }
 
         /// <summary>
+        /// Gets the changelog for the latest release from GitHub.
+        /// </summary>
+        /// <returns>The changelog text, or an empty string if not found.</returns>
+        public async Task<string> GetLatestChangelogAsync()
+        {
+            try
+            {
+                var jsonDocument = JsonDocument.Parse(await _httpClient.GetStringAsync(SIRSTRAP_API));
+                var rootElement = jsonDocument.RootElement;
+                Version latestVersion = new("0.0.0.0");
+                var latestChangelog = string.Empty;
+                var currentChannel = GetCurrentChannel();
+
+                foreach (JsonElement jsonElement in rootElement.EnumerateArray())
+                {
+                    if (IsReleaseDraft(jsonElement))
+                        continue;
+
+                    var tagName = GetReleaseTagName(jsonElement);
+
+                    if (string.IsNullOrWhiteSpace(tagName))
+                        continue;
+
+                    var (versionPart, channelPart) = ParseTagName(tagName);
+
+                    if (!Version.TryParse(versionPart, out Version? version) || !string.Equals(channelPart, currentChannel, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (version > latestVersion)
+                    {
+                        latestVersion = version;
+
+                        if (jsonElement.TryGetProperty("body", out JsonElement bodyElement))
+                            latestChangelog = bodyElement.GetString() ?? string.Empty;
+                    }
+                }
+
+                return latestChangelog;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(GetLatestChangelogAsync));
+
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Updates the Sirstrap application to the latest version.
         /// </summary>
         /// <param name="sirstrapType">The type of Sirstrap to update.</param>
