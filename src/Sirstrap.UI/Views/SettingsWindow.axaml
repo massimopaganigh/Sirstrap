@@ -5,14 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
-    Width="400"
-    Height="270"
     mc:Ignorable="d"
     CanResize="False"
-    d:DesignHeight="270"
-    d:DesignWidth="400"
     ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/favicon.ico"
+    SizeToContent="WidthAndHeight"
     Opacity="0.5"
     Title="Settings"
     TransparencyLevelHint="AcrylicBlur"
@@ -64,106 +61,143 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <TextBlock
-            Grid.Row="0"
-            Grid.Column="0"
             Grid.ColumnSpan="2"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Text="Settings" />
+            Text="Settings"
+            FontSize="18" />
+        <TextBlock
+            Grid.Row="1"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Auto Update:"
+            FontSize="14" />
         <CheckBox
             Grid.Row="1"
-            Grid.Column="0"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,5,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Content="Auto Update"
             CornerRadius="999"
             DataContext="{Binding Settings}"
             IsChecked="{Binding AutoUpdate}" />
-        <CheckBox
-            Grid.Row="1"
-            Grid.Column="1"
-            HorizontalAlignment="Left"
+        <TextBlock
+            Grid.Row="2"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Content="Incognito"
-            CornerRadius="999"
-            DataContext="{Binding Settings}"
-            IsChecked="{Binding Incognito}" />
+            Text="Multi Instance:"
+            FontSize="14" />
         <CheckBox
             Grid.Row="2"
-            Grid.Column="0"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,5,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Content="Multi Instance"
             CornerRadius="999"
             DataContext="{Binding Settings}"
             IsChecked="{Binding MultiInstance}" />
+        <TextBlock
+            Grid.Row="3"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Incognito:"
+            FontSize="14" />
         <CheckBox
-            Grid.Row="2"
+            Grid.Row="3"
             Grid.Column="1"
+            Height="32"
+            Margin="15,5,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Content="Roblox API"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            IsChecked="{Binding Incognito}" />
+        <TextBlock
+            Grid.Row="4"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Roblox API:"
+            FontSize="14" />
+        <CheckBox
+            Grid.Row="4"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,5,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
             CornerRadius="999"
             DataContext="{Binding Settings}"
             IsChecked="{Binding RobloxApi}" />
         <TextBlock
-            Grid.Row="3"
-            Grid.Column="0"
-            Margin="0,10,10,0"
+            Grid.Row="5"
+            Margin="0,10,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Text="Channel Name:" />
+            Text="Channel Name:"
+            FontSize="14" />
         <TextBox
-            Grid.Row="3"
+            Grid.Row="5"
             Grid.Column="1"
-            Margin="0,10,0,0"
+            Height="32"
+            Margin="10,10,0,0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CornerRadius="999"
             DataContext="{Binding Settings}"
             Text="{Binding ChannelName}" />
         <TextBlock
-            Grid.Row="4"
-            Grid.Column="0"
-            Margin="0,10,10,0"
+            Grid.Row="6"
+            Margin="0,10,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Text="Roblox CDN URI:" />
+            Text="Roblox CDN URI:"
+            FontSize="14" />
         <TextBox
-            Grid.Row="4"
+            Grid.Row="6"
             Grid.Column="1"
-            Margin="0,10,0,0"
+            Height="32"
+            Margin="10,10,0,0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CornerRadius="999"
             DataContext="{Binding Settings}"
             Text="{Binding RobloxCdnUri}" />
         <TextBlock
-            Grid.Row="5"
-            Grid.Column="0"
-            Margin="0,10,10,0"
+            Grid.Row="7"
+            Margin="0,10,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Text="SirHurt Path:" />
+            Text="SirHurt Path:"
+            FontSize="14" />
         <TextBox
-            Grid.Row="5"
+            Grid.Row="7"
             Grid.Column="1"
-            Margin="0,10,0,0"
+            Height="32"
+            Margin="10,10,0,0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CornerRadius="999"
             DataContext="{Binding Settings}"
             Text="{Binding SirHurtPath}" />
         <Border
-            Grid.Row="6"
+            Grid.Row="8"
             Grid.Column="1"
-            Margin="0,10,0,0"
+            Height="32"
+            Margin="10,10,0,0"
             BorderBrush="#40FFFFFF"
             BorderThickness="1"
             Classes="glassBorder"
