@@ -31,7 +31,7 @@
                         scaleTransform.ScaleY = 1.0 - (0.9 * easedProgress);
                     }
 
-                    Opacity = 1 * (1 - progress);
+                    Opacity = 0.5 * (1 - progress);
                 });
 
                 await Task.Delay(stepDelay);
@@ -57,7 +57,7 @@
                         scaleTransform.ScaleY = 0.1 + (0.9 * easedProgress);
                     }
 
-                    Opacity = 1 * progress;
+                    Opacity = 0.5 * progress;
                 });
 
                 await Task.Delay(stepDelay);
