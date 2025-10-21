@@ -9,6 +9,9 @@
         private string _channelName = string.Empty;
 
         [ObservableProperty]
+        private string _fontFamily = "Minecraft";
+
+        [ObservableProperty]
         private bool _incognito = false;
 
         [ObservableProperty]
@@ -29,6 +32,7 @@
 
             AutoUpdate = SirstrapConfiguration.AutoUpdate;
             ChannelName = SirstrapConfiguration.ChannelName;
+            FontFamily = SirstrapConfiguration.FontFamily;
             Incognito = SirstrapConfiguration.Incognito;
             MultiInstance = SirstrapConfiguration.MultiInstance;
             RobloxApi = SirstrapConfiguration.RobloxApi;
@@ -40,6 +44,7 @@
         {
             SirstrapConfiguration.AutoUpdate = AutoUpdate;
             SirstrapConfiguration.ChannelName = ChannelName;
+            SirstrapConfiguration.FontFamily = FontFamily;
             SirstrapConfiguration.Incognito = Incognito;
             SirstrapConfiguration.MultiInstance = MultiInstance;
             SirstrapConfiguration.RobloxApi = RobloxApi;
