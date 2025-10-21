@@ -125,7 +125,14 @@
             VerticalAlignment="Stretch"
             CornerRadius="999"
             ItemsSource="{Binding Fonts}"
-            SelectedItem="{Binding Settings.FontFamily}" />
+            SelectedItem="{Binding Settings.FontFamily}">
+            <ComboBox.Styles>
+                <Style Selector="ComboBox /template/ Popup">
+                    <Setter Property="HorizontalOffset" Value="0" />
+                    <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                </Style>
+            </ComboBox.Styles>
+        </ComboBox>
         <TextBlock
             Grid.Row="4"
             Margin="0,10,0,0"
