@@ -6,6 +6,8 @@
 
         public static string ChannelName { get; set; } = "-beta";
 
+        public static string FontFamily { get; set; } = "Minecraft";
+
         /// <summary>
         /// WIP
         /// </summary>

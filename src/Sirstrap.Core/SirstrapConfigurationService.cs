@@ -78,13 +78,14 @@
                                 SirstrapConfiguration.RobloxApi = v;
                         }),
                         "ChannelName" => Set(() => SirstrapConfiguration.ChannelName = trimmedTrimmedLineValue),
+                        "FontFamily" => Set(() => SirstrapConfiguration.FontFamily = trimmedTrimmedLineValue),
                         "RobloxCdnUri" => Set(() => SirstrapConfiguration.RobloxCdnUri = trimmedTrimmedLineValue),
                         "SirHurtPath" => Set(() => SirstrapConfiguration.SirHurtPath = trimmedTrimmedLineValue),
                         _ => Set(() => Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedTrimmedLineKey, trimmedTrimmedLineValue))
                     };
                 }
 
-                if (keys.Count != 7)
+                if (keys.Count != 8)
                 {
                     SaveSettings();
 
@@ -116,6 +117,7 @@
                     $"Incognito={SirstrapConfiguration.Incognito}",
                     $"RobloxApi={SirstrapConfiguration.RobloxApi}",
                     $"ChannelName={SirstrapConfiguration.ChannelName}",
+                    $"FontFamily={SirstrapConfiguration.FontFamily}",
                     $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
                     $"SirHurtPath={SirstrapConfiguration.SirHurtPath}"
                 });
