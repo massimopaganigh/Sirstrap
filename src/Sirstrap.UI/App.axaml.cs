@@ -45,29 +45,8 @@ namespace Sirstrap.UI
                     fontFamily = new FontFamily(fontFamilyName);
                 }
 
-                var textBlockStyle = app.Styles.OfType<Style>()
-                    .FirstOrDefault(s => s.Selector?.ToString() == "TextBlock");
-                if (textBlockStyle != null)
-                {
-                    textBlockStyle.Setters.Clear();
-                    textBlockStyle.Setters.Add(new Setter(TextBlock.FontFamilyProperty, fontFamily));
-                }
-
-                var checkBoxStyle = app.Styles.OfType<Style>()
-                    .FirstOrDefault(s => s.Selector?.ToString() == "CheckBox");
-                if (checkBoxStyle != null)
-                {
-                    checkBoxStyle.Setters.Clear();
-                    checkBoxStyle.Setters.Add(new Setter(CheckBox.FontFamilyProperty, fontFamily));
-                }
-
-                var textBoxStyle = app.Styles.OfType<Style>()
-                    .FirstOrDefault(s => s.Selector?.ToString() == "TextBox");
-                if (textBoxStyle != null)
-                {
-                    textBoxStyle.Setters.Clear();
-                    textBoxStyle.Setters.Add(new Setter(TextBox.FontFamilyProperty, fontFamily));
-                }
+                // Update the dynamic resource
+                app.Resources["AppFontFamily"] = fontFamily;
             }
             catch (Exception ex)
             {
