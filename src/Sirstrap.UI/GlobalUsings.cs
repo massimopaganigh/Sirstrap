@@ -6,7 +6,6 @@ global using Avalonia.Data.Core.Plugins;
 global using Avalonia.Interactivity;
 global using Avalonia.Markup.Xaml;
 global using Avalonia.Media;
-global using Avalonia.Platform;
 global using Avalonia.Styling;
 global using Avalonia.Threading;
 global using CommunityToolkit.Mvvm.ComponentModel;

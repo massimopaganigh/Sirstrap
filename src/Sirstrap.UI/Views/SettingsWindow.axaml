@@ -124,7 +124,7 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CornerRadius="999"
-            ItemsSource="{Binding AvailableFonts}"
+            ItemsSource="{Binding Fonts}"
             SelectedItem="{Binding Settings.FontFamily}" />
         <TextBlock
             Grid.Row="4"

@@ -3,35 +3,30 @@
     public partial class SettingsWindowViewModel : ViewModelBase
     {
         [ObservableProperty]
+        private ObservableCollection<string> _fonts = [];
+
+        [ObservableProperty]
         private Settings _settings = new();
 
-        public ObservableCollection<string> AvailableFonts { get; }
+        public SettingsWindowViewModel() => GetFonts();
 
-        public SettingsWindowViewModel()
+        private void GetFonts()
         {
-            AvailableFonts = new ObservableCollection<string>(GetSystemFonts());
-        }
-
-        private IEnumerable<string> GetSystemFonts()
-        {
-            var fonts = new List<string> { "Minecraft" };
-
             try
             {
-                var systemFonts = FontManager.Current.SystemFonts
-                    .Select(f => f.Name)
-                    .Distinct()
-                    .OrderBy(f => f)
-                    .ToList();
+                var fonts = new List<string>
+                {
+                    "Minecraft"
+                };
 
-                fonts.AddRange(systemFonts);
+                fonts.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
+
+                Fonts = new ObservableCollection<string>(fonts);
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Failed to retrieve system fonts: {0}", ex.Message);
+                Log.Error(ex, nameof(GetFonts));
             }
-
-            return fonts;
         }
 
         [RelayCommand]

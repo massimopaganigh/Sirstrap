@@ -10,6 +10,30 @@ namespace Sirstrap.UI
                 BindingPlugins.DataValidators.Remove(plugin);
         }
 
+        public static void ApplyFontFamily()
+        {
+            try
+            {
+                if (Current is not App app)
+                    return;
+
+                var fontFamilyName = SirstrapConfiguration.FontFamily;
+
+                FontFamily fontFamily;
+
+                if (fontFamilyName == "Minecraft")
+                    fontFamily = new FontFamily("avares://Sirstrap/Assets#Minecraft");
+                else
+                    fontFamily = new FontFamily(fontFamilyName);
+
+                app.Resources["AppFontFamily"] = fontFamily;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(ApplyFontFamily));
+            }
+        }
+
         public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
         public override void OnFrameworkInitializationCompleted()
@@ -24,34 +48,6 @@ namespace Sirstrap.UI
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        public static void ApplyFontFamily()
-        {
-            try
-            {
-                var app = Current as App;
-                if (app == null) return;
-
-                var fontFamilyName = SirstrapConfiguration.FontFamily;
-
-                FontFamily fontFamily;
-                if (fontFamilyName == "Minecraft")
-                {
-                    fontFamily = new FontFamily("avares://Sirstrap/Assets#Minecraft");
-                }
-                else
-                {
-                    fontFamily = new FontFamily(fontFamilyName);
-                }
-
-                // Update the dynamic resource
-                app.Resources["AppFontFamily"] = fontFamily;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to apply font family: {0}", ex.Message);
-            }
         }
     }
 }

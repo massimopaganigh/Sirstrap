@@ -62,6 +62,8 @@
                             if (bool.TryParse(trimmedTrimmedLineValue, out var v))
                                 SirstrapConfiguration.AutoUpdate = v;
                         }),
+                        "ChannelName" => Set(() => SirstrapConfiguration.ChannelName = trimmedTrimmedLineValue),
+                        "FontFamily" => Set(() => SirstrapConfiguration.FontFamily = trimmedTrimmedLineValue),
                         "MultiInstance" => Set(() =>
                         {
                             if (bool.TryParse(trimmedTrimmedLineValue, out var v))
@@ -77,8 +79,6 @@
                             if (bool.TryParse(trimmedTrimmedLineValue, out var v))
                                 SirstrapConfiguration.RobloxApi = v;
                         }),
-                        "ChannelName" => Set(() => SirstrapConfiguration.ChannelName = trimmedTrimmedLineValue),
-                        "FontFamily" => Set(() => SirstrapConfiguration.FontFamily = trimmedTrimmedLineValue),
                         "RobloxCdnUri" => Set(() => SirstrapConfiguration.RobloxCdnUri = trimmedTrimmedLineValue),
                         "SirHurtPath" => Set(() => SirstrapConfiguration.SirHurtPath = trimmedTrimmedLineValue),
                         _ => Set(() => Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedTrimmedLineKey, trimmedTrimmedLineValue))
@@ -113,11 +113,11 @@
                 File.WriteAllLines(settingsPath, new List<string>
                 {
                     $"AutoUpdate={SirstrapConfiguration.AutoUpdate}",
+                    $"ChannelName={SirstrapConfiguration.ChannelName}",
+                    $"FontFamily={SirstrapConfiguration.FontFamily}",
                     $"MultiInstance={SirstrapConfiguration.MultiInstance}",
                     $"Incognito={SirstrapConfiguration.Incognito}",
                     $"RobloxApi={SirstrapConfiguration.RobloxApi}",
-                    $"ChannelName={SirstrapConfiguration.ChannelName}",
-                    $"FontFamily={SirstrapConfiguration.FontFamily}",
                     $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
                     $"SirHurtPath={SirstrapConfiguration.SirHurtPath}"
                 });
