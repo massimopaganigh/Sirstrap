@@ -17,6 +17,15 @@
         [ObservableProperty]
         private bool _robloxApi = false;
 
+        partial void OnMultiInstanceChanged(bool value)
+        {
+            // Disable Incognito when MultiInstance is disabled
+            if (!value && Incognito)
+            {
+                Incognito = false;
+            }
+        }
+
         [ObservableProperty]
         private string _robloxCdnUri = "https://setup.rbxcdn.com";
 

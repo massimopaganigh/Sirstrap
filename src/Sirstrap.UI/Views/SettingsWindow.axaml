@@ -124,7 +124,8 @@
             VerticalAlignment="Center"
             CornerRadius="999"
             DataContext="{Binding Settings}"
-            IsChecked="{Binding Incognito}" />
+            IsChecked="{Binding Incognito}"
+            IsEnabled="{Binding MultiInstance}" />
         <TextBlock
             Grid.Row="4"
             Margin="0,5,0,0"
