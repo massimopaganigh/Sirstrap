@@ -1,5 +1,8 @@
 ﻿using Serilog;
 using Sirstrap.Core;
+using Sirstrap.Core.Enums;
+using Sirstrap.Core.Extensions;
+using Sirstrap.Core.Services;
 
 namespace Sirstrap.CLI
 {
@@ -33,8 +36,8 @@ namespace Sirstrap.CLI
  ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {oSVersion}
                     ███    ███                            ███    ███ by SirHurt CSR Team
 ");
-                SirstrapConfigurationService.LoadConfiguration();
-                RegistryManager.RegisterProtocolHandler("roblox-player", args);
+                SirstrapConfigurationService.GetSettings();
+                RegistryService.RegisterProtocolHandler("roblox-player", args);
 
                 await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
             }

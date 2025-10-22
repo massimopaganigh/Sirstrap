@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core
+﻿namespace Sirstrap.Core.Enums
 {
     public enum SirstrapType
     {

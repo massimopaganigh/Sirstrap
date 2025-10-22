@@ -2,12 +2,11 @@ namespace Sirstrap.UI
 {
     public partial class App : Application
     {
-        [RequiresUnreferencedCode("Calls Avalonia.Data.Core.Plugins.BindingPlugins.DataValidators")]
         private void DisableAvaloniaDataAnnotationValidation()
         {
-            DataAnnotationsValidationPlugin[] dataValidationPluginsToRemove = [.. BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>()];
+            var dataValidationPluginsToRemove = BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
 
-            foreach (DataAnnotationsValidationPlugin plugin in dataValidationPluginsToRemove)
+            foreach (var plugin in dataValidationPluginsToRemove)
                 BindingPlugins.DataValidators.Remove(plugin);
         }
 
@@ -19,15 +18,7 @@ namespace Sirstrap.UI
             {
                 DisableAvaloniaDataAnnotationValidation();
 
-                MainWindowViewModel mwvm = new();
-                MainWindow mw = new()
-                {
-                    DataContext = mwvm,
-                };
-
-                mwvm.SetMainWindow(mw);
-
-                desktop.MainWindow = mw;
+                desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
             }
 
             base.OnFrameworkInitializationCompleted();

@@ -9,6 +9,12 @@
         private const string ROBLOX_MUTEX_NAME = "ROBLOX_singletonMutex";
         private static Mutex? _robloxMutex;
         private static readonly Lock _lockObject = new();
+        private static InstanceType _currentInstanceType = InstanceType.None;
+
+        /// <summary>
+        /// Occurs when the instance type changes.
+        /// </summary>
+        public static event EventHandler<InstanceType>? InstanceTypeChanged;
 
         /// <summary>
         /// Gets a value indicating whether the singleton has been successfully captured.
@@ -17,6 +23,35 @@
         /// <c>true</c> if the mutex has been captured; otherwise, <c>false</c>.
         /// </value>
         public static bool HasCapturedSingleton => _robloxMutex != null;
+
+        /// <summary>
+        /// Gets the current instance type (Master, Slave, or None).
+        /// </summary>
+        /// <value>
+        /// The current instance type.
+        /// </value>
+        public static InstanceType CurrentInstanceType
+        {
+            get
+            {
+                lock (_lockObject)
+                {
+                    return _currentInstanceType;
+                }
+            }
+            private set
+            {
+                lock (_lockObject)
+                {
+                    if (_currentInstanceType != value)
+                    {
+                        _currentInstanceType = value;
+                        Log.Information("[*] Instance type changed to: {0}", value);
+                        InstanceTypeChanged?.Invoke(null, value);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Attempts to capture the Roblox singleton by acquiring the mutex.
@@ -45,6 +80,9 @@
                     {
                         Log.Information("[*] Successfully captured Roblox singleton.");
 
+                        // This instance becomes the Master
+                        CurrentInstanceType = InstanceType.Master;
+
                         CloseAllRobloxInstances();
 
                         return true;
@@ -53,6 +91,9 @@
                     {
                         Log.Warning("[!] Cannot to capture singleton - another instance is already running.");
 
+                        // This instance becomes a Slave
+                        CurrentInstanceType = InstanceType.Slave;
+
                         _robloxMutex.Dispose();
                         _robloxMutex = null;
                     }
@@ -60,6 +101,9 @@
                 catch (Exception ex)
                 {
                     Log.Error(ex, "[!] Error occurred while attempting to capture singleton: {0}.", ex.Message);
+
+                    // On error, mark as Slave (failed to capture)
+                    CurrentInstanceType = InstanceType.Slave;
                 }
 
                 return false;
@@ -89,6 +133,9 @@
                 {
                     _robloxMutex.Dispose();
                     _robloxMutex = null;
+
+                    // Reset instance type when releasing singleton
+                    CurrentInstanceType = InstanceType.None;
 
                     Log.Information("[*] Successfully released Roblox singleton.");
 

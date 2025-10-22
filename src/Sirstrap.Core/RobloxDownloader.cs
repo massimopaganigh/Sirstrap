@@ -1,8 +1,4 @@
-﻿using Sirstrap.Core.Interfaces;
-using Sirstrap.Core.Models;
-using Sirstrap.Core.Services;
-
-namespace Sirstrap.Core
+﻿namespace Sirstrap.Core
 {
     /// <summary>
     /// Orchestrates the complete Roblox application deployment process, including 
@@ -10,9 +6,8 @@ namespace Sirstrap.Core
     /// </summary>
     public class RobloxDownloader
     {
-        private readonly RobloxVersionService _robloxVersionService;
-        private RobloxDownloadService _robloxDownloadService;
-        private readonly IRobloxDownloadConfigurationService _robloxDownloadConfigurationService = new RobloxDownloadConfigurationService();
+        private readonly VersionService _robloxVersionService;
+        private readonly Services.DownloadService _packageManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobloxDownloader"/> class.
@@ -27,7 +22,8 @@ namespace Sirstrap.Core
                 Timeout = TimeSpan.FromMinutes(5)
             };
 
-            _robloxVersionService = new RobloxVersionService(httpClient);
+            _robloxVersionService = new VersionService(httpClient);
+            _packageManager = new Services.DownloadService(httpClient);
         }
 
         /// <summary>
@@ -54,7 +50,7 @@ namespace Sirstrap.Core
 
                 await updateService.UpdateAsync(sirstrapType, args);
 
-                var configuration = _robloxDownloadConfigurationService.ParseConfiguration(args);
+                var configuration = ConfigurationService.CreateConfigurationFromArguments(ConfigurationService.ParseConfiguration(args));
 
                 if (!await InitializeDownloadAsync(configuration).ConfigureAwait(false))
                 {
@@ -71,7 +67,7 @@ namespace Sirstrap.Core
                     }
                 }
 
-                _robloxDownloadConfigurationService.ClearCacheDirectory();
+                Configuration.ClearCacheDirectory();
 
                 await DownloadAndProcessFilesAsync(configuration).ConfigureAwait(false);
 
@@ -98,11 +94,11 @@ namespace Sirstrap.Core
         /// retrieve the latest version from the version manager. It also ensures the version
         /// string is in the normalized format.
         /// </remarks>
-        private async Task<bool> InitializeDownloadAsync(RobloxDownloadConfiguration configuration)
+        private async Task<bool> InitializeDownloadAsync(Configuration configuration)
         {
             if (string.IsNullOrEmpty(configuration.VersionHash))
             {
-                configuration.VersionHash = await _robloxVersionService.GetLatestVersionAsync();
+                configuration.VersionHash = await _robloxVersionService.GetVersionAsync();
 
                 if (string.IsNullOrEmpty(configuration.VersionHash))
                 {
@@ -124,9 +120,9 @@ namespace Sirstrap.Core
         /// Currently only checks for Windows Player installations by verifying if the
         /// version directory exists.
         /// </remarks>
-        private static bool IsAlreadyInstalled(RobloxDownloadConfiguration configuration)
+        private static bool IsAlreadyInstalled(Configuration configuration)
         {
-            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetExtractionPath(configuration.VersionHash));
+            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(Directories.GetExtractionPath(configuration.VersionHash));
         }
 
         /// <summary>
@@ -141,7 +137,7 @@ namespace Sirstrap.Core
         /// Currently only supports launching the Windows Player version.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static bool LaunchApplication(RobloxDownloadConfiguration configuration)
+        private static bool LaunchApplication(Configuration configuration)
         {
             return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && RobloxLauncher.Launch(configuration);
         }
@@ -155,17 +151,15 @@ namespace Sirstrap.Core
         /// For macOS binaries, downloads the complete ZIP archive directly.
         /// For other platforms, downloads the manifest and processes the individual packages.
         /// </remarks>
-        private async Task DownloadAndProcessFilesAsync(RobloxDownloadConfiguration configuration)
+        private async Task DownloadAndProcessFilesAsync(Configuration configuration)
         {
-            _robloxDownloadService = new RobloxDownloadService(configuration);
-
             if (configuration.IsMacBinary)
             {
-                await _robloxDownloadService.DownloadForMacAsync().ConfigureAwait(false);
+                await _packageManager.Download4MacAsync(configuration).ConfigureAwait(false);
             }
             else
             {
-                await _robloxDownloadService.DownloadForWindowsAsync().ConfigureAwait(false);
+                await _packageManager.Download4WindowsAsync(configuration).ConfigureAwait(false);
             }
         }
 
@@ -178,14 +172,14 @@ namespace Sirstrap.Core
         /// The application is installed from the downloaded ZIP archive and then launched.
         /// If a LaunchUrl is specified, Roblox will be launched directly into that experience.
         /// </remarks>
-        private static void InstallAndLaunchApplication(RobloxDownloadConfiguration configuration)
+        private static void InstallAndLaunchApplication(Configuration configuration)
         {
             if (!configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            Installer.Install(configuration);
+            DownloadService.Install(configuration);
 
             LaunchApplication(configuration);
         }

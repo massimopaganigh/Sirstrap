@@ -7,14 +7,13 @@ namespace Sirstrap.UI
             if (param is null)
                 return null;
 
-            return param switch
-            {
-                MainWindowViewModel => new MainWindow(),
-                _ => new TextBlock
-                {
-                    Text = "Not Found: " + param.GetType().Name
-                }
-            };
+            var name = param.GetType().FullName!.Replace("ViewModel", "View", StringComparison.Ordinal);
+            var type = Type.GetType(name);
+
+            if (type != null)
+                return (Control)Activator.CreateInstance(type)!;
+
+            return new TextBlock { Text = "Not Found: " + name };
         }
 
         public bool Match(object? data) => data is ViewModelBase;
