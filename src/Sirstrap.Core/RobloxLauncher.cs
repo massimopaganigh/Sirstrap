@@ -27,10 +27,7 @@
 
                     if (incognito
                         && SingletonManager.CurrentInstanceType == InstanceType.Master)
-                    {
-                        Log.Information("[*] Incognito mode enabled on Master instance, moving Roblox folder to cache...");
                         IncognitoManager.MoveRobloxFolderToCache();
-                    }
                 }
 
                 ProcessStartInfo robloxPlayerBetaExeStartInfo = new()

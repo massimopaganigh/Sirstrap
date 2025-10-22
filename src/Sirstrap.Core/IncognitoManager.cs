@@ -6,19 +6,34 @@ namespace Sirstrap.Core
     /// </summary>
     public static class IncognitoManager
     {
-        private static readonly string _robloxFolderPath;
         private static readonly string _incognitoCachePath;
-        private static readonly Lock _lockObject = new();
         private static bool _isRobloxFolderMoved = false;
+        private static readonly Lock _lockObject = new();
+        private static readonly string _robloxFolderPath;
 
         static IncognitoManager()
         {
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+
             _robloxFolderPath = Path.Combine(localAppData, "Roblox");
             _incognitoCachePath = Path.Combine(localAppData, "Sirstrap", "IncognitoCache", "Roblox");
 
-            // Subscribe to instance type changes to restore folder when Master is released
             SingletonManager.InstanceTypeChanged += OnInstanceTypeChanged;
+        }
+
+        /// <summary>
+        /// Handles instance type changes to automatically restore the Roblox folder
+        /// when the instance is no longer Master.
+        /// </summary>
+        private static void OnInstanceTypeChanged(object? sender, InstanceType newType)
+        {
+            if (newType != InstanceType.Master
+                && _isRobloxFolderMoved)
+            {
+                Log.Information("[*] Instance type changed from Master to {0}, restoring Roblox folder...", newType);
+
+                RestoreRobloxFolderFromCache();
+            }
         }
 
         /// <summary>
@@ -37,27 +52,29 @@ namespace Sirstrap.Core
                     if (_isRobloxFolderMoved)
                     {
                         Log.Information("[*] Roblox folder already moved to Incognito cache.");
+
                         return true;
                     }
 
                     if (!Directory.Exists(_robloxFolderPath))
                     {
                         Log.Information("[*] Roblox folder does not exist, nothing to move.");
+
                         _isRobloxFolderMoved = false;
+
                         return true;
                     }
 
-                    // Ensure the parent directory exists
-                    string? incognitoCacheParent = Path.GetDirectoryName(_incognitoCachePath);
-                    if (incognitoCacheParent != null && !Directory.Exists(incognitoCacheParent))
-                    {
-                        Directory.CreateDirectory(incognitoCacheParent);
-                    }
+                    var incognitoCacheParent = Path.GetDirectoryName(_incognitoCachePath);
 
-                    // Remove existing cache if present
+                    if (incognitoCacheParent != null
+                        && !Directory.Exists(incognitoCacheParent))
+                        Directory.CreateDirectory(incognitoCacheParent);
+
                     if (Directory.Exists(_incognitoCachePath))
                     {
                         Log.Information("[*] Removing existing Incognito cache...");
+
                         Directory.Delete(_incognitoCachePath, true);
                     }
 
@@ -74,6 +91,7 @@ namespace Sirstrap.Core
                 catch (Exception ex)
                 {
                     Log.Error(ex, "[!] Error occurred while moving Roblox folder to cache: {0}.", ex.Message);
+
                     return false;
                 }
             }
@@ -95,20 +113,23 @@ namespace Sirstrap.Core
                     if (!_isRobloxFolderMoved)
                     {
                         Log.Information("[*] Roblox folder was not moved, nothing to restore.");
+
                         return true;
                     }
 
                     if (!Directory.Exists(_incognitoCachePath))
                     {
                         Log.Warning("[*] Incognito cache does not exist, nothing to restore.");
+
                         _isRobloxFolderMoved = false;
+
                         return true;
                     }
 
-                    // Remove existing Roblox folder if present (shouldn't happen, but just in case)
                     if (Directory.Exists(_robloxFolderPath))
                     {
                         Log.Warning("[*] Roblox folder already exists, removing it before restore...");
+
                         Directory.Delete(_robloxFolderPath, true);
                     }
 
@@ -125,22 +146,9 @@ namespace Sirstrap.Core
                 catch (Exception ex)
                 {
                     Log.Error(ex, "[!] Error occurred while restoring Roblox folder from cache: {0}.", ex.Message);
+
                     return false;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Handles instance type changes to automatically restore the Roblox folder
-        /// when the instance is no longer Master.
-        /// </summary>
-        private static void OnInstanceTypeChanged(object? sender, InstanceType newType)
-        {
-            // Restore folder when instance is no longer Master
-            if (newType != InstanceType.Master && _isRobloxFolderMoved)
-            {
-                Log.Information("[*] Instance type changed from Master to {0}, restoring Roblox folder...", newType);
-                RestoreRobloxFolderFromCache();
             }
         }
     }
