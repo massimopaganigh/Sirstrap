@@ -255,10 +255,6 @@ exit
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Gets the current full version of Sirstrap.
-        /// </summary>
-        /// <returns>The current full version of Sirstrap.</returns>
         public static string GetCurrentFullVersion()
         {
 #if DEBUG
@@ -270,10 +266,6 @@ exit
 #pragma warning restore CS0162
         }
 
-        /// <summary>
-        /// Gets the changelog for the latest release from GitHub.
-        /// </summary>
-        /// <returns>The changelog text, or an empty string if not found.</returns>
         public async Task<string> GetLatestChangelogAsync()
         {
             try
@@ -318,11 +310,6 @@ exit
             }
         }
 
-        /// <summary>
-        /// Updates the Sirstrap application to the latest version.
-        /// </summary>
-        /// <param name="sirstrapType">The type of Sirstrap to update.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task UpdateAsync(SirstrapType sirstrapType, string[] args)
         {
             try

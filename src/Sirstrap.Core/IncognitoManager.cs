@@ -1,9 +1,5 @@
 namespace Sirstrap.Core
 {
-    /// <summary>
-    /// Manages Roblox folder isolation in Incognito mode by moving the Roblox folder
-    /// to a temporary cache location and restoring it when needed.
-    /// </summary>
     public static class IncognitoManager
     {
         private static readonly string _incognitoCachePath;
@@ -21,10 +17,6 @@ namespace Sirstrap.Core
             SingletonManager.InstanceTypeChanged += OnInstanceTypeChanged;
         }
 
-        /// <summary>
-        /// Handles instance type changes to automatically restore the Roblox folder
-        /// when the instance is no longer Master.
-        /// </summary>
         private static void OnInstanceTypeChanged(object? sender, InstanceType newType)
         {
             if (newType != InstanceType.Master
@@ -36,13 +28,6 @@ namespace Sirstrap.Core
             }
         }
 
-        /// <summary>
-        /// Moves the Roblox folder to the Incognito cache location.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if the folder was successfully moved or was already moved;
-        /// <c>false</c> if an error occurred.
-        /// </returns>
         public static bool MoveRobloxFolderToCache()
         {
             lock (_lockObject)
@@ -97,13 +82,6 @@ namespace Sirstrap.Core
             }
         }
 
-        /// <summary>
-        /// Restores the Roblox folder from the Incognito cache location.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if the folder was successfully restored or was already restored;
-        /// <c>false</c> if an error occurred.
-        /// </returns>
         public static bool RestoreRobloxFolderFromCache()
         {
             lock (_lockObject)

@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core.Services
+﻿namespace Sirstrap.Core
 {
     public class SirHurtService
     {

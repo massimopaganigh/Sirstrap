@@ -8,9 +8,6 @@
 
         public static string FontFamily { get; set; } = "Minecraft";
 
-        /// <summary>
-        /// WIP
-        /// </summary>
         public static bool Incognito { get; set; } = false;
 
         public static bool MultiInstance { get; set; } = true;
