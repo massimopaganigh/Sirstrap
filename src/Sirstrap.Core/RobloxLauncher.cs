@@ -28,7 +28,8 @@
                     if (incognito
                         && SingletonManager.CurrentInstanceType == InstanceType.Master)
                     {
-                        //TODO
+                        Log.Information("[*] Incognito mode enabled on Master instance, moving Roblox folder to cache...");
+                        IncognitoManager.MoveRobloxFolderToCache();
                     }
                 }
 
