@@ -16,6 +16,7 @@
             }
 
             bool multiInstance = SirstrapConfiguration.MultiInstance;
+            bool incognito = SirstrapConfiguration.Incognito;
             bool singletonCaptured = false;
 
             try
@@ -24,18 +25,10 @@
                 {
                     singletonCaptured = SingletonManager.CaptureSingleton();
 
-                    // Execute dedicated operations based on instance type
-                    InstanceType currentInstanceType = SingletonManager.CurrentInstanceType;
-
-                    if (currentInstanceType == InstanceType.Master)
+                    if (incognito
+                        && SingletonManager.CurrentInstanceType == InstanceType.Master)
                     {
-                        Log.Information("[*] Running as MASTER instance - executing master-specific operations...");
-                        OnMasterInstancePreLaunch(configuration);
-                    }
-                    else if (currentInstanceType == InstanceType.Slave)
-                    {
-                        Log.Information("[*] Running as SLAVE instance - executing slave-specific operations...");
-                        OnSlaveInstancePreLaunch(configuration);
+                        //TODO
                     }
                 }
 
@@ -93,40 +86,6 @@
                 if (singletonCaptured)
                     SingletonManager.ReleaseSingleton();
             }
-        }
-
-        /// <summary>
-        /// Executes operations specific to the Master instance before launching Roblox.
-        /// The Master instance is the first instance that successfully captures the Roblox singleton.
-        /// </summary>
-        /// <param name="configuration">The configuration object containing launch parameters.</param>
-        private static void OnMasterInstancePreLaunch(Configuration configuration)
-        {
-            // TODO: Add master-specific operations here
-            // Examples:
-            // - Initialize shared resources
-            // - Setup monitoring or logging systems
-            // - Perform administrative tasks
-            // - Clean up previous sessions
-
-            Log.Debug("[*] Master instance pre-launch operations completed.");
-        }
-
-        /// <summary>
-        /// Executes operations specific to Slave instances before launching Roblox.
-        /// Slave instances are instances that failed to capture the singleton because a Master already exists.
-        /// </summary>
-        /// <param name="configuration">The configuration object containing launch parameters.</param>
-        private static void OnSlaveInstancePreLaunch(Configuration configuration)
-        {
-            // TODO: Add slave-specific operations here
-            // Examples:
-            // - Connect to master instance
-            // - Register with coordination service
-            // - Skip initialization of shared resources
-            // - Configure different settings for secondary instances
-
-            Log.Debug("[*] Slave instance pre-launch operations completed.");
         }
     }
 }
