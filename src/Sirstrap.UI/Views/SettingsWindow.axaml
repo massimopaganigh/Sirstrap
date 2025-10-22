@@ -155,7 +155,7 @@
             Margin="0,10,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Text="Incognito:"
+            Text="(PREVIEW) Incognito:"
             FontSize="14" />
         <CheckBox
             Grid.Row="5"
