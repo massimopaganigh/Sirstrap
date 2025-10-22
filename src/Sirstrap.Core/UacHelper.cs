@@ -50,7 +50,7 @@ namespace Sirstrap.Core
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "[!] Failed to verify administrator privileges: {0}", ex.Message);
+                Log.Warning(ex, "[*] Failed to verify administrator privileges: {0}", ex.Message);
 
                 return false;
             }

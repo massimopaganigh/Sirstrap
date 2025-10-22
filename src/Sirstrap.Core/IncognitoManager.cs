@@ -60,7 +60,7 @@ namespace Sirstrap.Core
                     {
                         Log.Information("[*] Removing existing Incognito cache...");
 
-                        Directory.Delete(_incognitoCachePath, true);
+                        _incognitoCachePath.BetterDirectoryDelete();
                     }
 
                     Log.Information("[*] Moving Roblox folder to Incognito cache: {0} -> {1}", _robloxFolderPath, _incognitoCachePath);
@@ -108,7 +108,9 @@ namespace Sirstrap.Core
                     {
                         Log.Warning("[*] Roblox folder already exists, removing it before restore...");
 
-                        Directory.Delete(_robloxFolderPath, true);
+                        SingletonManager.WaitForAllRobloxProcessesToExit();
+
+                        _robloxFolderPath.BetterDirectoryDelete();
                     }
 
                     Log.Information("[*] Restoring Roblox folder from Incognito cache: {0} -> {1}", _incognitoCachePath, _robloxFolderPath);

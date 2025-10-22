@@ -14,7 +14,6 @@
         {
             try
             {
-                // Get Roblox processes with their exact names
                 var processNames = new[] { "Roblox", "RobloxCrashHandler", "RobloxPlayerBeta" };
 
                 foreach (var processName in processNames)
@@ -39,6 +38,47 @@
             }
             catch
             {
+                return false;
+            }
+        }
+
+        public static bool WaitForAllRobloxProcessesToExit(int timeoutMs = 5000)
+        {
+            try
+            {
+                var processNames = new[] { "Roblox", "RobloxCrashHandler", "RobloxPlayerBeta" };
+                var startTime = DateTime.UtcNow;
+
+                while ((DateTime.UtcNow - startTime).TotalMilliseconds < timeoutMs)
+                {
+                    bool anyRunning = false;
+
+                    foreach (var processName in processNames)
+                        if (Process.GetProcessesByName(processName).Length > 0)
+                        {
+                            anyRunning = true;
+
+                            break;
+                        }
+
+                    if (!anyRunning)
+                    {
+                        Log.Information("[*] All Roblox processes have exited.");
+
+                        return true;
+                    }
+
+                    Thread.Sleep(100);
+                }
+
+                Log.Warning("[*] Timeout waiting for Roblox processes to exit.");
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Error while waiting for Roblox processes to exit: {0}.", ex.Message);
+
                 return false;
             }
         }
@@ -71,7 +111,7 @@
                     }
                     else
                     {
-                        Log.Warning("[!] Cannot to capture singleton - another instance is already running.");
+                        Log.Warning("[*] Cannot to capture singleton - another instance is already running.");
 
                         CurrentInstanceType = InstanceType.Slave;
 
