@@ -1,4 +1,7 @@
-﻿namespace Sirstrap.UI.Models
+﻿using Sirstrap.Core.Models;
+using Sirstrap.Core.Services;
+
+namespace Sirstrap.UI.Models
 {
     public partial class Settings : ModelBase
     {
@@ -25,7 +28,7 @@
 
         public Settings()
         {
-            SirstrapConfigurationService.LoadSettings();
+            SirstrapConfigurationService.GetSettings();
 
             AutoUpdate = SirstrapConfiguration.AutoUpdate;
             ChannelName = SirstrapConfiguration.ChannelName;
@@ -46,8 +49,8 @@
             SirstrapConfiguration.RobloxCdnUri = RobloxCdnUri;
             SirstrapConfiguration.SirHurtPath = SirHurtPath;
 
-            SirstrapConfigurationService.SaveSettings();
-            SirstrapConfigurationService.LoadSettings();
+            SirstrapConfigurationService.SetSettings();
+            SirstrapConfigurationService.GetSettings();
         }
     }
 }

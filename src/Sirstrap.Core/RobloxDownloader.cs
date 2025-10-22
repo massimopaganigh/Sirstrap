@@ -6,8 +6,8 @@
     /// </summary>
     public class RobloxDownloader
     {
-        private readonly RobloxVersionService _robloxVersionService;
-        private readonly PackageManager _packageManager;
+        private readonly VersionService _robloxVersionService;
+        private readonly Services.DownloadService _packageManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RobloxDownloader"/> class.
@@ -22,8 +22,8 @@
                 Timeout = TimeSpan.FromMinutes(5)
             };
 
-            _robloxVersionService = new RobloxVersionService(httpClient);
-            _packageManager = new PackageManager(httpClient);
+            _robloxVersionService = new VersionService(httpClient);
+            _packageManager = new Services.DownloadService(httpClient);
         }
 
         /// <summary>
@@ -50,7 +50,7 @@
 
                 await updateService.UpdateAsync(sirstrapType, args);
 
-                var configuration = ConfigurationManager.CreateConfigurationFromArguments(ConfigurationParser.ParseConfiguration(args));
+                var configuration = ConfigurationService.CreateConfigurationFromArguments(ConfigurationService.ParseConfiguration(args));
 
                 if (!await InitializeDownloadAsync(configuration).ConfigureAwait(false))
                 {
@@ -98,7 +98,7 @@
         {
             if (string.IsNullOrEmpty(configuration.VersionHash))
             {
-                configuration.VersionHash = await _robloxVersionService.GetLatestVersionAsync();
+                configuration.VersionHash = await _robloxVersionService.GetVersionAsync();
 
                 if (string.IsNullOrEmpty(configuration.VersionHash))
                 {
@@ -122,7 +122,7 @@
         /// </remarks>
         private static bool IsAlreadyInstalled(Configuration configuration)
         {
-            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetExtractionPath(configuration.VersionHash));
+            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(Directories.GetExtractionPath(configuration.VersionHash));
         }
 
         /// <summary>
@@ -153,7 +153,7 @@
         /// </remarks>
         private async Task DownloadAndProcessFilesAsync(Configuration configuration)
         {
-            if (configuration.IsMacBinary())
+            if (configuration.IsMacBinary)
             {
                 await _packageManager.Download4MacAsync(configuration).ConfigureAwait(false);
             }
@@ -179,7 +179,7 @@
                 return;
             }
 
-            Installer.Install(configuration);
+            DownloadService.Install(configuration);
 
             LaunchApplication(configuration);
         }

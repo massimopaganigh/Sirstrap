@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core
+﻿namespace Sirstrap.Core.Models
 {
     public static class SirstrapConfiguration
     {
@@ -6,10 +6,7 @@
 
         public static string ChannelName { get; set; } = "-beta";
 
-        /// <summary>
-        /// WIP
-        /// </summary>
-        public static bool Incognito { get; set; } = false;
+        public static bool Incognito { get; set; } = false; // TODO
 
         public static bool MultiInstance { get; set; } = true;
 

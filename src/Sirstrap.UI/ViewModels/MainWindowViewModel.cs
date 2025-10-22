@@ -1,4 +1,10 @@
-﻿namespace Sirstrap.UI.ViewModels
+﻿using Sirstrap.Core.Enums;
+using Sirstrap.Core.Extensions;
+using Sirstrap.Core.Models;
+using Sirstrap.Core.Services;
+using Sirstrap.Core.Utility;
+
+namespace Sirstrap.UI.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
@@ -55,13 +61,13 @@
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(LastLogSink.LastLog)
-                    && !string.Equals(LastLogMessage, LastLogSink.LastLog))
+                if (!string.IsNullOrWhiteSpace(LastLog.LastLog)
+                    && !string.Equals(LastLogMessage, LastLog.LastLog))
                 {
                     LastLogReceived = DateTimeOffset.Now;
-                    LastLogMessage = LastLogSink.LastLog;
-                    LastLogTimestamp = LastLogSink.LastLogTimestamp;
-                    LastLogLevel = LastLogSink.LastLogLevel;
+                    LastLogMessage = LastLog.LastLog;
+                    LastLogTimestamp = LastLog.LastLogTimestamp;
+                    LastLogLevel = LastLog.LastLogLevel;
                 }
 
                 GetRobloxProcesses();
@@ -186,11 +192,11 @@
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(Path.Combine(logsDirectoryPath, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
 
-                SirstrapConfigurationService.LoadSettings();
+                SirstrapConfigurationService.GetSettings();
 
                 var args = Program.Args ?? [];
 
-                RegistryManager.RegisterProtocolHandler("roblox-player", args);
+                RegistryService.RegisterProtocolHandler("roblox-player", args);
 
                 await _robloxDownloader.ExecuteAsync(args, SirstrapType.UI);
 
