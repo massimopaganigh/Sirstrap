@@ -16,12 +16,19 @@
             }
 
             bool multiInstance = SirstrapConfiguration.MultiInstance;
+            bool incognito = SirstrapConfiguration.Incognito;
             bool singletonCaptured = false;
 
             try
             {
                 if (multiInstance)
+                {
                     singletonCaptured = SingletonManager.CaptureSingleton();
+
+                    if (incognito
+                        && SingletonManager.CurrentInstanceType == InstanceType.Master)
+                        IncognitoManager.MoveRobloxFolderToCache();
+                }
 
                 ProcessStartInfo robloxPlayerBetaExeStartInfo = new()
                 {

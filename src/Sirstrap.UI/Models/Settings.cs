@@ -40,6 +40,13 @@
             SirHurtPath = SirstrapConfiguration.SirHurtPath;
         }
 
+        partial void OnMultiInstanceChanged(bool value)
+        {
+            if (!value
+                && Incognito)
+                Incognito = false;
+        }
+
         public void Set()
         {
             SirstrapConfiguration.AutoUpdate = AutoUpdate;

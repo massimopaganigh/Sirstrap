@@ -124,6 +124,9 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CornerRadius="999"
+            DataContext="{Binding Settings}"
+            IsChecked="{Binding Incognito}"
+            IsEnabled="{Binding MultiInstance}"
             ItemsSource="{Binding Fonts}"
             SelectedItem="{Binding Settings.FontFamily}">
             <ComboBox.Styles>
