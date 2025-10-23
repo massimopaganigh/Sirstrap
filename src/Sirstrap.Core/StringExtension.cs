@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core.Extensions
+﻿namespace Sirstrap.Core
 {
     public static class StringExtension
     {
@@ -24,7 +24,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Error creating directory: {0}", ex.Message);
+                Log.Error(ex, "[!] Error creating directory: {0}.", ex.Message);
 
                 throw;
             }
@@ -52,7 +52,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Error deleting directory: {0}", ex.Message);
+                Log.Error(ex, "[!] Error deleting directory: {0}.", ex.Message);
 
                 throw;
             }
@@ -80,7 +80,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Error deleting file: {0}", ex.Message);
+                Log.Error(ex, "[!] Error deleting file: {0}.", ex.Message);
 
                 throw;
             }

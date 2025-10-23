@@ -6,9 +6,8 @@
 
         public static string ChannelName { get; set; } = "-beta";
 
-        /// <summary>
-        /// WIP
-        /// </summary>
+        public static string FontFamily { get; set; } = "Minecraft";
+
         public static bool Incognito { get; set; } = false;
 
         public static bool MultiInstance { get; set; } = true;

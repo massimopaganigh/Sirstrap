@@ -10,6 +10,30 @@ namespace Sirstrap.UI
                 BindingPlugins.DataValidators.Remove(plugin);
         }
 
+        public static void ApplyFontFamily()
+        {
+            try
+            {
+                if (Current is not App app)
+                    return;
+
+                var fontFamilyName = SirstrapConfiguration.FontFamily;
+
+                FontFamily fontFamily;
+
+                if (fontFamilyName == "Minecraft")
+                    fontFamily = new FontFamily("avares://Sirstrap/Assets#Minecraft");
+                else
+                    fontFamily = new FontFamily(fontFamilyName);
+
+                app.Resources["AppFontFamily"] = fontFamily;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(ApplyFontFamily));
+            }
+        }
+
         public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
         public override void OnFrameworkInitializationCompleted()
@@ -19,6 +43,8 @@ namespace Sirstrap.UI
                 DisableAvaloniaDataAnnotationValidation();
 
                 desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
+
+                ApplyFontFamily();
             }
 
             base.OnFrameworkInitializationCompleted();

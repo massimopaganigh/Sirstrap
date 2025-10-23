@@ -2,7 +2,6 @@
 {
     public class Configuration : ConfigurationBase
     {
-        public string LaunchUri { get; set; } = string.Empty;
 
         public static void ClearCacheDirectory()
         {
@@ -37,5 +36,7 @@
 
         public bool IsMacBinary() => BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase)
             || BinaryType.Equals("MacStudio", StringComparison.OrdinalIgnoreCase);
+
+        public string LaunchUri { get; set; } = string.Empty;
     }
 }

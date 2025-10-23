@@ -5,7 +5,7 @@
         private const string CLI_ZIP_FILENAME = "Sirstrap.CLI.zip";
         private const int HTTP_TIMEOUT_MINUTES = 5;
         private const string SIRSTRAP_API = "https://api.github.com/repos/massimopaganigh/sirstrap/releases";
-        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.17";
+        private const string SIRSTRAP_CURRENT_VERSION = "1.1.8.18";
         private const string SIRSTRAP_EXE_FILENAME = "Sirstrap.exe";
         private const string SIRSTRAP_ZIP_FILENAME = "Sirstrap.zip";
         private const string UI_ZIP_FILENAME = "Sirstrap.UI.zip";
@@ -255,10 +255,6 @@ exit
             GC.SuppressFinalize(this);
         }
 
-        /// <summary>
-        /// Gets the current full version of Sirstrap.
-        /// </summary>
-        /// <returns>The current full version of Sirstrap.</returns>
         public static string GetCurrentFullVersion()
         {
 #if DEBUG
@@ -270,10 +266,6 @@ exit
 #pragma warning restore CS0162
         }
 
-        /// <summary>
-        /// Gets the changelog for the latest release from GitHub.
-        /// </summary>
-        /// <returns>The changelog text, or an empty string if not found.</returns>
         public async Task<string> GetLatestChangelogAsync()
         {
             try
@@ -318,11 +310,6 @@ exit
             }
         }
 
-        /// <summary>
-        /// Updates the Sirstrap application to the latest version.
-        /// </summary>
-        /// <param name="sirstrapType">The type of Sirstrap to update.</param>
-        /// <returns>A task representing the asynchronous operation.</returns>
         public async Task UpdateAsync(SirstrapType sirstrapType, string[] args)
         {
             try

@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core.Services
+﻿namespace Sirstrap.Core
 {
     public class SirHurtService
     {
@@ -19,13 +19,13 @@
                         return (true, parent.FullName);
                 }
 
-                Log.Warning("The SirHurt path file does not exist at: {0}.", result);
+                Log.Warning("[*] The SirHurt path file does not exist at: {0}.", result);
 
                 return (false, string.Empty);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occurred while trying to get the SirHurt path: {0}.", ex.Message);
+                Log.Error(ex, "[!] An error occurred while trying to get the SirHurt path: {0}.", ex.Message);
 
                 return (false, string.Empty);
             }
