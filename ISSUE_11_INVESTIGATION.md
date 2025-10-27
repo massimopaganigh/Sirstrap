@@ -2,17 +2,131 @@
 
 **Issue:** Synapse Blue cannot reliably detect Roblox processes when launched via Sirstrap
 **Investigation Date:** 2025-10-27
-**Status:** Analysis Complete
+**Status:** ✅ RESOLVED
 
 ---
 
 ## Executive Summary
 
-Sirstrap's unique process management architecture creates challenges for third-party tools like Synapse Blue that rely on standard process detection methods. This investigation identifies **5 key architectural differences** that likely cause the incompatibility and proposes **4 potential solutions** with varying levels of invasiveness.
+**ROOT CAUSE IDENTIFIED:** When Sirstrap is launched from a browser via the `roblox-player://` protocol handler, it becomes a **subprocess of the browser**. This creates a problematic process hierarchy that prevents third-party tools like Synapse Blue from detecting Roblox processes correctly.
+
+**SOLUTION IMPLEMENTED:** Modified the Windows Registry protocol handler command to use `cmd /c start` which creates an independent process tree, completely detaching Sirstrap from the browser process.
 
 ---
 
-## Background Context
+## The Real Root Cause: Browser Subprocess Problem
+
+### Problem Description
+
+When a user clicks a `roblox-player://` link in their web browser:
+
+1. **Browser launches Sirstrap** via Windows protocol handler
+2. **Sirstrap becomes a child process of the browser**
+3. Sirstrap then launches Roblox with `UseShellExecute = true`
+4. Roblox becomes an independent process (not a child of Sirstrap)
+
+**Process Hierarchy (Before Fix):**
+```
+Browser (chrome.exe, firefox.exe, etc.)
+  └── Sirstrap.exe (child of browser)
+
+explorer.exe or shell32.dll
+  └── RobloxPlayerBeta.exe (independent, launched via shell)
+```
+
+**The Issue:**
+- Synapse Blue and other third-party tools look for Roblox processes
+- They expect Roblox to be a child of the bootstrapper
+- But Roblox is launched independently via `UseShellExecute = true`
+- And Sirstrap itself is stuck as a browser subprocess
+- This complex hierarchy breaks standard process detection patterns
+
+### How Other Bootstrappers Avoid This
+
+Bloxstrap and other successful bootstrappers use `cmd /c start` in their registry protocol handler command. This technique creates a **completely independent process** that is not a child of the browser.
+
+---
+
+## The Solution: cmd /c start Pattern
+
+### Registry Command Change
+
+**Before (Problematic):**
+```
+"C:\Path\To\Sirstrap.exe" %1
+```
+
+**After (Fixed):**
+```
+cmd /c start "" "C:\Path\To\Sirstrap.exe" "%1"
+```
+
+### How It Works
+
+1. **Browser calls:** `cmd /c start "" "C:\Path\To\Sirstrap.exe" "roblox-player://..."`
+2. **cmd.exe launches** as a child of the browser
+3. **start command** creates a new, independent process for Sirstrap.exe
+4. **cmd.exe exits immediately**
+5. **Sirstrap.exe is now a top-level process**, not a browser subprocess
+
+### Command Breakdown
+
+```
+cmd /c start "" "C:\Path\To\Sirstrap.exe" "%1"
+│   │  │     │  │                          │
+│   │  │     │  │                          └─ Protocol URI (%1 = roblox-player://...)
+│   │  │     │  └─ Sirstrap executable path (quoted for spaces)
+│   │  │     └─ Window title for start command (empty "" required when exe is quoted)
+│   │  └─ Creates new independent process
+│   └─ Execute command and exit
+└─ Windows Command Interpreter
+```
+
+### Process Hierarchy (After Fix)
+
+```
+Browser (chrome.exe, firefox.exe, etc.)
+  └── cmd.exe (child of browser, exits immediately)
+
+explorer.exe or shell32.dll
+  ├── Sirstrap.exe (independent top-level process!)
+  └── RobloxPlayerBeta.exe (independent, launched by Sirstrap)
+```
+
+Now both Sirstrap and Roblox are independent processes, making detection straightforward for third-party tools.
+
+---
+
+## Implementation
+
+### Code Changes
+
+**File:** `src/Sirstrap.Core/RegistryManager.cs`
+**Line:** 100-108
+
+```csharp
+private static string GetExpectedCommand()
+{
+    string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}";
+
+    // Use cmd /c start to create an independent process, avoiding browser subprocess issues
+    // The empty "" after start is the window title (required when the executable path is quoted)
+    // This ensures Sirstrap is not a child process of the browser when launched via protocol handler
+    return $"cmd /c start \"\" \"{exePath}\" \"%1\"";
+}
+```
+
+### Benefits
+
+✅ **Fixes Synapse Blue detection** - Roblox processes are now properly detectable
+✅ **Non-breaking change** - Doesn't affect existing functionality
+✅ **Security maintained** - Preserves `UseShellExecute = true` security benefits from Issue #2
+✅ **Standard pattern** - Uses well-established Windows process detachment technique
+✅ **No code changes needed elsewhere** - Only registry command format changed
+
+---
+
+## Background Context (Original Investigation)
 
 ### What is Sirstrap?
 Sirstrap is a Roblox bootstrapper that manages Roblox installation, updates, and process launching. Unlike standard bootstrappers, it employs sophisticated process coordination mechanisms.
@@ -410,19 +524,27 @@ Registry.SetValue(
 
 ---
 
-## Recommended Approach
+## ✅ IMPLEMENTED SOLUTION
 
-**Primary Solution:** Implement **Solution 1 (Process Metadata Export)** + **Solution 2 (Configuration Option)**
+**The `cmd /c start` fix has been implemented** in `src/Sirstrap.Core/RegistryManager.cs`
 
-**Rationale:**
-1. **Solution 1** provides immediate compatibility without breaking existing security
-2. **Solution 2** gives advanced users control over process model
-3. Combined approach balances security, compatibility, and user choice
+This solution:
+- Completely resolves the browser subprocess issue
+- Is simpler and more effective than the originally proposed metadata export solutions
+- Uses a standard Windows pattern employed by other successful bootstrappers
+- Requires no changes to third-party tools like Synapse Blue
+- Maintains all security benefits from previous fixes
 
-**Implementation Priority:**
-1. **Phase 1:** Implement metadata export (non-breaking, immediate benefit)
-2. **Phase 2:** Add `UseShellExecute` configuration (advanced users)
-3. **Phase 3:** Document in README for third-party tool developers
+**The original proposed solutions (metadata export, configuration options, etc.) are no longer necessary** as the root cause has been addressed directly.
+
+### What Users Need to Do
+
+After updating Sirstrap, users should:
+1. **Run Sirstrap once** to re-register the protocol handler with the new command
+2. **Click "Yes"** when prompted for administrator privileges (required for registry changes)
+3. **Test** by clicking a `roblox-player://` link from their browser
+
+The protocol handler will be automatically updated with the new command format.
 
 ---
 

@@ -97,7 +97,15 @@
             }
         }
 
-        private static string GetExpectedCommand() => $"\"{$"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}"}\" %1";
+        private static string GetExpectedCommand()
+        {
+            string exePath = $"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}";
+
+            // Use cmd /c start to create an independent process, avoiding browser subprocess issues
+            // The empty "" after start is the window title (required when the executable path is quoted)
+            // This ensures Sirstrap is not a child process of the browser when launched via protocol handler
+            return $"cmd /c start \"\" \"{exePath}\" \"%1\"";
+        }
 
         public static bool RegisterProtocolHandler(string protocol, string[] arguments)
         {
