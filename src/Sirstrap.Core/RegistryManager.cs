@@ -97,7 +97,7 @@
             }
         }
 
-        private static string GetExpectedCommand() => $"\"{$"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}"}\" %1";
+        private static string GetExpectedCommand() => $"cmd /c start \"\" \"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}\" \"%1\"";
 
         public static bool RegisterProtocolHandler(string protocol, string[] arguments)
         {
