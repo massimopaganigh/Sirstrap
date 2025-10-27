@@ -86,6 +86,7 @@
                 }
 
                 Log.Information("[*] Protocol {0} is registered with a different handler: {1}", protocol, currentCommand ?? "null");
+                Log.Information("[*] Updating protocol handler to fix browser subprocess issues (Issue #11)...");
 
                 return CreateProtocolRegistration(protocol);
             }
