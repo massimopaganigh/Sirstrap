@@ -33,10 +33,19 @@
         [ObservableProperty]
         private Timer _logPollingTimer;
 
+        private readonly RobloxActivityWatcher _robloxActivityWatcher = new();
         private readonly RobloxDownloader _robloxDownloader = new();
 
         [ObservableProperty]
         private int _robloxProcesses;
+
+        [ObservableProperty]
+        private string _serverLocation = "UNKNOWN";
+
+        [ObservableProperty]
+        private bool _showServerLocation;
+
+        private bool _wasRobloxRunning;
 
         public MainWindowViewModel()
         {
@@ -45,6 +54,8 @@
             _logPollingTimer.Elapsed += (s, e) => GetLastLogFromSink();
 
             _logPollingTimer.Start();
+
+            _robloxActivityWatcher.ServerLocationChanged += OnServerLocationChanged;
 
 #if !DEBUG
             Task.Run(RunAsync);
@@ -96,7 +107,28 @@
             try
             {
                 RobloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta").Length;
-                IsRobloxRunning = RobloxProcesses > 0 && SirstrapConfiguration.MultiInstance;
+
+                var robloxIsActuallyRunning = RobloxProcesses > 0;
+
+                IsRobloxRunning = robloxIsActuallyRunning && SirstrapConfiguration.MultiInstance;
+                ShowServerLocation = robloxIsActuallyRunning;
+
+                if (robloxIsActuallyRunning
+                    && !_wasRobloxRunning)
+                {
+                    _robloxActivityWatcher.StartWatching();
+
+                    _wasRobloxRunning = true;
+                }
+                else if (!robloxIsActuallyRunning
+                    && _wasRobloxRunning)
+                {
+                    _robloxActivityWatcher.StopWatching();
+
+                    ServerLocation = "UNKNOWN";
+
+                    _wasRobloxRunning = false;
+                }
 
                 var mainWindow = GetMainWindow();
 
@@ -117,6 +149,11 @@
                 Log.Error(ex, nameof(GetRobloxProcesses));
             }
         }
+
+        private void OnServerLocationChanged(object? sender, string location) => Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            ServerLocation = location;
+        });
 
         [RelayCommand]
         private void OpenGitHub()
