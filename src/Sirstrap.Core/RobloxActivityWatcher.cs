@@ -163,7 +163,7 @@ namespace Sirstrap.Core
                     {
                         var ip = match.Groups[1].Value;
                         // Validate it's not a local IP
-                        if (!ip.StartsWith("127.") && !ip.StartsWith("192.168.") && !ip.StartsWith("10."))
+                        if (!ip.StartsWith("127.") && !ip.StartsWith("192.168.") && !ip.StartsWith("10.") && !IsPrivateIpRange172(ip))
                             return ip;
                     }
                 }
@@ -174,6 +174,21 @@ namespace Sirstrap.Core
             }
 
             return null;
+        }
+
+        private static bool IsPrivateIpRange172(string ip)
+        {
+            // Check for 172.16.0.0/12 range (172.16.0.0 - 172.31.255.255)
+            if (!ip.StartsWith("172."))
+                return false;
+
+            var parts = ip.Split('.');
+            if (parts.Length >= 2 && int.TryParse(parts[1], out var secondOctet))
+            {
+                return secondOctet >= 16 && secondOctet <= 31;
+            }
+
+            return false;
         }
 
         private async Task UpdateServerLocationAsync(string ipAddress)

@@ -5,8 +5,8 @@ namespace Sirstrap.Core
         private const string IPINFO_BASE_URL = "https://ipinfo.io";
         private const string LOCATION_UNAVAILABLE = "località non disponibile";
 
-        private static readonly Dictionary<string, string> _locationCache = new();
-        private static readonly HttpClient _httpClient = new();
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, string> _locationCache = new();
+        private static readonly HttpClient _httpClient = new() { Timeout = TimeSpan.FromSeconds(10) };
 
         public static async Task<string> GetServerLocationAsync(string ipAddress)
         {
