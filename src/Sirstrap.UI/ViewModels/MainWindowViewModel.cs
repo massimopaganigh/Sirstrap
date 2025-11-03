@@ -12,6 +12,8 @@
         [ObservableProperty]
         private int _currentPollingInterval = MIN_POLLING_INTERVAL;
 
+        private readonly IpcService _ipcService = new();
+
         [ObservableProperty]
         private bool _isMinimized;
 
@@ -223,6 +225,8 @@
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(Path.Combine(logsDirectoryPath, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
 
+                await _ipcService.StartAsync("SirstrapIpc");
+
                 SirstrapConfigurationService.LoadSettings();
 
                 var args = Program.Args ?? [];
@@ -241,6 +245,8 @@
             }
             finally
             {
+                await _ipcService.StopAsync();
+
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(Environment.ExitCode);
