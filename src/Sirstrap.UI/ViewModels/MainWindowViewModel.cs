@@ -43,6 +43,11 @@
         [ObservableProperty]
         private string _serverLocation = "località non disponibile";
 
+        [ObservableProperty]
+        private bool _showServerLocation;
+
+        private bool _wasRobloxRunning;
+
         public MainWindowViewModel()
         {
             _logPollingTimer = new(_currentPollingInterval);
@@ -112,18 +117,22 @@
             {
                 var previousRobloxRunning = IsRobloxRunning;
                 RobloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta").Length;
-                IsRobloxRunning = RobloxProcesses > 0 && SirstrapConfiguration.MultiInstance;
+                var robloxIsActuallyRunning = RobloxProcesses > 0;
+                IsRobloxRunning = robloxIsActuallyRunning && SirstrapConfiguration.MultiInstance;
+                ShowServerLocation = robloxIsActuallyRunning;
 
-                // Start watching when Roblox starts running
-                if (IsRobloxRunning && !previousRobloxRunning)
+                // Start watching when Roblox starts running (independent of MultiInstance)
+                if (robloxIsActuallyRunning && !_wasRobloxRunning)
                 {
                     _activityWatcher.StartWatching();
+                    _wasRobloxRunning = true;
                 }
                 // Stop watching when Roblox stops running
-                else if (!IsRobloxRunning && previousRobloxRunning)
+                else if (!robloxIsActuallyRunning && _wasRobloxRunning)
                 {
                     _activityWatcher.StopWatching();
                     ServerLocation = "località non disponibile";
+                    _wasRobloxRunning = false;
                 }
 
                 var mainWindow = GetMainWindow();

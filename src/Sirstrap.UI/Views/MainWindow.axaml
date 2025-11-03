@@ -157,7 +157,7 @@
                 BorderThickness="1"
                 Classes="glassBorder"
                 CornerRadius="1000"
-                IsVisible="{Binding IsRobloxRunning}"
+                IsVisible="{Binding ShowServerLocation}"
                 Opacity="0.9"
                 ToolTip.Tip="Server Location">
                 <Border.Background>
