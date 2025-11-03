@@ -33,15 +33,14 @@
         [ObservableProperty]
         private Timer _logPollingTimer;
 
+        private readonly RobloxActivityWatcher _robloxActivityWatcher = new();
         private readonly RobloxDownloader _robloxDownloader = new();
 
         [ObservableProperty]
         private int _robloxProcesses;
 
-        private readonly RobloxActivityWatcher _activityWatcher = new();
-
         [ObservableProperty]
-        private string _serverLocation = "località non disponibile";
+        private string _serverLocation = "UNKNOWN";
 
         [ObservableProperty]
         private bool _showServerLocation;
@@ -56,19 +55,11 @@
 
             _logPollingTimer.Start();
 
-            _activityWatcher.ServerLocationChanged += OnServerLocationChanged;
+            _robloxActivityWatcher.ServerLocationChanged += OnServerLocationChanged;
 
 #if !DEBUG
             Task.Run(RunAsync);
 #endif
-        }
-
-        private void OnServerLocationChanged(object? sender, string location)
-        {
-            Dispatcher.UIThread.InvokeAsync(() =>
-            {
-                ServerLocation = location;
-            });
         }
 
         private void GetLastLogFromSink()
@@ -115,23 +106,27 @@
         {
             try
             {
-                var previousRobloxRunning = IsRobloxRunning;
                 RobloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta").Length;
+
                 var robloxIsActuallyRunning = RobloxProcesses > 0;
+
                 IsRobloxRunning = robloxIsActuallyRunning && SirstrapConfiguration.MultiInstance;
                 ShowServerLocation = robloxIsActuallyRunning;
 
-                // Start watching when Roblox starts running (independent of MultiInstance)
-                if (robloxIsActuallyRunning && !_wasRobloxRunning)
+                if (robloxIsActuallyRunning
+                    && !_wasRobloxRunning)
                 {
-                    _activityWatcher.StartWatching();
+                    _robloxActivityWatcher.StartWatching();
+
                     _wasRobloxRunning = true;
                 }
-                // Stop watching when Roblox stops running
-                else if (!robloxIsActuallyRunning && _wasRobloxRunning)
+                else if (!robloxIsActuallyRunning
+                    && _wasRobloxRunning)
                 {
-                    _activityWatcher.StopWatching();
-                    ServerLocation = "località non disponibile";
+                    _robloxActivityWatcher.StopWatching();
+
+                    ServerLocation = "UNKNOWN";
+
                     _wasRobloxRunning = false;
                 }
 
@@ -154,6 +149,11 @@
                 Log.Error(ex, nameof(GetRobloxProcesses));
             }
         }
+
+        private void OnServerLocationChanged(object? sender, string location) => Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            ServerLocation = location;
+        });
 
         [RelayCommand]
         private void OpenGitHub()
