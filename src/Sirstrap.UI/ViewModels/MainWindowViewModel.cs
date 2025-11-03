@@ -38,6 +38,11 @@
         [ObservableProperty]
         private int _robloxProcesses;
 
+        private readonly RobloxActivityWatcher _activityWatcher = new();
+
+        [ObservableProperty]
+        private string _serverLocation = "località non disponibile";
+
         public MainWindowViewModel()
         {
             _logPollingTimer = new(_currentPollingInterval);
@@ -46,9 +51,19 @@
 
             _logPollingTimer.Start();
 
+            _activityWatcher.ServerLocationChanged += OnServerLocationChanged;
+
 #if !DEBUG
             Task.Run(RunAsync);
 #endif
+        }
+
+        private void OnServerLocationChanged(object? sender, string location)
+        {
+            Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                ServerLocation = location;
+            });
         }
 
         private void GetLastLogFromSink()
@@ -95,8 +110,21 @@
         {
             try
             {
+                var previousRobloxRunning = IsRobloxRunning;
                 RobloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta").Length;
                 IsRobloxRunning = RobloxProcesses > 0 && SirstrapConfiguration.MultiInstance;
+
+                // Start watching when Roblox starts running
+                if (IsRobloxRunning && !previousRobloxRunning)
+                {
+                    _activityWatcher.StartWatching();
+                }
+                // Stop watching when Roblox stops running
+                else if (!IsRobloxRunning && previousRobloxRunning)
+                {
+                    _activityWatcher.StopWatching();
+                    ServerLocation = "località non disponibile";
+                }
 
                 var mainWindow = GetMainWindow();
 

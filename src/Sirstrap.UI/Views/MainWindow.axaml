@@ -157,6 +157,35 @@
                 BorderThickness="1"
                 Classes="glassBorder"
                 CornerRadius="1000"
+                IsVisible="{Binding IsRobloxRunning}"
+                Opacity="0.9"
+                ToolTip.Tip="Server Location">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding ServerLocation}" />
+            </Border>
+            <Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
                 Opacity="0.9">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
