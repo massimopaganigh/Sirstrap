@@ -2,9 +2,10 @@ namespace Sirstrap.Core
 {
     public partial class RobloxActivityWatcher
     {
+        private CancellationTokenSource? _cancellationTokenSource;
         private string? _currentLogFile;
         private string? _currentServerLocation;
-        private long _lastPosition;
+        private Task? _logReadingTask;
         private FileSystemWatcher? _logWatcher;
 
         public event EventHandler<string>? ServerLocationChanged;
@@ -64,28 +65,16 @@ namespace Sirstrap.Core
             return false;
         }
 
-        private void OnLogFileChanged(object sender, FileSystemEventArgs e)
-        {
-            try
-            {
-                if (_currentLogFile == null
-                    || e.FullPath != _currentLogFile)
-                    return;
-
-                ProcessNewLogEntries(e.FullPath);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "[!] Error processing log file changes: {0}", ex.Message);
-            }
-        }
-
         private void OnLogFileCreated(object sender, FileSystemEventArgs e)
         {
             try
             {
+                _cancellationTokenSource?.Cancel();
+                _logReadingTask?.Wait(TimeSpan.FromSeconds(2));
+
                 _currentLogFile = e.FullPath;
-                _lastPosition = 0;
+                _cancellationTokenSource = new CancellationTokenSource();
+                _logReadingTask = Task.Run(() => ReadLogFileAsync(_currentLogFile, _cancellationTokenSource.Token));
             }
             catch (Exception ex)
             {
@@ -93,27 +82,32 @@ namespace Sirstrap.Core
             }
         }
 
-        private void ProcessNewLogEntries(string logFilePath)
+        private async Task ReadLogFileAsync(string logFilePath, CancellationToken cancellationToken)
         {
             try
             {
-                using var fileStream = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                await Task.Delay(500, cancellationToken);
 
-                fileStream.Seek(_lastPosition, SeekOrigin.Begin);
-
+                using var fileStream = new FileStream(logFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
                 using var reader = new StreamReader(fileStream);
 
-                string? line;
-
-                while ((line = reader.ReadLine()) != null)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    var ipAddress = ExtractServerIp(line);
+                    string? line = await reader.ReadLineAsync(cancellationToken);
 
-                    if (!string.IsNullOrEmpty(ipAddress))
-                        _ = UpdateServerLocationAsync(ipAddress);
+                    if (line is null)
+                        await Task.Delay(1000, cancellationToken);
+                    else
+                    {
+                        var ipAddress = ExtractServerIp(line);
+
+                        if (!string.IsNullOrEmpty(ipAddress))
+                            _ = UpdateServerLocationAsync(ipAddress);
+                    }
                 }
-
-                _lastPosition = fileStream.Position;
+            }
+            catch (OperationCanceledException)
+            {
             }
             catch (Exception ex)
             {
@@ -157,17 +151,17 @@ namespace Sirstrap.Core
                 if (logFiles.Length > 0)
                 {
                     _currentLogFile = logFiles[0];
-                    _lastPosition = new FileInfo(_currentLogFile).Length;
+                    _cancellationTokenSource = new CancellationTokenSource();
+                    _logReadingTask = Task.Run(() => ReadLogFileAsync(_currentLogFile, _cancellationTokenSource.Token));
                 }
 
                 _logWatcher = new FileSystemWatcher(robloxLogsPath)
                 {
-                    NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.CreationTime,
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime,
                     Filter = "*.log",
                     EnableRaisingEvents = true
                 };
 
-                _logWatcher.Changed += OnLogFileChanged;
                 _logWatcher.Created += OnLogFileCreated;
 
                 Log.Information("[*] Started watching Roblox activity logs.");
@@ -180,16 +174,35 @@ namespace Sirstrap.Core
 
         public void StopWatching()
         {
-            if (_logWatcher != null)
+            try
             {
-                _logWatcher.Changed -= OnLogFileChanged;
-                _logWatcher.Created -= OnLogFileCreated;
+                _cancellationTokenSource?.Cancel();
 
-                _logWatcher.Dispose();
+                if (_logReadingTask != null)
+                {
+                    _logReadingTask.Wait(TimeSpan.FromSeconds(5));
 
-                _logWatcher = null;
+                    _logReadingTask = null;
+                }
+
+                _cancellationTokenSource?.Dispose();
+
+                _cancellationTokenSource = null;
+
+                if (_logWatcher != null)
+                {
+                    _logWatcher.Created -= OnLogFileCreated;
+
+                    _logWatcher.Dispose();
+
+                    _logWatcher = null;
+                }
 
                 Log.Information("[*] Stopped watching Roblox activity logs.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Error stopping Roblox activity watcher: {0}", ex.Message);
             }
         }
 
