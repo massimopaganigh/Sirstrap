@@ -219,8 +219,7 @@
             VerticalAlignment="Stretch"
             CornerRadius="999"
             DataContext="{Binding Settings}"
-            Text="{Binding RobloxVersionOverride}"
-            IsReadOnly="True" />
+            Text="{Binding RobloxVersionOverride}" />
         <TextBlock
             Grid.Row="9"
             Margin="0,10,0,0"
