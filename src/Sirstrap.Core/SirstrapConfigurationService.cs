@@ -86,7 +86,7 @@
                     };
                 }
 
-                if (keys.Count != 8)
+                if (keys.Count != 9)
                 {
                     SaveSettings();
 
