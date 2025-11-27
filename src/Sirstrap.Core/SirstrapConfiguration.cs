@@ -16,6 +16,8 @@
 
         public static string RobloxCdnUri { get; set; } = "https://setup.rbxcdn.com";
 
+        public static string RobloxVersionOverride { get; set; } = string.Empty;
+
         public static string SirHurtPath { get; set; } = string.Empty;
     }
 }

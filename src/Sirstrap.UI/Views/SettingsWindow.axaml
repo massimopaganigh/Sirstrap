@@ -64,6 +64,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -207,7 +208,7 @@
             Margin="0,10,0,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Center"
-            Text="SirHurt Path:"
+            Text="Roblox Version Override:"
             FontSize="14" />
         <TextBox
             Grid.Row="8"
@@ -218,9 +219,28 @@
             VerticalAlignment="Stretch"
             CornerRadius="999"
             DataContext="{Binding Settings}"
-            Text="{Binding SirHurtPath}" />
-        <Border
+            Text="{Binding RobloxVersionOverride}"
+            IsReadOnly="True" />
+        <TextBlock
             Grid.Row="9"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="SirHurt Path:"
+            FontSize="14" />
+        <TextBox
+            Grid.Row="9"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            Text="{Binding SirHurtPath}"
+            IsReadOnly="True" />
+        <Border
+            Grid.Row="10"
             Grid.Column="1"
             Height="32"
             Margin="10,10,0,0"

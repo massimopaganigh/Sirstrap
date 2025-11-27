@@ -90,6 +90,9 @@
         {
             string version;
 
+            if (!string.IsNullOrWhiteSpace(SirstrapConfiguration.RobloxVersionOverride))
+                return SirstrapConfiguration.RobloxVersionOverride;
+
             if (SirstrapConfiguration.RobloxApi)
             {
                 Log.Information("[*] Roblox API is enabled, using Roblox API to retrieve version...");

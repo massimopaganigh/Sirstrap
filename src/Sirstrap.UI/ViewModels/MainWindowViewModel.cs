@@ -12,6 +12,8 @@
         [ObservableProperty]
         private int _currentPollingInterval = MIN_POLLING_INTERVAL;
 
+        private readonly IpcService _ipcService = new();
+
         [ObservableProperty]
         private bool _isMinimized;
 
@@ -33,10 +35,19 @@
         [ObservableProperty]
         private Timer _logPollingTimer;
 
+        private readonly RobloxActivityWatcher _robloxActivityWatcher = new();
         private readonly RobloxDownloader _robloxDownloader = new();
 
         [ObservableProperty]
         private int _robloxProcesses;
+
+        [ObservableProperty]
+        private string _serverLocation = "UNKNOWN";
+
+        [ObservableProperty]
+        private bool _showServerLocation;
+
+        private bool _wasRobloxRunning;
 
         public MainWindowViewModel()
         {
@@ -45,6 +56,8 @@
             _logPollingTimer.Elapsed += (s, e) => GetLastLogFromSink();
 
             _logPollingTimer.Start();
+
+            _robloxActivityWatcher.ServerLocationChanged += OnServerLocationChanged;
 
 #if !DEBUG
             Task.Run(RunAsync);
@@ -96,7 +109,28 @@
             try
             {
                 RobloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta").Length;
-                IsRobloxRunning = RobloxProcesses > 0 && SirstrapConfiguration.MultiInstance;
+
+                var robloxIsActuallyRunning = RobloxProcesses > 0;
+
+                IsRobloxRunning = robloxIsActuallyRunning && SirstrapConfiguration.MultiInstance;
+                ShowServerLocation = robloxIsActuallyRunning;
+
+                if (robloxIsActuallyRunning
+                    && !_wasRobloxRunning)
+                {
+                    _robloxActivityWatcher.StartWatching();
+
+                    _wasRobloxRunning = true;
+                }
+                else if (!robloxIsActuallyRunning
+                    && _wasRobloxRunning)
+                {
+                    _robloxActivityWatcher.StopWatching();
+
+                    ServerLocation = "UNKNOWN";
+
+                    _wasRobloxRunning = false;
+                }
 
                 var mainWindow = GetMainWindow();
 
@@ -117,6 +151,11 @@
                 Log.Error(ex, nameof(GetRobloxProcesses));
             }
         }
+
+        private void OnServerLocationChanged(object? sender, string location) => Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            ServerLocation = location;
+        });
 
         [RelayCommand]
         private void OpenGitHub()
@@ -186,6 +225,8 @@
 
                 Log.Logger = new LoggerConfiguration().WriteTo.File(Path.Combine(logsDirectoryPath, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
 
+                await _ipcService.StartAsync("SirstrapIpc");
+
                 SirstrapConfigurationService.LoadSettings();
 
                 var args = Program.Args ?? [];
@@ -204,6 +245,8 @@
             }
             finally
             {
+                await _ipcService.StopAsync();
+
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(Environment.ExitCode);
