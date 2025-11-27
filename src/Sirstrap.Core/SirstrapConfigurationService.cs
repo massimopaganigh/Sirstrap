@@ -80,6 +80,7 @@
                                 SirstrapConfiguration.RobloxApi = v;
                         }),
                         "RobloxCdnUri" => Set(() => SirstrapConfiguration.RobloxCdnUri = trimmedTrimmedLineValue),
+                        "RobloxVersionOverride" => Set(() => SirstrapConfiguration.RobloxVersionOverride = trimmedTrimmedLineValue),
                         "SirHurtPath" => Set(() => SirstrapConfiguration.SirHurtPath = trimmedTrimmedLineValue),
                         _ => Set(() => Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedTrimmedLineKey, trimmedTrimmedLineValue))
                     };
@@ -119,6 +120,7 @@
                     $"Incognito={SirstrapConfiguration.Incognito}",
                     $"RobloxApi={SirstrapConfiguration.RobloxApi}",
                     $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
+                    $"RobloxVersionOverride={SirstrapConfiguration.RobloxVersionOverride}",
                     $"SirHurtPath={SirstrapConfiguration.SirHurtPath}"
                 });
 
