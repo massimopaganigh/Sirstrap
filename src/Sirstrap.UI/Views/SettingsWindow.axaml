@@ -218,7 +218,8 @@
             VerticalAlignment="Stretch"
             CornerRadius="999"
             DataContext="{Binding Settings}"
-            Text="{Binding SirHurtPath}" />
+            Text="{Binding SirHurtPath}"
+            IsReadOnly="True" />
         <Border
             Grid.Row="9"
             Grid.Column="1"

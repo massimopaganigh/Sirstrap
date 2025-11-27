@@ -80,9 +80,15 @@
                 </Style>
             </Image.Styles>
         </Image>
+        <TextBlock
+            Margin="10"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Text="Sirstrap"
+            FontSize="18" />
         <Border
             MaxWidth="145"
-            MaxHeight="180"
+            MaxHeight="150"
             Margin="10,0,0,10"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
@@ -178,7 +184,7 @@
                     Padding="10"
                     Text="{Binding CurrentFullVersion}" />
             </Border>
-            <Border
+            <!--<Border
                 Margin="10,0,0,0"
                 BorderBrush="#40FFFFFF"
                 BorderThickness="1"
@@ -204,7 +210,7 @@
                     FontSize="10"
                     Padding="10"
                     Text="Sirstrap" />
-            </Border>
+            </Border>-->
         </StackPanel>
         <StackPanel
             Margin="0,0,10,55"
@@ -313,6 +319,41 @@
                         Source="avares://Sirstrap/Assets/settings.png" />
                 </Button>
             </Border>
+            <!--<Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                IsVisible="{Binding ShowServerLocation}"
+                Opacity="0.9"
+                ToolTip.Tip="Server location">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding ServerLocation}" />
+            </Border>-->
+        </StackPanel>
+        <StackPanel
+            Margin="0,0,10,100"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
             <Border
                 Margin="10,0,0,0"
                 BorderBrush="#40FFFFFF"
@@ -321,7 +362,7 @@
                 CornerRadius="1000"
                 IsVisible="{Binding ShowServerLocation}"
                 Opacity="0.9"
-                ToolTip.Tip="Server Location">
+                ToolTip.Tip="Server location">
                 <Border.Background>
                     <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                         <GradientStop Offset="0" Color="#80454EE6" />
