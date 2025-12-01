@@ -2,32 +2,26 @@
 {
     public class SirHurtService
     {
-        private static string GetSirHurtAppDataPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sirhurt", "sirhui");
-
-        public static (bool Result, string SirHurtPath) GetSirHurtPath()
+        public static string GetSirHurtPath()
         {
             try
             {
-                var result = Path.Combine(GetSirHurtAppDataPath(), "dllpath.dat");
+                var dllPathDat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sirhurt", "sirhui", "dllpath.dat");
 
-                if (File.Exists(result))
+                if (File.Exists(dllPathDat))
                 {
-                    var parent = Directory.GetParent(File.ReadAllText(result));
+                    var parent = Directory.GetParent(File.ReadAllText(dllPathDat));
 
                     if (parent != null
                         && Directory.Exists(parent.FullName))
-                        return (true, parent.FullName);
+                        return parent.FullName;
                 }
 
-                Log.Warning("[*] The SirHurt path file does not exist at: {0}.", result);
-
-                return (false, string.Empty);
+                return string.Empty;
             }
-            catch (Exception ex)
+            catch
             {
-                Log.Error(ex, "[!] An error occurred while trying to get the SirHurt path: {0}.", ex.Message);
-
-                return (false, string.Empty);
+                return string.Empty;
             }
         }
     }

@@ -2,133 +2,214 @@
 {
     public static class SirstrapConfigurationService
     {
-        private static object? Set(Action action)
+        private static List<string> GetMissingKeys(HashSet<string> foundKeys)
         {
-            action();
+            var missingKeys = new List<string>();
+            var settingsDefinitions = GetSettingsDefinitions();
 
-            return null;
+            foreach (var setting in settingsDefinitions)
+                if (!foundKeys.Contains(setting.Key))
+                    missingKeys.Add($"{setting.Key}={setting.Value.Getter()}");
+
+            return missingKeys;
         }
 
-        public static string GetSettingsPath()
+        private static Dictionary<string, (Func<string> Getter, Action<string> Setter)> GetSettingsDefinitions() => new()
+        {
+            ["AUTO_UPDATE"] = (
+                () => SirstrapConfiguration.AutoUpdate.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.AutoUpdate = v; }
+            ),
+            ["CHANNEL_NAME"] = (
+                () => SirstrapConfiguration.ChannelName,
+                value => SirstrapConfiguration.ChannelName = value
+            ),
+            ["FONT_FAMILY"] = (
+                () => SirstrapConfiguration.FontFamily,
+                value => SirstrapConfiguration.FontFamily = value
+            ),
+            ["INCOGNITO"] = (
+                () => SirstrapConfiguration.Incognito.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.Incognito = v; }
+            ),
+            ["MULTI_INSTANCE"] = (
+                () => SirstrapConfiguration.MultiInstance.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.MultiInstance = v; }
+            ),
+            ["ROBLOX_API"] = (
+                () => SirstrapConfiguration.RobloxApi.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.RobloxApi = v; }
+            ),
+            ["ROBLOX_CND_URI"] = (
+                () => SirstrapConfiguration.RobloxCdnUri,
+                value => SirstrapConfiguration.RobloxCdnUri = value
+            ),
+            ["ROBLOX_VERSION_OVERRIDE"] = (
+                () => SirstrapConfiguration.RobloxVersionOverride,
+                value => SirstrapConfiguration.RobloxVersionOverride = value
+            ),
+            ["SIRHURT_PATH"] = (
+                () => SirHurtService.GetSirHurtPath(),
+                value => SirHurtService.GetSirHurtPath()
+            )
+        };
+
+        private static string GetSettingsFilePath()
         {
             var settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
 
             if (!Directory.Exists(settingsPath))
                 Directory.CreateDirectory(settingsPath);
+            else
+            {
+                var oldSettingsFilePath = Path.Combine(settingsPath, "settings.ini");
 
-            return Path.Combine(settingsPath, "settings.ini");
+                if (File.Exists(oldSettingsFilePath))
+                    File.Delete(oldSettingsFilePath);
+            }
+
+            return Path.Combine(settingsPath, "Sirstrap.ini");
         }
 
-        public static void LoadSettings(string? settingsPath = null)
+        public static void LoadSettings(string? settingsFilePath = null)
         {
             try
             {
-                settingsPath ??= GetSettingsPath();
+                settingsFilePath ??= GetSettingsFilePath();
 
-                if (!File.Exists(settingsPath))
+                Log.Debug("[{0}] Loading settings (SettingsFilePath: {1})...", nameof(LoadSettings), settingsFilePath);
+
+                if (!File.Exists(settingsFilePath))
                     SaveSettings();
 
-                var lines = File.ReadAllLines(settingsPath);
-                var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var rows = File.ReadAllLines(settingsFilePath);
+                var settingsSection = false;
+                var settingsDefinitions = GetSettingsDefinitions();
 
-                foreach (var line in lines)
+                foreach (var row in rows)
                 {
-                    var trimmedLine = line.Trim();
+                    var trimmedRow = row.Trim();
 
-                    if (string.IsNullOrEmpty(trimmedLine)
-                        || trimmedLine.StartsWith('#'))
-                        continue;
-
-                    var trimmedLineParts = trimmedLine.Split('=', 2);
-
-                    if (trimmedLineParts.Length != 2)
-                        continue;
-
-                    string trimmedTrimmedLineKey = trimmedLineParts[0].Trim();
-                    string trimmedTrimmedLineValue = trimmedLineParts[1].Trim();
-
-                    if (string.IsNullOrEmpty(trimmedTrimmedLineKey))
-                        continue;
-
-                    keys.Add(trimmedTrimmedLineKey);
-
-                    if (string.IsNullOrEmpty(trimmedTrimmedLineValue))
-                        continue;
-
-                    _ = trimmedTrimmedLineKey switch
+                    if (trimmedRow.StartsWith('['))
                     {
-                        "AutoUpdate" => Set(() =>
-                        {
-                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
-                                SirstrapConfiguration.AutoUpdate = v;
-                        }),
-                        "ChannelName" => Set(() => SirstrapConfiguration.ChannelName = trimmedTrimmedLineValue),
-                        "FontFamily" => Set(() => SirstrapConfiguration.FontFamily = trimmedTrimmedLineValue),
-                        "MultiInstance" => Set(() =>
-                        {
-                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
-                                SirstrapConfiguration.MultiInstance = v;
-                        }),
-                        "Incognito" => Set(() =>
-                        {
-                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
-                                SirstrapConfiguration.Incognito = v;
-                        }),
-                        "RobloxApi" => Set(() =>
-                        {
-                            if (bool.TryParse(trimmedTrimmedLineValue, out var v))
-                                SirstrapConfiguration.RobloxApi = v;
-                        }),
-                        "RobloxCdnUri" => Set(() => SirstrapConfiguration.RobloxCdnUri = trimmedTrimmedLineValue),
-                        "RobloxVersionOverride" => Set(() => SirstrapConfiguration.RobloxVersionOverride = trimmedTrimmedLineValue),
-                        "SirHurtPath" => Set(() => SirstrapConfiguration.SirHurtPath = trimmedTrimmedLineValue),
-                        _ => Set(() => Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedTrimmedLineKey, trimmedTrimmedLineValue))
-                    };
-                }
+                        settingsSection = trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase);
 
-                if (keys.Count != 9)
+                        continue;
+                    }
+
+                    if (!settingsSection
+                        || !trimmedRow.Contains('='))
+                        continue;
+
+                    var parts = trimmedRow.Split('=');
+
+                    if (parts.Length != 2)
+                        continue;
+
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+
+                    if (settingsDefinitions.TryGetValue(key, out var definition))
+                        definition.Setter(value);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(LoadSettings));
+            }
+        }
+
+        public static void SaveSettings(string? settingsFilePath = null)
+        {
+            try
+            {
+                settingsFilePath ??= GetSettingsFilePath();
+
+                Log.Debug("[{0}] Saving settings (SettingsFilePath: {1})...", nameof(SaveSettings), settingsFilePath);
+
+                var settingsDefinitions = GetSettingsDefinitions();
+
+                if (!File.Exists(settingsFilePath))
                 {
-                    SaveSettings();
+                    var directory = Path.GetDirectoryName(settingsFilePath);
+
+                    if (!string.IsNullOrWhiteSpace(directory)
+                        && !Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
+
+                    var content = new StringBuilder();
+
+                    content.AppendLine("[SETTINGS]");
+
+                    foreach (var setting in settingsDefinitions)
+                        content.AppendLine($"{setting.Key}={setting.Value.Getter()}");
+
+                    File.WriteAllText(settingsFilePath, content.ToString(), Encoding.UTF8);
 
                     return;
                 }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "An error occurred while trying to load the settings: {0}.", ex.Message);
-            }
-        }
 
-        public static void SaveSettings(string? settingsPath = null)
-        {
+                var rows = File.ReadAllLines(settingsFilePath).ToList();
+                var settingsSection = false;
+                var settingsSectionIndex = -1;
+                var foundKeys = new HashSet<string>();
 
-            try
-            {
-                settingsPath ??= GetSettingsPath();
-
-                var (result, sirHurtPath) = SirHurtService.GetSirHurtPath();
-
-                if (result)
-                    SirstrapConfiguration.SirHurtPath = sirHurtPath;
-
-                File.WriteAllLines(settingsPath, new List<string>
+                for (var i = 0; i < rows.Count; i++)
                 {
-                    $"AutoUpdate={SirstrapConfiguration.AutoUpdate}",
-                    $"ChannelName={SirstrapConfiguration.ChannelName}",
-                    $"FontFamily={SirstrapConfiguration.FontFamily}",
-                    $"MultiInstance={SirstrapConfiguration.MultiInstance}",
-                    $"Incognito={SirstrapConfiguration.Incognito}",
-                    $"RobloxApi={SirstrapConfiguration.RobloxApi}",
-                    $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
-                    $"RobloxVersionOverride={SirstrapConfiguration.RobloxVersionOverride}",
-                    $"SirHurtPath={SirstrapConfiguration.SirHurtPath}"
-                });
+                    var trimmedRow = rows[i].Trim();
 
-                LoadSettings();
+                    if (trimmedRow.StartsWith('['))
+                    {
+                        var wasSettingsSection = settingsSection;
+
+                        settingsSection = trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase);
+
+                        if (settingsSection)
+                            settingsSectionIndex = i;
+
+                        if (wasSettingsSection
+                            && !settingsSection)
+                        {
+                            var missingKeys = GetMissingKeys(foundKeys);
+
+                            rows.InsertRange(i, missingKeys);
+
+                            i += missingKeys.Count;
+                        }
+
+                        continue;
+                    }
+
+                    if (!settingsSection
+                        || !trimmedRow.Contains('='))
+                        continue;
+
+                    var parts = trimmedRow.Split('=');
+
+                    if (parts.Length != 2)
+                        continue;
+
+                    var key = parts[0].Trim();
+
+                    foundKeys.Add(key);
+
+                    if (settingsDefinitions.TryGetValue(key, out var definition))
+                        rows[i] = $"{key}={definition.Getter()}";
+                }
+
+                if (settingsSectionIndex == -1)
+                {
+                    rows.Insert(0, "[SETTINGS]");
+                    rows.InsertRange(1, GetMissingKeys(foundKeys));
+                }
+                else if (settingsSection)
+                    rows.AddRange(GetMissingKeys(foundKeys));
+
+                File.WriteAllLines(settingsFilePath, rows);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occurred while trying to save the settings: {0}.", ex.Message);
+                Log.Error(ex, nameof(SaveSettings));
             }
         }
     }

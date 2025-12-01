@@ -29,6 +29,9 @@
         [ObservableProperty]
         private string _sirHurtPath = string.Empty;
 
+        [ObservableProperty]
+        private bool _runSirHurtEnabled = false;
+
         public Settings()
         {
             SirstrapConfigurationService.LoadSettings();
@@ -42,6 +45,7 @@
             RobloxCdnUri = SirstrapConfiguration.RobloxCdnUri;
             RobloxVersionOverride = SirstrapConfiguration.RobloxVersionOverride;
             SirHurtPath = SirstrapConfiguration.SirHurtPath;
+            RunSirHurtEnabled = File.Exists(Path.Combine(SirstrapConfiguration.SirHurtPath, "bootstrapper.exe"));
         }
 
         partial void OnMultiInstanceChanged(bool value)
