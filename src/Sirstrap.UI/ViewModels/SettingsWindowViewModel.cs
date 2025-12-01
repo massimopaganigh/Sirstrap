@@ -30,13 +30,48 @@
         }
 
         [RelayCommand]
+        private void RunSirHurt()
+        {
+            try
+            {
+                var sirHurt = Path.Combine(Settings.SirHurtPath, "bootstrapper.exe");
+
+                if (!File.Exists(sirHurt))
+                    return;
+
+                ProcessStartInfo processStartInfo = new()
+                {
+                    FileName = sirHurt
+                };
+
+                using Process process = new()
+                {
+                    StartInfo = processStartInfo
+                };
+
+                process.Start();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(RunSirHurt));
+            }
+        }
+
+        [RelayCommand]
         private void Save()
         {
-            Settings.Set();
+            try
+            {
+                Settings.Set();
 
-            App.ApplyFontFamily();
+                App.ApplyFontFamily();
 
-            CloseSpecificWindow<SettingsWindow>();
+                CloseSpecificWindow<SettingsWindow>();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(Save));
+            }
         }
     }
 }
