@@ -77,7 +77,7 @@
             {
                 settingsFilePath ??= GetSettingsFilePath();
 
-                Log.Debug("[{0}] Loading settings (SettingsFilePath: {1})...", nameof(LoadSettings), settingsFilePath);
+                Log.Information("[{0}] Loading settings (SettingsFilePath: {1})...", nameof(LoadSettings), settingsFilePath);
 
                 if (!File.Exists(settingsFilePath))
                     SaveSettings();
@@ -110,7 +110,11 @@
                     var value = parts[1].Trim();
 
                     if (settingsDefinitions.TryGetValue(key, out var definition))
+                    {
+                        Log.Information("[{0}] Setting {1} to {2}...", nameof(LoadSettings), key, value);
+
                         definition.Setter(value);
+                    }
                 }
             }
             catch (Exception ex)
@@ -125,7 +129,7 @@
             {
                 settingsFilePath ??= GetSettingsFilePath();
 
-                Log.Debug("[{0}] Saving settings (SettingsFilePath: {1})...", nameof(SaveSettings), settingsFilePath);
+                Log.Information("[{0}] Saving settings (SettingsFilePath: {1})...", nameof(SaveSettings), settingsFilePath);
 
                 var settingsDefinitions = GetSettingsDefinitions();
 
