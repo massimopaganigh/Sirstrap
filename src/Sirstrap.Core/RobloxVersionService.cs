@@ -135,7 +135,7 @@
                     return version;
                 }
             }
-
+            
             if (SirstrapConfiguration.RobloxApi)
             {
                 Log.Information("[*] Roblox API is enabled, using Roblox API to retrieve version...");
