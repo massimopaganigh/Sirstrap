@@ -2,6 +2,7 @@ namespace Sirstrap.UI
 {
     public partial class App : Application
     {
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "<In sospeso>")]
         private void DisableAvaloniaDataAnnotationValidation()
         {
             var dataValidationPluginsToRemove = BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
@@ -34,7 +35,14 @@ namespace Sirstrap.UI
             }
         }
 
-        public override void Initialize() => AvaloniaXamlLoader.Load(this);
+        public override void Initialize()
+        {
+            AvaloniaXamlLoader.Load(this);
+
+#if DEBUG
+            this.AttachDeveloperTools();
+#endif
+        }
 
         public override void OnFrameworkInitializationCompleted()
         {

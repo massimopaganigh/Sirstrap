@@ -1,7 +1,4 @@
-﻿using Serilog;
-using Sirstrap.Core;
-
-namespace Sirstrap.CLI
+﻿namespace Sirstrap.CLI
 {
     internal class Program
     {
@@ -11,18 +8,12 @@ namespace Sirstrap.CLI
         {
             try
             {
-                string logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+                var logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
 
                 if (!Directory.Exists(logsDirectory))
                     Directory.CreateDirectory(logsDirectory);
 
-                string logFilePath = Path.Combine(logsDirectory, "SirstrapLog.txt");
-
-                Log.Logger = new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFilePath, fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 10).WriteTo.LastLog().CreateLogger();
-
-                string? targetFrameworkName = AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName;
-                DateTime creationTime = File.GetCreationTime(AppContext.BaseDirectory);
-                OperatingSystem oSVersion = Environment.OSVersion;
+                Log.Logger = new LoggerConfiguration().Enrich.WithThreadId().Enrich.WithThreadName().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}").WriteTo.File(Path.Combine(logsDirectory, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}").WriteTo.LastLog().CreateLogger();
 
                 Console.WriteLine($@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
@@ -30,18 +21,26 @@ namespace Sirstrap.CLI
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
   ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
 ▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {targetFrameworkName}
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {creationTime}
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {oSVersion}
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {File.GetCreationTime(AppContext.BaseDirectory)}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {Environment.OSVersion}
                     ███    ███                            ███    ███ by SirHurt CSR Team
 ");
+                SirstrapConfigurationService.LoadSettings();
 
                 await _ipcService.StartAsync("SirstrapIpc");
 
-                SirstrapConfigurationService.LoadSettings();
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
                 await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
+
+                Environment.ExitCode = 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(Main));
+
+                Environment.ExitCode = 1;
             }
             finally
             {
@@ -49,7 +48,7 @@ namespace Sirstrap.CLI
 
                 await Log.CloseAndFlushAsync();
 
-                Environment.Exit(0);
+                Environment.Exit(Environment.ExitCode);
             }
         }
     }
