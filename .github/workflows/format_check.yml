@@ -31,7 +31,7 @@ jobs:
         shell: bash
         run: |
           set -e
-          dotnet format src --folder || true
+          dotnet format src/Sirstrap.slnx || true
 
       - name: Show branch debug
         shell: bash
