@@ -1,0 +1,318 @@
+<Window
+    x:Class="Sirstrap.UI.Views.SettingsWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Sirstrap.UI.ViewModels"
+    mc:Ignorable="d"
+    CanResize="False"
+    ExtendClientAreaToDecorationsHint="True"
+    Icon="/Assets/favicon.ico"
+    SizeToContent="WidthAndHeight"
+    Opacity="0.5"
+    Title="Settings"
+    TransparencyLevelHint="AcrylicBlur"
+    WindowStartupLocation="CenterOwner"
+    x:DataType="vm:SettingsWindowViewModel">
+    <Design.DataContext>
+        <vm:SettingsWindowViewModel />
+    </Design.DataContext>
+    <Window.Styles>
+        <Style Selector="Border.glassBorder">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.2" />
+                    <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.2" />
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Border.glassBorder:pointerover">
+            <Setter Property="Opacity" Value="1.0" />
+            <Setter Property="RenderTransform" Value="scale(1.05)" />
+        </Style>
+        <Style Selector="Border.glassBorder:pointerover > TextBlock">
+            <Setter Property="Foreground" Value="#FFFFFF" />
+        </Style>
+        <Style Selector="Border.glassBorder:pointerover /template/ Border#PART_Border">
+            <Setter Property="Effect">
+                <DropShadowEffect
+                    Color="Black"
+                    BlurRadius="12"
+                    OffsetX="0"
+                    OffsetY="3"
+                    Opacity="0.5" />
+            </Setter>
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#A0454EE6" />
+                    <GradientStop Offset="0.5" Color="#80454EE6" />
+                    <GradientStop Offset="1" Color="#60454EE6" />
+                </LinearGradientBrush>
+            </Setter>
+        </Style>
+    </Window.Styles>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" MinWidth="300" />
+        </Grid.ColumnDefinitions>
+        <TextBlock
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Text="Settings"
+            FontSize="18" />
+        <TextBlock
+            Grid.Row="1"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Auto Update:"
+            FontSize="14" />
+        <CheckBox
+            Grid.Row="1"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            IsChecked="{Binding AutoUpdate}" />
+        <TextBlock
+            Grid.Row="2"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Channel Name:"
+            FontSize="14" />
+        <TextBox
+            Grid.Row="2"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            Text="{Binding ChannelName}" />
+        <TextBlock
+            Grid.Row="3"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Font Family:"
+            FontSize="14" />
+        <ComboBox
+            Grid.Row="3"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            ItemsSource="{Binding Fonts}"
+            SelectedItem="{Binding Settings.FontFamily}">
+            <ComboBox.Styles>
+                <Style Selector="ComboBox /template/ Popup">
+                    <Setter Property="HorizontalOffset" Value="0" />
+                    <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                </Style>
+            </ComboBox.Styles>
+        </ComboBox>
+        <TextBlock
+            Grid.Row="4"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Multi Instance:"
+            FontSize="14" />
+        <CheckBox
+            Grid.Row="4"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            IsChecked="{Binding MultiInstance}" />
+        <TextBlock
+            Grid.Row="5"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Incognito:"
+            FontSize="14" />
+        <CheckBox
+            Grid.Row="5"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            IsEnabled="{Binding MultiInstance}"
+            IsChecked="{Binding Incognito}" />
+        <TextBlock
+            Grid.Row="6"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Roblox API:"
+            FontSize="14" />
+        <CheckBox
+            Grid.Row="6"
+            Grid.Column="1"
+            Height="32"
+            Margin="15,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            IsChecked="{Binding RobloxApi}" />
+        <TextBlock
+            Grid.Row="7"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Roblox CDN URI:"
+            FontSize="14" />
+        <TextBox
+            Grid.Row="7"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            Text="{Binding RobloxCdnUri}" />
+        <TextBlock
+            Grid.Row="8"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="Roblox Version Override:"
+            FontSize="14" />
+        <TextBox
+            Grid.Row="8"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            Text="{Binding RobloxVersionOverride}" />
+        <TextBlock
+            Grid.Row="9"
+            Margin="0,10,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Center"
+            Text="SirHurt Path:"
+            FontSize="14" />
+        <TextBox
+            Grid.Row="9"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            CornerRadius="999"
+            DataContext="{Binding Settings}"
+            Text="{Binding SirHurtPath}"
+            IsReadOnly="True" />
+        <Border
+            Grid.Row="10"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            BorderBrush="#40FFFFFF"
+            BorderThickness="1"
+            Classes="glassBorder"
+            CornerRadius="1000"
+            Opacity="0.9">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#80454EE6" />
+                    <GradientStop Offset="0.5" Color="#60454EE6" />
+                    <GradientStop Offset="1" Color="#40454EE6" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect
+                    Color="Black"
+                    BlurRadius="8"
+                    OffsetX="0"
+                    OffsetY="2"
+                    Opacity="0.3" />
+            </Border.Effect>
+            <Button
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Command="{Binding RunSirHurtCommand}"
+                CornerRadius="999"
+                IsEnabled="{Binding Settings.RunSirHurtEnabled}">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="Run SirHurt" />
+            </Button>
+        </Border>
+        <Border
+            Grid.Row="11"
+            Grid.Column="1"
+            Height="32"
+            Margin="10,10,0,0"
+            BorderBrush="#40FFFFFF"
+            BorderThickness="1"
+            Classes="glassBorder"
+            CornerRadius="1000"
+            Opacity="0.9">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0" Color="#80454EE6" />
+                    <GradientStop Offset="0.5" Color="#60454EE6" />
+                    <GradientStop Offset="1" Color="#40454EE6" />
+                </LinearGradientBrush>
+            </Border.Background>
+            <Border.Effect>
+                <DropShadowEffect
+                    Color="Black"
+                    BlurRadius="8"
+                    OffsetX="0"
+                    OffsetY="2"
+                    Opacity="0.3" />
+            </Border.Effect>
+            <Button
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="Transparent"
+                Command="{Binding SaveCommand}"
+                CornerRadius="999">
+                <TextBlock
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Text="Save" />
+            </Button>
+        </Border>
+    </Grid>
+</Window>

@@ -16,7 +16,7 @@
     Opacity="0.5"
     Title="Sirstrap"
     TransparencyLevelHint="AcrylicBlur"
-    WindowStartupLocation="CenterScreen"
+    WindowStartupLocation="CenterOwner"
     x:DataType="vm:MainWindowViewModel">
     <Design.DataContext>
         <vm:MainWindowViewModel />
@@ -80,9 +80,15 @@
                 </Style>
             </Image.Styles>
         </Image>
+        <TextBlock
+            Margin="10"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Text="Sirstrap"
+            FontSize="18" />
         <Border
-            MaxWidth="150"
-            MaxHeight="180"
+            MaxWidth="145"
+            MaxHeight="150"
             Margin="10,0,0,10"
             HorizontalAlignment="Left"
             VerticalAlignment="Bottom"
@@ -90,7 +96,6 @@
             BorderThickness="1"
             CornerRadius="5"
             Opacity="0.9">
-            <!--Classes="glassBorder"-->
             <Border.Background>
                 <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                     <GradientStop Offset="0" Color="#80454EE6" />
@@ -145,7 +150,7 @@
                     <TextBlock
                         FontSize="10"
                         Padding="10"
-                        Text="{Binding RobloxProcessCount}" />
+                        Text="{Binding RobloxProcesses}" />
                     <Image
                         Height="14"
                         Margin="0,0,10,0"
@@ -179,7 +184,7 @@
                     Padding="10"
                     Text="{Binding CurrentFullVersion}" />
             </Border>
-            <Border
+            <!--<Border
                 Margin="10,0,0,0"
                 BorderBrush="#40FFFFFF"
                 BorderThickness="1"
@@ -205,6 +210,178 @@
                     FontSize="10"
                     Padding="10"
                     Text="Sirstrap" />
+            </Border>-->
+        </StackPanel>
+        <StackPanel
+            Margin="0,0,10,55"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
+            <Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <Button
+                    Background="Transparent"
+                    Command="{Binding OpenIssueCommand}"
+                    CornerRadius="1000"
+                    ToolTip.Tip="Open an issue">
+                    <Image
+                        Width="19"
+                        Height="19"
+                        Margin="0,0,0,0"
+                        Source="avares://Sirstrap/Assets/issue.png" />
+                </Button>
+            </Border>
+            <Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <Button
+                    Background="Transparent"
+                    Command="{Binding OpenGitHubCommand}"
+                    CornerRadius="1000"
+                    ToolTip.Tip="Open GitHub">
+                    <Image
+                        Width="19"
+                        Height="19"
+                        Margin="0,0,0,0"
+                        Source="avares://Sirstrap/Assets/github.png" />
+                </Button>
+            </Border>
+            <Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                Opacity="0.9">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <Button
+                    Background="Transparent"
+                    Command="{Binding OpenSettingsCommand}"
+                    CornerRadius="1000"
+                    ToolTip.Tip="Open settings">
+                    <Image
+                        Width="19"
+                        Height="19"
+                        Margin="0,0,0,0"
+                        Source="avares://Sirstrap/Assets/settings.png" />
+                </Button>
+            </Border>
+            <!--<Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                IsVisible="{Binding ShowServerLocation}"
+                Opacity="0.9"
+                ToolTip.Tip="Server location">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding ServerLocation}" />
+            </Border>-->
+        </StackPanel>
+        <StackPanel
+            Margin="0,0,10,100"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
+            <Border
+                Margin="10,0,0,0"
+                BorderBrush="#40FFFFFF"
+                BorderThickness="1"
+                Classes="glassBorder"
+                CornerRadius="1000"
+                IsVisible="{Binding ShowServerLocation}"
+                Opacity="0.9"
+                ToolTip.Tip="Server location">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Offset="0" Color="#80454EE6" />
+                        <GradientStop Offset="0.5" Color="#60454EE6" />
+                        <GradientStop Offset="1" Color="#40454EE6" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <Border.Effect>
+                    <DropShadowEffect
+                        Color="Black"
+                        BlurRadius="8"
+                        OffsetX="0"
+                        OffsetY="2"
+                        Opacity="0.3" />
+                </Border.Effect>
+                <TextBlock
+                    FontSize="10"
+                    Padding="10"
+                    Text="{Binding ServerLocation}" />
             </Border>
         </StackPanel>
     </Grid>

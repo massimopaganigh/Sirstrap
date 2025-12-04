@@ -5,6 +5,8 @@ namespace Sirstrap.CLI
 {
     internal class Program
     {
+        private static readonly IpcService _ipcService = new();
+
         public static async Task Main(string[] args)
         {
             try
@@ -33,13 +35,18 @@ namespace Sirstrap.CLI
  ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {oSVersion}
                     ███    ███                            ███    ███ by SirHurt CSR Team
 ");
-                SirstrapConfigurationService.LoadConfiguration();
+
+                await _ipcService.StartAsync("SirstrapIpc");
+
+                SirstrapConfigurationService.LoadSettings();
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
                 await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
             }
             finally
             {
+                await _ipcService.StopAsync();
+
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(0);

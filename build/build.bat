@@ -9,7 +9,7 @@ if "%1" == "--no-test" (
 )
 
 set "release_dir=..\out\release"
-set "upx_path=..\src\ext\upx-5.0.1-win64\upx.exe"
+set "upx_path=..\src\ext\upx-5.0.2-win64\upx.exe"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
 set "sirstrap_cli_fat_publish_dir=..\out\Sirstrap.CLI_fat"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
@@ -112,7 +112,11 @@ del /f /q "%sirstrap_cli_publish_dir%\_Sirstrap.exe"
 
 echo Building Sirstrap.UI...
 
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
+
 dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -c Release
+
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
 
 if %ERRORLEVEL% neq 0 (
     echo Build of Sirstrap.UI failed.
@@ -134,8 +138,12 @@ if %ERRORLEVEL% neq 0 (
 
 echo Compressing Sirstrap.UI...
 
+ren "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll" "_libHarfBuzzSharp.dll"
+ren "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll" "_libSkiaSharp.dll"
 ren "%sirstrap_ui_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
 
+"%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\bin\_libHarfBuzzSharp.dll" -o "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll"
+"%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\bin\_libSkiaSharp.dll" -o "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll"
 "%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\_Sirstrap.exe" -o "%sirstrap_ui_publish_dir%\Sirstrap.exe"
 
 if %ERRORLEVEL% neq 0 (
@@ -143,6 +151,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
+"%upx_path%" -t "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll"
+"%upx_path%" -t "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll"
 "%upx_path%" -t "%sirstrap_ui_publish_dir%\Sirstrap.exe"
 
 if %ERRORLEVEL% neq 0 (
@@ -150,6 +160,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
+del /f /q "%sirstrap_ui_publish_dir%\bin\_libHarfBuzzSharp.dll"
+del /f /q "%sirstrap_ui_publish_dir%\bin\_libSkiaSharp.dll"
 del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
 
 if "%should_test%" == "true" (

@@ -1,16 +1,39 @@
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core.Plugins;
-using Avalonia.Markup.Xaml;
-using Sirstrap.UI.ViewModels;
-using Sirstrap.UI.Views;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-
 namespace Sirstrap.UI
 {
     public partial class App : Application
     {
+        private void DisableAvaloniaDataAnnotationValidation()
+        {
+            var dataValidationPluginsToRemove = BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
+
+            foreach (var plugin in dataValidationPluginsToRemove)
+                BindingPlugins.DataValidators.Remove(plugin);
+        }
+
+        public static void ApplyFontFamily()
+        {
+            try
+            {
+                if (Current is not App app)
+                    return;
+
+                var fontFamilyName = SirstrapConfiguration.FontFamily;
+
+                FontFamily fontFamily;
+
+                if (fontFamilyName == "Minecraft")
+                    fontFamily = new FontFamily("avares://Sirstrap/Assets#Minecraft");
+                else
+                    fontFamily = new FontFamily(fontFamilyName);
+
+                app.Resources["AppFontFamily"] = fontFamily;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(ApplyFontFamily));
+            }
+        }
+
         public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
         public override void OnFrameworkInitializationCompleted()
@@ -19,27 +42,12 @@ namespace Sirstrap.UI
             {
                 DisableAvaloniaDataAnnotationValidation();
 
-                MainWindowViewModel viewModel = new();
-                MainWindow mainWindow = new()
-                {
-                    DataContext = viewModel,
-                };
+                desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
 
-                viewModel.SetMainWindow(mainWindow);
-
-                desktop.MainWindow = mainWindow;
+                ApplyFontFamily();
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        [SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = "<Pending>")]
-        private void DisableAvaloniaDataAnnotationValidation()
-        {
-            var dataValidationPluginsToRemove = BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-            foreach (var plugin in dataValidationPluginsToRemove)
-                BindingPlugins.DataValidators.Remove(plugin);
         }
     }
 }

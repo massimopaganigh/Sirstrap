@@ -1,22 +1,7 @@
 namespace Sirstrap.Core
 {
-    /// <summary>
-    /// Utility class that provides functionality for managing User Account Control (UAC) elevation
-    /// and handling application restarts with elevated privileges when required.
-    /// </summary>
     public static class UacHelper
     {
-        /// <summary>
-        /// Ensures that an operation requiring elevated privileges is executed with the necessary permissions,
-        /// automatically handling the elevation process if required.
-        /// </summary>
-        /// <param name="operation">The operation delegate that requires elevated privileges.</param>
-        /// <param name="arguments">Command-line arguments for the elevated instance if restart is needed.</param>
-        /// <param name="operationDescription">A descriptive name of the operation for logging purposes.</param>
-        /// <returns>
-        /// <c>true</c> if the operation completed successfully;
-        /// <c>false</c> if elevation is required or if the operation failed.
-        /// </returns>
         public static bool EnsureAdministratorPrivileges(Func<bool> operation, string[] arguments, string operationDescription)
         {
             try
@@ -52,12 +37,6 @@ namespace Sirstrap.Core
             }
         }
 
-        /// <summary>
-        /// Determines whether the current application instance is running with elevated administrator privileges.
-        /// </summary>
-        /// <returns>
-        /// <c>true</c> if the application has administrator privileges; otherwise, <c>false</c>.
-        /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "<Pending>")]
         public static bool IsRunningAsAdministrator()
         {
@@ -71,24 +50,12 @@ namespace Sirstrap.Core
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "[!] Failed to verify administrator privileges: {0}", ex.Message);
+                Log.Warning(ex, "[*] Failed to verify administrator privileges: {0}", ex.Message);
 
                 return false;
             }
         }
 
-        /// <summary>
-        /// Initiates a restart of the current application with elevated administrator privileges.
-        /// </summary>
-        /// <param name="arguments">Command-line arguments to be passed to the elevated instance.</param>
-        /// <returns>
-        /// <c>true</c> if the restart process was successfully initiated; otherwise, <c>false</c>.
-        /// </returns>
-        /// <remarks>
-        /// This method triggers the Windows UAC prompt to request elevation.
-        /// The current application instance should terminate upon successful elevation.
-        /// If the user denies the UAC prompt, the method returns <c>false</c>.
-        /// </remarks>
         public static bool RestartAsAdministrator(string[] arguments)
         {
             try

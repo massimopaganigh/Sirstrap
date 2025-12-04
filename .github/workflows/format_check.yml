@@ -18,29 +18,66 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup dotnet
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '9.0.x'
 
-      - name: Format check
-        id: format_check
-        run: cd src && dotnet format --verify-no-changes
-        shell: cmd
-        continue-on-error: true
-
-      - name: Format
-        if: steps.format_check.outcome == 'failure'
-        run: cd src && dotnet format
-        shell: cmd
-
-      - name: Commit
-        if: steps.format_check.outcome == 'failure'
+      - name: Run dotnet format
+        shell: bash
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add -A
-          git diff --staged --quiet || git commit -m "chore: auto-format code"
-          git push origin HEAD:${{ github.head_ref }}
-        shell: cmd
+          set -e
+          dotnet format src/Sirstrap.slnx || true
+
+      - name: Show branch debug
+        shell: bash
+        run: |
+          echo "GITHUB_REF=${GITHUB_REF}"
+          echo "github.ref_name=${{ github.ref_name }}"
+
+      - name: Commit and push formatting changes
+        shell: bash
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo "Using branch: ${BRANCH_NAME}"
+          if [ -z "${BRANCH_NAME}" ]; then
+            # fallback: extract from GITHUB_REF
+            BRANCH_NAME=$(echo "${GITHUB_REF}" | sed -E 's@^refs/heads/@@')
+            echo "Falling back to branch parsed from GITHUB_REF: ${BRANCH_NAME}"
+          fi
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore: auto-format code"
+            git push origin HEAD:"${BRANCH_NAME}"
+          else
+            echo "No formatting changes to commit"
+          fi
+
+      # Alternative PowerShell commit step for maintainers who prefer pwsh:
+      # - name: Commit and push formatting changes (PowerShell)
+      #   shell: pwsh
+      #   env:
+      #     BRANCH_NAME: ${{ github.ref_name }}
+      #   run: |
+      #     git config user.name "github-actions[bot]"
+      #     git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      #     Write-Host "Using branch: $env:BRANCH_NAME"
+      #     if ([string]::IsNullOrEmpty($env:BRANCH_NAME)) {
+      #       $env:BRANCH_NAME = $env:GITHUB_REF -replace '^refs/heads/', ''
+      #       Write-Host "Falling back to branch parsed from GITHUB_REF: $env:BRANCH_NAME"
+      #     }
+      #     $changes = git status --porcelain
+      #     if ($changes) {
+      #       git add -A
+      #       git commit -m "chore: auto-format code"
+      #       git push origin "HEAD:$env:BRANCH_NAME"
+      #     } else {
+      #       Write-Host "No formatting changes to commit"
+      #     }

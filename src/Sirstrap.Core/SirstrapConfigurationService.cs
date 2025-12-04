@@ -2,118 +2,219 @@
 {
     public static class SirstrapConfigurationService
     {
-        private static string GetConfigurationPath()
+        private static List<string> GetMissingKeys(HashSet<string> foundKeys)
         {
-            string configurationPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
+            var missingKeys = new List<string>();
+            var settingsDefinitions = GetSettingsDefinitions();
 
-            Directory.CreateDirectory(configurationPath);
+            foreach (var setting in settingsDefinitions)
+                if (!foundKeys.Contains(setting.Key))
+                    missingKeys.Add($"{setting.Key}={setting.Value.Getter()}");
 
-            return Path.Combine(configurationPath, "settings.ini");
+            return missingKeys;
         }
 
-        private static void SaveConfiguration()
+        private static Dictionary<string, (Func<string> Getter, Action<string> Setter)> GetSettingsDefinitions() => new()
         {
-            string configurationPath = GetConfigurationPath();
+            ["AUTO_UPDATE"] = (
+                () => SirstrapConfiguration.AutoUpdate.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.AutoUpdate = v; }
+            ),
+            ["CHANNEL_NAME"] = (
+                () => SirstrapConfiguration.ChannelName,
+                value => SirstrapConfiguration.ChannelName = value
+            ),
+            ["FONT_FAMILY"] = (
+                () => SirstrapConfiguration.FontFamily,
+                value => SirstrapConfiguration.FontFamily = value
+            ),
+            ["INCOGNITO"] = (
+                () => SirstrapConfiguration.Incognito.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.Incognito = v; }
+            ),
+            ["MULTI_INSTANCE"] = (
+                () => SirstrapConfiguration.MultiInstance.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.MultiInstance = v; }
+            ),
+            ["ROBLOX_API"] = (
+                () => SirstrapConfiguration.RobloxApi.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.RobloxApi = v; }
+            ),
+            ["ROBLOX_CND_URI"] = (
+                () => SirstrapConfiguration.RobloxCdnUri,
+                value => SirstrapConfiguration.RobloxCdnUri = value
+            ),
+            ["ROBLOX_VERSION_OVERRIDE"] = (
+                () => SirstrapConfiguration.RobloxVersionOverride,
+                value => SirstrapConfiguration.RobloxVersionOverride = value
+            ),
+            ["SIRHURT_PATH"] = (
+                () => SirHurtService.GetSirHurtPath(),
+                value => SirHurtService.GetSirHurtPath()
+            )
+        };
 
-            try
-            {
-                List<string> lines =
-                [
-                    $"ChannelName={SirstrapConfiguration.ChannelName}",
-                    $"MultiInstance={SirstrapConfiguration.MultiInstance}",
-                    $"RobloxApi={SirstrapConfiguration.RobloxApi}",
-                    $"RobloxCdnUri={SirstrapConfiguration.RobloxCdnUri}",
-                    $"# WIP",
-                    $"Incognito={SirstrapConfiguration.Incognito}"
-                ];
+        private static string GetSettingsFilePath()
+        {
+            var settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
 
-                File.WriteAllLines(configurationPath, lines);
-            }
-            catch (Exception ex)
+            if (!Directory.Exists(settingsPath))
+                Directory.CreateDirectory(settingsPath);
+            else
             {
-                Log.Error(ex, "[!] Configuration saving exception: {0}", ex.Message);
+                var oldSettingsFilePath = Path.Combine(settingsPath, "settings.ini");
+
+                if (File.Exists(oldSettingsFilePath))
+                    File.Delete(oldSettingsFilePath);
             }
+
+            return Path.Combine(settingsPath, "Sirstrap.ini");
         }
 
-        public static void LoadConfiguration()
+        public static void LoadSettings(string? settingsFilePath = null)
         {
-            string configurationPath = GetConfigurationPath();
-            HashSet<string> keys = new(StringComparer.OrdinalIgnoreCase);
-            bool toUpdate = false;
-
             try
             {
-                if (File.Exists(configurationPath))
+                settingsFilePath ??= GetSettingsFilePath();
+
+                Log.Information("[{0}] Loading settings (SettingsFilePath: {1})...", nameof(LoadSettings), settingsFilePath);
+
+                if (!File.Exists(settingsFilePath))
+                    SaveSettings();
+
+                var rows = File.ReadAllLines(settingsFilePath);
+                var settingsSection = false;
+                var settingsDefinitions = GetSettingsDefinitions();
+
+                foreach (var row in rows)
                 {
-                    string[] lines = File.ReadAllLines(configurationPath);
+                    var trimmedRow = row.Trim();
 
-                    foreach (string line in lines)
+                    if (trimmedRow.StartsWith('['))
                     {
-                        string trimmedLine = line.Trim();
+                        settingsSection = trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase);
 
-                        if (string.IsNullOrEmpty(trimmedLine)
-                            || trimmedLine.StartsWith('#'))
-                            continue;
-
-                        string[] parts = trimmedLine.Split('=', 2);
-
-                        if (parts.Length != 2)
-                            continue;
-
-                        string trimmedKey = parts[0].Trim();
-                        string trimmedValue = parts[1].Trim();
-
-                        if (string.IsNullOrEmpty(trimmedKey)
-                            || string.IsNullOrEmpty(trimmedValue))
-                            continue;
-
-                        keys.Add(trimmedKey);
-
-                        switch (trimmedKey)
-                        {
-                            case "ChannelName":
-                                SirstrapConfiguration.ChannelName = trimmedValue;
-                                break;
-                            case "MultiInstance":
-                                if (bool.TryParse(trimmedValue, out bool multiInstance))
-                                    SirstrapConfiguration.MultiInstance = multiInstance;
-                                break;
-                            case "RobloxCdnUri":
-                                SirstrapConfiguration.RobloxCdnUri = trimmedValue;
-                                break;
-                            case "RobloxApi":
-                                if (bool.TryParse(trimmedValue, out bool safeMode))
-                                    SirstrapConfiguration.RobloxApi = safeMode;
-                                break;
-                            case "Incognito":
-                                if (bool.TryParse(trimmedValue, out bool incognitoMode))
-                                    SirstrapConfiguration.Incognito = incognitoMode;
-                                break;
-                            default:
-                                Log.Warning("[*] Configuration unknown values: {0}={1}.", trimmedKey, trimmedValue);
-                                break;
-                        }
+                        continue;
                     }
 
-                    if (!keys.Contains("ChannelName")
-                        || !keys.Contains("MultiInstance")
-                        || !keys.Contains("RobloxApi")
-                        || !keys.Contains("RobloxCdnUri")
-                        || !keys.Contains("Incognito"))
-                        toUpdate = true;
+                    if (!settingsSection
+                        || !trimmedRow.Contains('='))
+                        continue;
 
-                    if (toUpdate)
-                        SaveConfiguration();
+                    var parts = trimmedRow.Split('=');
 
-                    return;
+                    if (parts.Length != 2)
+                        continue;
+
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+
+                    if (settingsDefinitions.TryGetValue(key, out var definition))
+                    {
+                        Log.Information("[{0}] Setting {1} to {2}...", nameof(LoadSettings), key, value);
+
+                        definition.Setter(value);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "[*] Configuration loading exception: {0}", ex.Message);
+                Log.Error(ex, nameof(LoadSettings));
             }
+        }
 
-            SaveConfiguration();
+        public static void SaveSettings(string? settingsFilePath = null)
+        {
+            try
+            {
+                settingsFilePath ??= GetSettingsFilePath();
+
+                Log.Information("[{0}] Saving settings (SettingsFilePath: {1})...", nameof(SaveSettings), settingsFilePath);
+
+                var settingsDefinitions = GetSettingsDefinitions();
+
+                if (!File.Exists(settingsFilePath))
+                {
+                    var directory = Path.GetDirectoryName(settingsFilePath);
+
+                    if (!string.IsNullOrWhiteSpace(directory)
+                        && !Directory.Exists(directory))
+                        Directory.CreateDirectory(directory);
+
+                    var content = new StringBuilder();
+
+                    content.AppendLine("[SETTINGS]");
+
+                    foreach (var setting in settingsDefinitions)
+                        content.AppendLine($"{setting.Key}={setting.Value.Getter()}");
+
+                    File.WriteAllText(settingsFilePath, content.ToString(), Encoding.UTF8);
+
+                    return;
+                }
+
+                var rows = File.ReadAllLines(settingsFilePath).ToList();
+                var settingsSection = false;
+                var settingsSectionIndex = -1;
+                var foundKeys = new HashSet<string>();
+
+                for (var i = 0; i < rows.Count; i++)
+                {
+                    var trimmedRow = rows[i].Trim();
+
+                    if (trimmedRow.StartsWith('['))
+                    {
+                        var wasSettingsSection = settingsSection;
+
+                        settingsSection = trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase);
+
+                        if (settingsSection)
+                            settingsSectionIndex = i;
+
+                        if (wasSettingsSection
+                            && !settingsSection)
+                        {
+                            var missingKeys = GetMissingKeys(foundKeys);
+
+                            rows.InsertRange(i, missingKeys);
+
+                            i += missingKeys.Count;
+                        }
+
+                        continue;
+                    }
+
+                    if (!settingsSection
+                        || !trimmedRow.Contains('='))
+                        continue;
+
+                    var parts = trimmedRow.Split('=');
+
+                    if (parts.Length != 2)
+                        continue;
+
+                    var key = parts[0].Trim();
+
+                    foundKeys.Add(key);
+
+                    if (settingsDefinitions.TryGetValue(key, out var definition))
+                        rows[i] = $"{key}={definition.Getter()}";
+                }
+
+                if (settingsSectionIndex == -1)
+                {
+                    rows.Insert(0, "[SETTINGS]");
+                    rows.InsertRange(1, GetMissingKeys(foundKeys));
+                }
+                else if (settingsSection)
+                    rows.AddRange(GetMissingKeys(foundKeys));
+
+                File.WriteAllLines(settingsFilePath, rows);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(SaveSettings));
+            }
         }
     }
 }
