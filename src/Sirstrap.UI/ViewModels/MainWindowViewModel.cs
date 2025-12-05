@@ -218,16 +218,16 @@
         {
             try
             {
-                var logsDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+                var logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
 
-                if (!Directory.Exists(logsDirectoryPath))
-                    Directory.CreateDirectory(logsDirectoryPath);
+                if (!Directory.Exists(logsDirectory))
+                    Directory.CreateDirectory(logsDirectory);
 
-                Log.Logger = new LoggerConfiguration().WriteTo.File(Path.Combine(logsDirectoryPath, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5).WriteTo.LastLog().CreateLogger();
-
-                await _ipcService.StartAsync("SirstrapIpc");
+                Log.Logger = new LoggerConfiguration().Enrich.WithThreadId().Enrich.WithThreadName().WriteTo.File(Path.Combine(logsDirectory, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}").WriteTo.LastLog().CreateLogger();
 
                 SirstrapConfigurationService.LoadSettings();
+
+                await _ipcService.StartAsync("SirstrapIpc");
 
                 var args = Program.Args ?? [];
 

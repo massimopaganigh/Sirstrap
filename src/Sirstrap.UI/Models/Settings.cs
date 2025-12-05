@@ -27,10 +27,10 @@
         private string _robloxVersionOverride = string.Empty;
 
         [ObservableProperty]
-        private string _sirHurtPath = string.Empty;
+        private bool _runSirHurtEnabled = false;
 
         [ObservableProperty]
-        private bool _runSirHurtEnabled = false;
+        private string _sirHurtPath = string.Empty;
 
         public Settings()
         {
@@ -44,8 +44,8 @@
             RobloxApi = SirstrapConfiguration.RobloxApi;
             RobloxCdnUri = SirstrapConfiguration.RobloxCdnUri;
             RobloxVersionOverride = SirstrapConfiguration.RobloxVersionOverride;
-            SirHurtPath = SirstrapConfiguration.SirHurtPath;
             RunSirHurtEnabled = File.Exists(Path.Combine(SirstrapConfiguration.SirHurtPath, "bootstrapper.exe"));
+            SirHurtPath = SirstrapConfiguration.SirHurtPath;
         }
 
         partial void OnMultiInstanceChanged(bool value)

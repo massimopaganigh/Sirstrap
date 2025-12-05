@@ -2,6 +2,7 @@ namespace Sirstrap.UI
 {
     public class ViewLocator : IDataTemplate
     {
+        [UnconditionalSuppressMessage("Trimming", "IL2057", Justification = "<In sospeso>")]
         public Control? Build(object? param)
         {
             if (param is null)
