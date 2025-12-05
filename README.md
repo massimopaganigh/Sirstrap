@@ -2,7 +2,7 @@
 
 # <image src="images/SirstrapIcon.png" height="24"> Sirstrap
 
-An alternative bootstrapper for Roblox with a bunch of extra features. Created by exploiters for exploiters.
+An alternative Roblox bootstrapper packed with additional features — built by exploiters, for exploiters.
 
 [![Release](https://img.shields.io/github/v/release/massimopaganigh/sirstrap?label=Release)](https://github.com/massimopaganigh/sirstrap/releases/latest)
 [![License](https://img.shields.io/github/license/massimopaganigh/sirstrap?label=License)](https://github.com/massimopaganigh/sirstrap/blob/main/LICENSE)
