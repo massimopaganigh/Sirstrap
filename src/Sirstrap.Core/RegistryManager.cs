@@ -2,9 +2,14 @@
 {
     public static class RegistryManager
     {
+        /// <summary>
+        /// Registers a protocol handler in the Windows Registry.
+        /// Uses CurrentUser\Software\Classes path which doesn't require admin privileges.
+        /// Based on Bloxstrap's registry handling approach.
+        /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Convalida compatibilità della piattaforma", Justification = "<In sospeso>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Rimuovere l'eliminazione non necessaria", Justification = "<In sospeso>")]
-        private static bool CreateProtocolRegistration(string protocol)
+        private static bool RegisterProtocol(string protocol)
         {
             try
             {
@@ -12,25 +17,47 @@
 
                 Log.Information("[*] Registering protocol {0} with command: {1}", protocol, expectedCommand);
 
-                using RegistryKey protocolKey = Registry.ClassesRoot.CreateSubKey(protocol);
-                using RegistryKey shellKey = protocolKey.CreateSubKey("shell");
-                using RegistryKey openKey = shellKey.CreateSubKey("open");
-                using RegistryKey commandKey = openKey.CreateSubKey("command");
+                // Use CurrentUser\Software\Classes instead of ClassesRoot - doesn't require admin privileges
+                // CreateSubKey creates the key if it doesn't exist, or opens it with write access if it does
+                using RegistryKey protocolKey = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{protocol}");
+                using RegistryKey defaultIconKey = protocolKey.CreateSubKey("DefaultIcon");
+                using RegistryKey commandKey = protocolKey.CreateSubKey(@"shell\open\command");
 
-                commandKey.SetValue(string.Empty, expectedCommand);
+                // Set URL Protocol attributes if not already set
+                if (protocolKey.GetValue("") is null)
+                {
+                    SetValueSafe(protocolKey, "", $"URL: {protocol} Protocol");
+                    SetValueSafe(protocolKey, "URL Protocol", "");
+                }
+
+                // Only update command if it's different from expected
+                string? currentCommand = commandKey.GetValue("")?.ToString();
+                if (!string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase))
+                {
+                    string iconPath = $"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}";
+                    SetValueSafe(defaultIconKey, "", iconPath);
+                    SetValueSafe(commandKey, "", expectedCommand);
+                }
 
                 Log.Information("[*] Protocol {0} registered successfully.", protocol);
 
                 return true;
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ex, "[!] Unauthorized access when registering protocol {0}. Registry write permissions may be restricted.", protocol);
+                return false;
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Failed to register protocol {0}: {1}", protocol, ex.Message);
-
                 return false;
             }
         }
 
+        /// <summary>
+        /// Checks if a protocol is already correctly registered and registers it if needed.
+        /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Convalida compatibilità della piattaforma", Justification = "<In sospeso>")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Rimuovere l'eliminazione non necessaria", Justification = "<In sospeso>")]
         private static bool EnsureProtocolRegistration(string protocol)
@@ -39,61 +66,52 @@
             {
                 string expectedCommand = GetExpectedCommand();
 
-                using RegistryKey? protocolKey = Registry.ClassesRoot.OpenSubKey(protocol);
+                // Check if protocol is already registered correctly
+                // Use CurrentUser\Software\Classes path to match where we write
+                using RegistryKey? commandKey = Registry.CurrentUser.OpenSubKey($@"Software\Classes\{protocol}\shell\open\command");
 
-                if (protocolKey == null)
+                if (commandKey != null)
                 {
-                    Log.Information("[*] Protocol {0} is not registered in the registry.", protocol);
+                    string? currentCommand = commandKey.GetValue("")?.ToString();
+                    
+                    if (string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Log.Information("[*] Protocol {0} is already correctly registered with Sirstrap.", protocol);
+                        return true;
+                    }
 
-                    return CreateProtocolRegistration(protocol);
+                    Log.Information("[*] Protocol {0} is registered with a different handler: {1}", protocol, currentCommand ?? "null");
+                }
+                else
+                {
+                    Log.Information("[*] Protocol {0} is not registered or has incomplete configuration.", protocol);
                 }
 
-                using RegistryKey? shellKey = protocolKey.OpenSubKey("shell");
-
-                if (shellKey == null)
-                {
-                    Log.Information("[*] Protocol {0} exists but has no shell configuration.", protocol);
-
-                    return CreateProtocolRegistration(protocol);
-                }
-
-                using RegistryKey? openKey = shellKey.OpenSubKey("open");
-
-                if (openKey == null)
-                {
-                    Log.Information("[*] Protocol {0} exists but has no open command configuration.", protocol);
-
-                    return CreateProtocolRegistration(protocol);
-                }
-
-                using RegistryKey? commandKey = openKey.OpenSubKey("command");
-
-                if (commandKey == null)
-                {
-                    Log.Information("[*] Protocol {0} exists but has no command configuration.", protocol);
-
-                    return CreateProtocolRegistration(protocol);
-                }
-
-                string? currentCommand = commandKey.GetValue(string.Empty)?.ToString();
-                bool isCorrectlyRegistered = string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase);
-
-                if (isCorrectlyRegistered)
-                {
-                    Log.Information("[*] Protocol {0} is already correctly registered with Sirstrap.", protocol);
-
-                    return true;
-                }
-
-                Log.Information("[*] Protocol {0} is registered with a different handler: {1}", protocol, currentCommand ?? "null");
-
-                return CreateProtocolRegistration(protocol);
+                // Register or update the protocol
+                return RegisterProtocol(protocol);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Error checking protocol registration for {0}: {1}", protocol, ex.Message);
-
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Sets a registry value safely with proper error handling.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Convalida compatibilità della piattaforma", Justification = "<In sospeso>")]
+        private static void SetValueSafe(RegistryKey registryKey, string? name, object value)
+        {
+            try
+            {
+                Log.Debug("[*] Writing '{0}' to {1}\\{2}", value, registryKey.Name, name ?? "(Default)");
+                registryKey.SetValue(name, value);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Error(ex, "[!] Unauthorized access when writing to registry: {0}\\{1}", registryKey.Name, name ?? "(Default)");
+                throw;
             }
         }
 
@@ -103,7 +121,17 @@
         {
             Log.Information("[*] Ensuring protocol {0} registration...", protocol);
 
-            return UacHelper.EnsureAdministratorPrivileges(() => EnsureProtocolRegistration(protocol), arguments, $"Protocol registration for {protocol}");
+            // First try without elevation since CurrentUser\Software\Classes doesn't typically need admin
+            try
+            {
+                return EnsureProtocolRegistration(protocol);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // Fall back to requesting admin privileges if necessary
+                Log.Warning("[*] Registry access denied, requesting administrator privileges...");
+                return UacHelper.EnsureAdministratorPrivileges(() => EnsureProtocolRegistration(protocol), arguments, $"Protocol registration for {protocol}");
+            }
         }
     }
 }
