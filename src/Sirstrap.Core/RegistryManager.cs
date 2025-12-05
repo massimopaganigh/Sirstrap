@@ -30,12 +30,18 @@
                     SetValueSafe(protocolKey, "URL Protocol", "");
                 }
 
+                // Set the default icon path (always ensure it's set correctly)
+                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
+                string? currentIcon = defaultIconKey.GetValue("")?.ToString();
+                if (!string.Equals(currentIcon, iconPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    SetValueSafe(defaultIconKey, "", iconPath);
+                }
+
                 // Only update command if it's different from expected
                 string? currentCommand = commandKey.GetValue("")?.ToString();
                 if (!string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase))
                 {
-                    string iconPath = $"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}";
-                    SetValueSafe(defaultIconKey, "", iconPath);
                     SetValueSafe(commandKey, "", expectedCommand);
                 }
 
