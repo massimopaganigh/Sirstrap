@@ -47,10 +47,6 @@
             ["ROBLOX_VERSION_OVERRIDE"] = (
                 () => SirstrapConfiguration.RobloxVersionOverride,
                 value => SirstrapConfiguration.RobloxVersionOverride = value
-            ),
-            ["SIRHURT_PATH"] = (
-                () => SirHurtService.GetSirHurtPath(),
-                value => SirHurtService.GetSirHurtPath()
             )
         };
 

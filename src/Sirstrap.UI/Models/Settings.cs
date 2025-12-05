@@ -65,7 +65,6 @@
             SirstrapConfiguration.RobloxApi = RobloxApi;
             SirstrapConfiguration.RobloxCdnUri = RobloxCdnUri;
             SirstrapConfiguration.RobloxVersionOverride = RobloxVersionOverride;
-            SirstrapConfiguration.SirHurtPath = SirHurtPath;
 
             SirstrapConfigurationService.SaveSettings();
             SirstrapConfigurationService.LoadSettings();
