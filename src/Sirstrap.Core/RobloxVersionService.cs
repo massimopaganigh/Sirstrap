@@ -86,12 +86,55 @@
             }
         }
 
+        private async Task<bool> ValidateVersion(string version)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(version))
+                    return false;
+
+                var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, UriBuilder.GetManifestUri(new Configuration
+                {
+                    ChannelName = SirstrapConfiguration.ChannelName,
+                    VersionHash = version
+                })));
+
+                if (response.IsSuccessStatusCode)
+                    return true;
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<string> GetLatestVersionAsync()
         {
             string version;
 
             if (!string.IsNullOrWhiteSpace(SirstrapConfiguration.RobloxVersionOverride))
-                return SirstrapConfiguration.RobloxVersionOverride;
+            {
+                Log.Information("[*] Roblox version override is set, using Roblox version override to retrieve version...");
+
+                version = SirstrapConfiguration.RobloxVersionOverride;
+
+                if (!await ValidateVersion(version))
+                {
+                    Log.Error("[!] Validation failed. Invalid Roblox version override.");
+
+#pragma warning disable IDE0059 // Assegnazione non necessaria di un valore
+                    version = string.Empty;
+#pragma warning restore IDE0059 // Assegnazione non necessaria di un valore
+                }
+                else
+                {
+                    Log.Information("[*] Using version: {0}.", version);
+
+                    return version;
+                }
+            }
 
             if (SirstrapConfiguration.RobloxApi)
             {
@@ -101,10 +144,6 @@
 
                 if (string.IsNullOrWhiteSpace(version))
                     Log.Error("[!] Failed to retrieve version.");
-                else
-                    Log.Information("[*] Using version: {0}.", version);
-
-                return version;
             }
             else
             {
@@ -120,8 +159,6 @@
 
                     if (string.IsNullOrEmpty(version))
                         Log.Error("[!] Failed to retrieve version.");
-                    else
-                        Log.Information("[*] Using version: {0}.", version);
                 }
                 else if (isOutdated)
                 {
@@ -134,19 +171,13 @@
                         Log.Error("[!] Failed to retrieve version from Roblox API, using outdated SirHurt version...");
 
                         version = sirhurtVersion;
-
-                        Log.Information("[*] Using version: {0}.", version);
                     }
-                    else
-                        Log.Information("[*] Using version: {0}.", version);
                 }
                 else
-                {
                     version = sirhurtVersion;
-
-                    Log.Information("[*] Using version: {0}.", version);
-                }
             }
+
+            Log.Information("[*] Using version: {0}.", version);
 
             return version;
         }
