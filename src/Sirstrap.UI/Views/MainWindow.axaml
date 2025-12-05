@@ -69,11 +69,13 @@
                                 <Setter Property="ScaleTransform.ScaleX" Value="0.5" />
                                 <Setter Property="ScaleTransform.ScaleY" Value="0.5" />
                                 <Setter Property="Opacity" Value="0.5" />
+                                <Setter Property="RotateTransform.Angle" Value="0" />
                             </KeyFrame>
                             <KeyFrame Cue="100%">
                                 <Setter Property="ScaleTransform.ScaleX" Value="0.8" />
                                 <Setter Property="ScaleTransform.ScaleY" Value="0.8" />
                                 <Setter Property="Opacity" Value="0.8" />
+                                <Setter Property="RotateTransform.Angle" Value="15" />
                             </KeyFrame>
                         </Animation>
                     </Style.Animations>
