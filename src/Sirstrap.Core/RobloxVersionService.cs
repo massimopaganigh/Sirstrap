@@ -119,21 +119,25 @@
                 Log.Information("[*] Roblox version override is set, using Roblox version override to retrieve version...");
 
                 version = SirstrapConfiguration.RobloxVersionOverride;
+                
+                Log.Information("[*] Using version: {0}.", version);
 
-                if (!await ValidateVersion(version))
-                {
-                    Log.Error("[!] Validation failed. Invalid Roblox version override.");
+                return version;
 
-#pragma warning disable IDE0059 // Assegnazione non necessaria di un valore
-                    version = string.Empty;
-#pragma warning restore IDE0059 // Assegnazione non necessaria di un valore
-                }
-                else
-                {
-                    Log.Information("[*] Using version: {0}.", version);
+//                if (!await ValidateVersion(version))
+//                {
+//                    Log.Error("[!] Validation failed. Invalid Roblox version override.");
 
-                    return version;
-                }
+//#pragma warning disable IDE0059 // Assegnazione non necessaria di un valore
+//                    version = string.Empty;
+//#pragma warning restore IDE0059 // Assegnazione non necessaria di un valore
+//                }
+//                else
+//                {
+//                    Log.Information("[*] Using version: {0}.", version);
+
+//                    return version;
+//                }
             }
 
             if (SirstrapConfiguration.RobloxApi)
