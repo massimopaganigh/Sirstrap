@@ -18,6 +18,6 @@
 
         public static string RobloxVersionOverride { get; set; } = string.Empty;
 
-        public static string SirHurtPath { get; set; } = string.Empty;
+        public static string SirHurtPath => SirHurtService.GetSirHurtPath();
     }
 }

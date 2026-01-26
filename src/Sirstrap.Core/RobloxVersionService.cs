@@ -120,20 +120,24 @@
 
                 version = SirstrapConfiguration.RobloxVersionOverride;
 
-                if (!await ValidateVersion(version))
-                {
-                    Log.Error("[!] Validation failed. Invalid Roblox version override.");
+                Log.Information("[*] Using version: {0}.", version);
 
-#pragma warning disable IDE0059 // Assegnazione non necessaria di un valore
-                    version = string.Empty;
-#pragma warning restore IDE0059 // Assegnazione non necessaria di un valore
-                }
-                else
-                {
-                    Log.Information("[*] Using version: {0}.", version);
+                return version;
 
-                    return version;
-                }
+                //                if (!await ValidateVersion(version))
+                //                {
+                //                    Log.Error("[!] Validation failed. Invalid Roblox version override.");
+
+                //#pragma warning disable IDE0059 // Assegnazione non necessaria di un valore
+                //                    version = string.Empty;
+                //#pragma warning restore IDE0059 // Assegnazione non necessaria di un valore
+                //                }
+                //                else
+                //                {
+                //                    Log.Information("[*] Using version: {0}.", version);
+
+                //                    return version;
+                //                }
             }
 
             if (SirstrapConfiguration.RobloxApi)

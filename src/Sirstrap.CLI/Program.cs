@@ -13,16 +13,25 @@
                 if (!Directory.Exists(logsDirectory))
                     Directory.CreateDirectory(logsDirectory);
 
-                Log.Logger = new LoggerConfiguration().Enrich.WithThreadId().Enrich.WithThreadName().WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}").WriteTo.File(Path.Combine(logsDirectory, "SirstrapLog.txt"), fileSizeLimitBytes: 5 * 1024 * 1024, rollOnFileSizeLimit: true, retainedFileCountLimit: 5, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}").WriteTo.LastLog().CreateLogger();
+                var appGuid = Guid.NewGuid().ToString("N");
 
-                Console.WriteLine($@"
+                Log.Logger = new LoggerConfiguration()
+                    .Enrich.WithThreadId()
+                    .Enrich.WithThreadName()
+                    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}")
+                    .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
+                    .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
+                    .WriteTo.LastLog()
+                    .CreateLogger();
+
+                Log.Information($@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
   ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
 ▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName}
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {File.GetCreationTime(AppContext.BaseDirectory)}
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {SirstrapUpdateService.GetCurrentFullVersion}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName}
  ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {Environment.OSVersion}
                     ███    ███                            ███    ███ by SirHurt CSR Team
 ");
@@ -32,23 +41,25 @@
 
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
+#if !DEBUG
                 await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
+#endif
 
                 Environment.ExitCode = 0;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, nameof(Main));
-
                 Environment.ExitCode = 1;
             }
             finally
             {
+#if !DEBUG
                 await _ipcService.StopAsync();
-
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(Environment.ExitCode);
+#endif
             }
         }
     }

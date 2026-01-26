@@ -8,6 +8,9 @@ if "%1" == "--no-test" (
     set "should_test=false"
 )
 
+set /p raw_version=<..\VERSION
+set "version=%raw_version:v=%"
+set "version=%version:-alpha=%"
 set "release_dir=..\out\release"
 set "upx_path=..\src\ext\upx-5.0.2-win64\upx.exe"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
@@ -70,7 +73,7 @@ if %ERRORLEVEL% neq 0 (
 
 echo Building Sirstrap.CLI...
 
-dotnet publish ..\src\Sirstrap.CLI\Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_cli_publish_dir%" -c Release
+dotnet publish ..\src\Sirstrap.CLI\Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_cli_publish_dir%" -p:Version=%version% -c Release
 
 if %ERRORLEVEL% neq 0 (
     echo Build of Sirstrap.CLI failed.
@@ -114,7 +117,7 @@ echo Building Sirstrap.UI...
 
 powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
 
-dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -c Release
+dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -p:Version=%version% -c Release
 
 powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
 
