@@ -28,11 +28,15 @@
 			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="HotAvalonia" Version="3.0.2">
+			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
 	</ItemGroup>
-	<Target Name="MoveAvaloniaLibsToBindir" AfterTargets="Publish">
+	<Target Name="MoveAvaloniaLibsToBinDir" AfterTargets="Publish">
 		<ItemGroup>
 			<AvaloniaLibs Include="$(PublishDir)av_libglesv2.dll" />
 			<AvaloniaLibs Include="$(PublishDir)libHarfBuzzSharp.dll" />
