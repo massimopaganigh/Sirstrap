@@ -10,7 +10,7 @@ if "%1" == "--no-test" (
 
 set /p raw_version=<..\VERSION
 set "version=%raw_version:v=%"
-set "version=%version:-beta=%"
+set "version=%version:-alpha=%"
 set "release_dir=..\out\release"
 set "upx_path=..\src\ext\upx-5.0.2-win64\upx.exe"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
