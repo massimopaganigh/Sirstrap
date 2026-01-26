@@ -166,7 +166,7 @@
                 }
                 else if (isOutdated)
                 {
-                    Log.Warning("[*] SirHurt hasn't updated in more than 3 days, falling back to Roblox API...");
+                    Log.Warning("[*] SirHurt hasn't updated in more than 10 days, falling back to Roblox API...");
 
                     version = await GetRobloxVersionAsync();
 
