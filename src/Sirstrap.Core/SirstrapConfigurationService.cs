@@ -24,6 +24,10 @@
                 () => SirstrapConfiguration.ChannelName,
                 value => SirstrapConfiguration.ChannelName = value
             ),
+            ["EXPLOIT_NAME"] = (
+                () => SirstrapConfiguration.ExploitName,
+                value => SirstrapConfiguration.ExploitName = value
+            ),
             ["FONT_FAMILY"] = (
                 () => SirstrapConfiguration.FontFamily,
                 value => SirstrapConfiguration.FontFamily = value

@@ -6,6 +6,8 @@
 
         public static string ChannelName { get; set; } = "-beta";
 
+        public static string ExploitName { get; set; } = "SirHurt V5";
+
         public static string FontFamily { get; set; } = "Minecraft";
 
         public static bool Incognito { get; set; } = false;

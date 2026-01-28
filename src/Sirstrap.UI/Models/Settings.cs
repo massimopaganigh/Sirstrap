@@ -9,6 +9,9 @@
         private string _channelName = string.Empty;
 
         [ObservableProperty]
+        private string _exploitName = "SirHurt V5";
+
+        [ObservableProperty]
         private string _fontFamily = "Minecraft";
 
         [ObservableProperty]
@@ -38,6 +41,7 @@
 
             AutoUpdate = SirstrapConfiguration.AutoUpdate;
             ChannelName = SirstrapConfiguration.ChannelName;
+            ExploitName = SirstrapConfiguration.ExploitName;
             FontFamily = SirstrapConfiguration.FontFamily;
             Incognito = SirstrapConfiguration.Incognito;
             MultiInstance = SirstrapConfiguration.MultiInstance;
@@ -59,6 +63,7 @@
         {
             SirstrapConfiguration.AutoUpdate = AutoUpdate;
             SirstrapConfiguration.ChannelName = ChannelName;
+            SirstrapConfiguration.ExploitName = ExploitName;
             SirstrapConfiguration.FontFamily = FontFamily;
             SirstrapConfiguration.Incognito = Incognito;
             SirstrapConfiguration.MultiInstance = MultiInstance;
