@@ -4,7 +4,8 @@
     {
         private const string ROBLOX_API_URI = "https://clientsettingscdn.roblox.com/v1/client-version/WindowsPlayer";
         private const string SIRHURT_API_URI = "https://sirhurt.net/status/fetch.php?exploit=SirHurt%20V5";
-        private const string WEAO_API_URI = "https://weao.xyz/api/status/exploits";
+        private const string WEAO_API_URI = "https://v3.weao.xyz/documentation/status-exploits";
+        private const string WEAO_USER_AGENT = "WEAO-3PService";
 
         private readonly HttpClient _httpClient = httpClient;
 
@@ -94,7 +95,14 @@
                 // Note: The exploit names must match exactly with the JSON property names
                 // returned by the weao.xyz API. The API returns an array of objects,
                 // where each element contains exploit data as properties.
-                string response = await _httpClient.GetStringAsync(WEAO_API_URI);
+                // API requires User-Agent: WEAO-3PService header
+                var request = new HttpRequestMessage(HttpMethod.Get, WEAO_API_URI);
+                request.Headers.Add("User-Agent", WEAO_USER_AGENT);
+                
+                var httpResponse = await _httpClient.SendAsync(request);
+                httpResponse.EnsureSuccessStatusCode();
+                
+                string response = await httpResponse.Content.ReadAsStringAsync();
 
                 using JsonDocument jsonDocument = JsonDocument.Parse(response);
 
