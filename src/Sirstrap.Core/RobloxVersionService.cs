@@ -91,12 +91,16 @@
         {
             try
             {
+                // Note: The exploit names must match exactly with the JSON property names
+                // returned by the weao.xyz API. The API returns an array of objects,
+                // where each element contains exploit data as properties.
                 string response = await _httpClient.GetStringAsync(WEAO_API_URI);
 
                 using JsonDocument jsonDocument = JsonDocument.Parse(response);
 
                 if (jsonDocument.RootElement.ValueKind == JsonValueKind.Array && jsonDocument.RootElement.GetArrayLength() > 0)
                 {
+                    // Iterate through all array elements to find the exploit
                     foreach (JsonElement element in jsonDocument.RootElement.EnumerateArray())
                     {
                         if (element.TryGetProperty(exploitName, out var exploit))

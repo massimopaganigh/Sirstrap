@@ -19,22 +19,15 @@
 
         private void GetExploits()
         {
-            try
+            Exploits = new ObservableCollection<string>
             {
-                Exploits = new ObservableCollection<string>
-                {
-                    "SirHurt V5",
-                    "Wave",
-                    "Solara",
-                    "Electron",
-                    "Nexus",
-                    "Celery"
-                };
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, nameof(GetExploits));
-            }
+                "SirHurt V5",
+                "Wave",
+                "Solara",
+                "Electron",
+                "Nexus",
+                "Celery"
+            };
         }
 
         private void GetFonts()
