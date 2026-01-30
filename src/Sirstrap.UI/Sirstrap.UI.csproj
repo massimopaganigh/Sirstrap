@@ -19,20 +19,24 @@
 		<Content Include="favicon.ico" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="11.3.10" />
-		<PackageReference Include="Avalonia.Desktop" Version="11.3.10" />
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.10" />
-		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.10" />
+		<PackageReference Include="Avalonia" Version="11.3.11" />
+		<PackageReference Include="Avalonia.Desktop" Version="11.3.11" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.11" />
+		<PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.11" />
 		<PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.1.1">
 			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
 			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="HotAvalonia" Version="3.0.2">
+			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
 	</ItemGroup>
-	<Target Name="MoveAvaloniaLibsToBindir" AfterTargets="Publish">
+	<Target Name="MoveAvaloniaLibsToBinDir" AfterTargets="Publish">
 		<ItemGroup>
 			<AvaloniaLibs Include="$(PublishDir)av_libglesv2.dll" />
 			<AvaloniaLibs Include="$(PublishDir)libHarfBuzzSharp.dll" />
