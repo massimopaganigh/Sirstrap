@@ -96,48 +96,30 @@ namespace Sirstrap.Core
 
         private async Task ExtractPackageBytesAsync(byte[]? packageBytes, string package, ZipArchive archive)
         {
-            try
+            if (packageBytes == null)
+                return;
+
+            Dictionary<string, string> roots = GetRoots(package.AsSpan());
+
+            if (roots.TryGetValue(package, out string? value))
             {
-                if (packageBytes == null)
-                    return;
+                using MemoryStream packageStream = new(packageBytes);
+                using ZipArchive packageArchive = new(packageStream, ZipArchiveMode.Read);
 
-                Dictionary<string, string> roots = GetRoots(package.AsSpan());
+                IEnumerable<ZipArchiveEntry> entries = packageArchive.Entries.Where(x => !string.IsNullOrEmpty(x.FullName));
 
-                if (roots.TryGetValue(package, out string? value))
-                {
-                    using MemoryStream packageStream = new(packageBytes);
-                    using ZipArchive packageArchive = new(packageStream, ZipArchiveMode.Read);
-
-                    IEnumerable<ZipArchiveEntry> entries = packageArchive.Entries.Where(x => !string.IsNullOrEmpty(x.FullName));
-
-                    foreach (ZipArchiveEntry entry in entries)
-                    {
-                        await _semaphore.WaitAsync();
-
-                        try
-                        {
-                            string entryPath = $"{value}{entry.FullName.Replace('\\', '/')}";
-
-                            using Stream sourceStream = entry.Open();
-                            using Stream targetStream = archive.CreateEntry(entryPath, CompressionLevel.Fastest).Open();
-
-                            await sourceStream.CopyToAsync(targetStream);
-                        }
-                        finally
-                        {
-                            _semaphore.Release();
-                        }
-                    }
-                }
-                else
+                foreach (ZipArchiveEntry entry in entries)
                 {
                     await _semaphore.WaitAsync();
 
                     try
                     {
-                        using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open();
+                        string entryPath = $"{value}{entry.FullName.Replace('\\', '/')}";
 
-                        await entryStream.WriteAsync(packageBytes);
+                        using Stream sourceStream = entry.Open();
+                        using Stream targetStream = archive.CreateEntry(entryPath, CompressionLevel.Fastest).Open();
+
+                        await sourceStream.CopyToAsync(targetStream);
                     }
                     finally
                     {
@@ -145,9 +127,20 @@ namespace Sirstrap.Core
                     }
                 }
             }
-            catch (Exception)
+            else
             {
-                throw;
+                await _semaphore.WaitAsync();
+
+                try
+                {
+                    using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open();
+
+                    await entryStream.WriteAsync(packageBytes);
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
             }
         }
 
