@@ -86,30 +86,6 @@
             }
         }
 
-        private async Task<bool> ValidateVersion(string version)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(version))
-                    return false;
-
-                var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, UriBuilder.GetManifestUri(new Configuration
-                {
-                    ChannelName = SirstrapConfiguration.ChannelName,
-                    VersionHash = version
-                })));
-
-                if (response.IsSuccessStatusCode)
-                    return true;
-
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         public async Task<string> GetLatestVersionAsync()
         {
             string version;
