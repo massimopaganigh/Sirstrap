@@ -38,7 +38,7 @@ jobs:
       shell: cmd
 
     - name: Cosign installer
-      uses: sigstore/cosign-installer@v3.9.2
+      uses: sigstore/cosign-installer@v4.0.0
 
     - name: Sign
       run: |
