@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "develop"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 25
     labels:
       - "dependencies"
       - "nuget"
@@ -16,7 +16,7 @@ updates:
     schedule:
       interval: "daily"
     target-branch: "develop"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 25
     labels:
       - "dependencies"
       - "github-actions"
