@@ -76,43 +76,43 @@ jobs:
     #     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
     - name: Upload artifact Sirstrap.CLI
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Sirstrap.CLI
         path: out/Sirstrap.CLI
 
     - name: Upload artifact Sirstrap.CLI_fat
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Sirstrap.CLI_fat
         path: out/Sirstrap.CLI_fat
 
     - name: Upload artifact Sirstrap.UI
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Sirstrap.UI
         path: out/Sirstrap.UI
 
     - name: Upload artifact Sirstrap.UI_fat
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Sirstrap.UI_fat
         path: out/Sirstrap.UI_fat
 
     - name: Upload artifact build.log
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: build.log
         path: build/build.log
 
     - name: Upload artifact post_build.log
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: post_build.log
         path: out/post_build.log
 
     - name: Upload artifact Sirstrap.CLI_test.log
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v6
       with:
         name: Sirstrap.CLI_test.log
         path: out/Sirstrap.CLI_test.log
