@@ -16,77 +16,77 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v6
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '10.0.x'
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
 
-    - name: Cache NuGet packages
-      uses: actions/cache@v5
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+      - name: Cache NuGet packages
+        uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-    - name: Build
-      run: cd build && build_with_log.bat
-      shell: cmd
+      - name: Build
+        run: cd build && build_with_log.bat
+        shell: cmd
 
-    - name: Post build
-      run: cd build && post_build_with_log.bat
-      shell: cmd
+      - name: Post build
+        run: cd build && post_build_with_log.bat
+        shell: cmd
 
-    - name: Run Microsoft Security DevOps
-      uses: microsoft/security-devops-action@latest
-      id: msdo
+      - name: Run Microsoft Security DevOps
+        uses: microsoft/security-devops-action@latest
+        id: msdo
 
-    - name: Upload results to Security tab
-      uses: github/codeql-action/upload-sarif@v4
-      with:
-        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+      - name: Upload results to Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: ${{ steps.msdo.outputs.sarifFile }}
 
-    - name: Upload artifact Sirstrap.CLI
-      uses: actions/upload-artifact@v6
-      with:
-        name: Sirstrap.CLI
-        path: out/Sirstrap.CLI
+      - name: Upload artifact Sirstrap.CLI
+        uses: actions/upload-artifact@v6
+        with:
+          name: Sirstrap.CLI
+          path: out/Sirstrap.CLI
 
-    - name: Upload artifact Sirstrap.CLI_fat
-      uses: actions/upload-artifact@v6
-      with:
-        name: Sirstrap.CLI_fat
-        path: out/Sirstrap.CLI_fat
+      - name: Upload artifact Sirstrap.CLI_fat
+        uses: actions/upload-artifact@v6
+        with:
+          name: Sirstrap.CLI_fat
+          path: out/Sirstrap.CLI_fat
 
-    - name: Upload artifact Sirstrap.UI
-      uses: actions/upload-artifact@v6
-      with:
-        name: Sirstrap.UI
-        path: out/Sirstrap.UI
+      - name: Upload artifact Sirstrap.UI
+        uses: actions/upload-artifact@v6
+        with:
+          name: Sirstrap.UI
+          path: out/Sirstrap.UI
 
-    - name: Upload artifact Sirstrap.UI_fat
-      uses: actions/upload-artifact@v6
-      with:
-        name: Sirstrap.UI_fat
-        path: out/Sirstrap.UI_fat
+      - name: Upload artifact Sirstrap.UI_fat
+        uses: actions/upload-artifact@v6
+        with:
+          name: Sirstrap.UI_fat
+          path: out/Sirstrap.UI_fat
 
-    - name: Upload artifact build.log
-      uses: actions/upload-artifact@v6
-      with:
-        name: build.log
-        path: build/build.log
+      - name: Upload artifact build.log
+        uses: actions/upload-artifact@v6
+        with:
+          name: build.log
+          path: build/build.log
 
-    - name: Upload artifact post_build.log
-      uses: actions/upload-artifact@v6
-      with:
-        name: post_build.log
-        path: out/post_build.log
+      - name: Upload artifact post_build.log
+        uses: actions/upload-artifact@v6
+        with:
+          name: post_build.log
+          path: out/post_build.log
 
-    - name: Upload artifact Sirstrap.CLI_test.log
-      uses: actions/upload-artifact@v6
-      with:
-        name: Sirstrap.CLI_test.log
-        path: out/Sirstrap.CLI_test.log
+      - name: Upload artifact Sirstrap.CLI_test.log
+        uses: actions/upload-artifact@v6
+        with:
+          name: Sirstrap.CLI_test.log
+          path: out/Sirstrap.CLI_test.log
