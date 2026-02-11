@@ -54,7 +54,7 @@
             }
             finally
             {
-                pipeServer.Dispose();
+                await pipeServer.DisposeAsync();
             }
         }
 
@@ -80,7 +80,8 @@
                 }
                 catch (OperationCanceledException)
                 {
-                    pipeServer?.Dispose();
+                    if (pipeServer != null)
+                        await pipeServer.DisposeAsync();
 
                     break;
                 }
@@ -88,14 +89,15 @@
                 {
                     Log.Error(ex, nameof(ListenForConnectionsAsync));
 
-                    pipeServer?.Dispose();
+                    if (pipeServer != null)
+                        await pipeServer.DisposeAsync();
 
                     await Task.Delay(5000, cancellationToken);
                 }
             }
         }
 
-        public async Task<bool> SendMessageAsync(string pipeName, string message, CancellationToken cancellationToken = default)
+        public static async Task<bool> SendMessageAsync(string pipeName, string message, CancellationToken cancellationToken = default)
         {
             NamedPipeClientStream? pipeClient = null;
 
@@ -126,7 +128,8 @@
             }
             finally
             {
-                pipeClient?.Dispose();
+                if (pipeClient != null)
+                    await pipeClient.DisposeAsync();
             }
         }
 
@@ -162,7 +165,8 @@
                 if (!_isRunning)
                     return;
 
-                _serverCts?.Cancel();
+                if (_serverCts != null)
+                    await _serverCts.CancelAsync();
 
                 if (_serverTask != null)
                     await _serverTask;

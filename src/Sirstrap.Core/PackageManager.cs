@@ -86,9 +86,9 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] The package has been downloaded successfully: {0}.", package);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "[!] An error occurred while downloading the package: {0}.", package);
+                Log.Error("[!] An error occurred while downloading the package: {0}.", package);
 
                 throw;
             }
@@ -116,8 +116,11 @@ namespace Sirstrap.Core
                     {
                         string entryPath = $"{value}{entry.FullName.Replace('\\', '/')}";
 
-                        using Stream sourceStream = entry.Open();
-                        using Stream targetStream = archive.CreateEntry(entryPath, CompressionLevel.Fastest).Open();
+#pragma warning disable S6966 // Awaitable method should be used - ZipArchiveEntry.Open() does not have an async version
+                        await using Stream sourceStream = entry.Open();
+                        ZipArchiveEntry targetEntry = archive.CreateEntry(entryPath, CompressionLevel.Fastest);
+                        await using Stream targetStream = targetEntry.Open();
+#pragma warning restore S6966
 
                         await sourceStream.CopyToAsync(targetStream);
                     }
@@ -133,7 +136,10 @@ namespace Sirstrap.Core
 
                 try
                 {
-                    using Stream entryStream = archive.CreateEntry(package, CompressionLevel.Fastest).Open();
+#pragma warning disable S6966 // Awaitable method should be used - ZipArchiveEntry.Open() does not have an async version
+                    ZipArchiveEntry entry = archive.CreateEntry(package, CompressionLevel.Fastest);
+                    await using Stream entryStream = entry.Open();
+#pragma warning restore S6966
 
                     await entryStream.WriteAsync(packageBytes);
                 }
@@ -146,7 +152,10 @@ namespace Sirstrap.Core
 
         private static async Task ExtractPackageContentAsync(string content, string package, ZipArchive archive)
         {
-            using StreamWriter writer = new(archive.CreateEntry(package, CompressionLevel.Optimal).Open());
+#pragma warning disable S6966 // Awaitable method should be used - ZipArchiveEntry.Open() does not have an async version
+            ZipArchiveEntry entry = archive.CreateEntry(package, CompressionLevel.Optimal);
+            await using StreamWriter writer = new(entry.Open());
+#pragma warning restore S6966
 
             await writer.WriteAsync(content);
         }
@@ -159,7 +168,7 @@ namespace Sirstrap.Core
             return _playerRoots;
         }
 
-        public void Dispose() => _semaphore?.Dispose();
+        public void DisposeSemaphore() => _semaphore?.Dispose();
 
         public async Task Download4MacAsync(Configuration configuration)
         {
@@ -176,9 +185,9 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] The package has been downloaded successfully for Mac: {0}.", archiveName);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "[!] An error occurred while downloading the package for Mac.");
+                Log.Error("[!] An error occurred while downloading the package for Mac.");
 
                 throw;
             }
@@ -195,7 +204,9 @@ namespace Sirstrap.Core
                 if (!manifest.IsValid)
                     return;
 
+#pragma warning disable S6966 // Awaitable method should be used - ZipFile.Open() does not have an async version in .NET
                 using ZipArchive archive = ZipFile.Open(configuration.GetOutputPath(), ZipArchiveMode.Create);
+#pragma warning restore S6966
 
                 await ExtractPackageContentAsync(APP_SETTINGS_XML, "AppSettings.xml", archive);
 
@@ -219,9 +230,9 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] All packages have been downloaded successfully for Windows.");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "[!] An error occurred while downloading packages for Windows.");
+                Log.Error("[!] An error occurred while downloading packages for Windows.");
 
                 throw;
             }

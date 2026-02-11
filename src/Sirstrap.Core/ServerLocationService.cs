@@ -1,6 +1,6 @@
 namespace Sirstrap.Core
 {
-    public class ServerLocationService
+    public static class ServerLocationService
     {
         private const string LOCATION_UNAVAILABLE = "UNKNOWN";
 

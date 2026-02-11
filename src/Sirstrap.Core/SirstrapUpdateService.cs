@@ -65,7 +65,7 @@ exit
                 var (_, _, downloadUrl) = await GetLatestVersionChannelAndDownloadUriAsync(sirstrapType);
 
                 if (string.IsNullOrEmpty(downloadUrl))
-                    throw new Exception($"{nameof(GetLatestVersionChannelAndDownloadUriAsync)} failed.");
+                    throw new InvalidOperationException($"{nameof(GetLatestVersionChannelAndDownloadUriAsync)} failed.");
 
                 var updateDirectory = PrepareUpdateDirectory();
 
@@ -90,7 +90,7 @@ exit
 
             await File.WriteAllBytesAsync(zipPath, await _httpClient.GetByteArrayAsync(downloadUrl));
 
-            ZipFile.ExtractToDirectory(zipPath, updateDirectory, overwriteFiles: true);
+            await Task.Run(() => ZipFile.ExtractToDirectory(zipPath, updateDirectory, overwriteFiles: true));
             File.Delete(zipPath);
         }
 
@@ -106,9 +106,9 @@ exit
                 {
                     var name = nameElement.GetString() ?? string.Empty;
 
-                    if (name.Equals(targetFileName, StringComparison.OrdinalIgnoreCase))
-                        if (assetElement.TryGetProperty("browser_download_url", out JsonElement urlElement))
-                            return urlElement.GetString() ?? string.Empty;
+                    if (name.Equals(targetFileName, StringComparison.OrdinalIgnoreCase) &&
+                        assetElement.TryGetProperty("browser_download_url", out JsonElement urlElement))
+                        return urlElement.GetString() ?? string.Empty;
                 }
 
             return string.Empty;
@@ -190,7 +190,7 @@ exit
                 var (latestVersion, latestChannel, _) = await GetLatestVersionChannelAndDownloadUriAsync(sirstrapType);
 
                 if (latestVersion.Major == 0 && latestVersion.Minor == 0 && latestVersion.Build == 0 && latestVersion.Revision == 0 || string.IsNullOrWhiteSpace(latestChannel))
-                    throw new Exception($"{nameof(GetLatestVersionChannelAndDownloadUriAsync)} failed.");
+                    throw new InvalidOperationException($"{nameof(GetLatestVersionChannelAndDownloadUriAsync)} failed.");
 
                 if (latestVersion > currentVersion)
                 {
@@ -248,10 +248,17 @@ exit
             return updateDirectory;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _httpClient?.Dispose();
+            }
+        }
+
         public void Dispose()
         {
-            _httpClient?.Dispose();
-
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 

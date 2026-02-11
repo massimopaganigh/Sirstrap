@@ -22,9 +22,9 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "[!] Error creating directory: {0}.", ex.Message);
+                Log.Error("[!] Error creating directory: {0}.", directoryPath);
 
                 throw;
             }
@@ -50,9 +50,9 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "[!] Error deleting directory: {0}.", ex.Message);
+                Log.Error("[!] Error deleting directory: {0}.", directoryPath);
 
                 throw;
             }
@@ -78,9 +78,9 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Log.Error(ex, "[!] Error deleting file: {0}.", ex.Message);
+                Log.Error("[!] Error deleting file: {0}.", filePath);
 
                 throw;
             }
