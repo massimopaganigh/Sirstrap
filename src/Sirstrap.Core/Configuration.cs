@@ -7,7 +7,7 @@
             try
             {
                 string cacheDir = GetCacheDir();
-                
+
                 foreach (string file in Directory.GetFiles(cacheDir))
                     try
                     {
@@ -17,7 +17,7 @@
                     {
                         //Sybau 🥀
                     }
-                    
+
                 Directory.CreateDirectory(cacheDir);
             }
             catch (Exception)
