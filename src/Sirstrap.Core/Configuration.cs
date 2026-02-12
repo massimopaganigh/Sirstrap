@@ -2,40 +2,42 @@
 {
     public class Configuration : ConfigurationBase
     {
-
         public static void ClearCacheDirectory()
         {
-            string cacheDirectory = GetCacheDirectory();
-
             try
             {
-                foreach (string file in Directory.GetFiles(cacheDirectory))
-                {
+                string cacheDir = GetCacheDir();
+                
+                foreach (string file in Directory.GetFiles(cacheDir))
                     try
                     {
                         File.Delete(file);
                     }
-                    catch (Exception) { /* Sybau 🥀 */ }
-                }
+                    catch (Exception)
+                    {
+                        //Sybau 🥀
+                    }
+                    
+                Directory.CreateDirectory(cacheDir);
             }
-            catch (Exception) { /* Sybau 🥀 */ }
-
-            Directory.CreateDirectory(cacheDirectory);
+            catch (Exception)
+            {
+                //Sybau 🥀
+            }
         }
 
-        public static string GetCacheDirectory()
+        private static string GetCacheDir()
         {
-            string cacheDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Cache");
+            string cacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Cache");
 
-            Directory.CreateDirectory(cacheDirectory);
+            Directory.CreateDirectory(cacheDir);
 
-            return cacheDirectory;
+            return cacheDir;
         }
 
-        public string GetOutputPath() => Path.Combine(GetCacheDirectory(), $"{VersionHash}.zip");
+        public string GetOutputPath() => Path.Combine(GetCacheDir(), $"{VersionHash}.zip");
 
-        public bool IsMacBinary() => BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase)
-            || BinaryType.Equals("MacStudio", StringComparison.OrdinalIgnoreCase);
+        public bool IsMacBinary() => BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) || BinaryType.Equals("MacStudio", StringComparison.OrdinalIgnoreCase);
 
         public string LaunchUri { get; set; } = string.Empty;
     }
