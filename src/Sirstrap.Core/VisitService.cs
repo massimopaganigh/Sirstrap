@@ -1,4 +1,7 @@
-﻿namespace Sirstrap.Core
+﻿using System.Net;
+using System.Net.Http.Headers;
+
+namespace Sirstrap.Core
 {
     public class VisitService : IDisposable
     {
@@ -6,14 +9,29 @@
         private const string AUTH_TICKET_URL = "https://auth.roblox.com/v1/authentication-ticket";
         private const string ROBLOX_GAME_URL = "https://www.roblox.com/games";
         private const string ROBLOX_PLAYER_BETA = "RobloxPlayerBeta";
+        private const string USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+        private const int MAX_CSRF_RETRIES = 3;
 
         private readonly HttpClient _httpClient;
         private readonly bool _ownsHttpClient;
 
         public VisitService(HttpClient? httpClient = null)
         {
-            _ownsHttpClient = httpClient is null;
-            _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(1) };
+            if (httpClient is not null)
+            {
+                _ownsHttpClient = false;
+                _httpClient = httpClient;
+            }
+            else
+            {
+                _ownsHttpClient = true;
+                var handler = new HttpClientHandler
+                {
+                    AllowAutoRedirect = false,
+                    UseCookies = false
+                };
+                _httpClient = new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(1) };
+            }
         }
 
         public void Dispose()
@@ -32,34 +50,101 @@
                 .ToArray();
         }
 
+        private HttpRequestMessage CreatePostRequest(string url, string roblosecurityToken)
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Content = new StringContent(string.Empty)
+            };
+
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Content.Headers.ContentLength = 0;
+            request.Headers.Add("Cookie", $".ROBLOSECURITY={roblosecurityToken}");
+            request.Headers.Add("User-Agent", USER_AGENT);
+
+            return request;
+        }
+
+        private static async Task LogResponseDetailsAsync(HttpResponseMessage response, string context)
+        {
+            string body = string.Empty;
+
+            try
+            {
+                body = await response.Content.ReadAsStringAsync();
+            }
+            catch { /* Sybau 🥀 */ }
+
+            Log.Warning("[*] {0} - Status: {1} ({2})", context, (int)response.StatusCode, response.StatusCode);
+            Log.Warning("[*] {0} - Response headers: {1}", context, string.Join(", ", response.Headers.Select(h => $"{h.Key}: {string.Join(", ", h.Value)}")));
+
+            if (!string.IsNullOrEmpty(body))
+                Log.Warning("[*] {0} - Response body: {1}", context, body);
+        }
+
         public async Task<string> GetCsrfTokenAsync(string roblosecurityToken)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, CSRF_TOKEN_URL);
-
-            request.Headers.Add("Cookie", $".ROBLOSECURITY={roblosecurityToken}");
+            using var request = CreatePostRequest(CSRF_TOKEN_URL, roblosecurityToken);
 
             var response = await _httpClient.SendAsync(request);
 
             if (response.Headers.TryGetValues("x-csrf-token", out var csrfValues))
-                return csrfValues.First();
+            {
+                string token = csrfValues.First();
+
+                Log.Information("[*] CSRF token retrieved (status {0}).", (int)response.StatusCode);
+
+                return token;
+            }
+
+            await LogResponseDetailsAsync(response, "GetCsrfToken");
 
             throw new InvalidOperationException("Failed to retrieve CSRF token from response headers.");
         }
 
         public async Task<string> GetAuthTicketAsync(string roblosecurityToken, string csrfToken, long placeId)
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, AUTH_TICKET_URL);
+            string currentCsrfToken = csrfToken;
 
-            request.Headers.Add("Cookie", $".ROBLOSECURITY={roblosecurityToken}");
-            request.Headers.Add("x-csrf-token", csrfToken);
-            request.Headers.Referrer = new Uri($"{ROBLOX_GAME_URL}/{placeId}");
+            for (int attempt = 1; attempt <= MAX_CSRF_RETRIES; attempt++)
+            {
+                using var request = CreatePostRequest(AUTH_TICKET_URL, roblosecurityToken);
 
-            var response = await _httpClient.SendAsync(request);
+                request.Headers.Add("x-csrf-token", currentCsrfToken);
+                request.Headers.Referrer = new Uri($"{ROBLOX_GAME_URL}/{placeId}");
 
-            if (response.Headers.TryGetValues("rbx-authentication-ticket", out var ticketValues))
-                return ticketValues.First();
+                var response = await _httpClient.SendAsync(request);
 
-            throw new InvalidOperationException("Failed to retrieve authentication ticket from response headers.");
+                if (response.Headers.TryGetValues("rbx-authentication-ticket", out var ticketValues))
+                {
+                    string ticket = ticketValues.First();
+
+                    Log.Information("[*] Authentication ticket retrieved (status {0}).", (int)response.StatusCode);
+
+                    return ticket;
+                }
+
+                if (response.StatusCode == HttpStatusCode.Forbidden
+                    && response.Headers.TryGetValues("x-csrf-token", out var freshCsrfValues))
+                {
+                    currentCsrfToken = freshCsrfValues.First();
+
+                    Log.Warning("[*] Auth ticket request returned 403 with fresh CSRF token, retrying (attempt {0}/{1})...", attempt, MAX_CSRF_RETRIES);
+
+                    continue;
+                }
+
+                await LogResponseDetailsAsync(response, $"GetAuthTicket (attempt {attempt}/{MAX_CSRF_RETRIES})");
+
+                if (attempt < MAX_CSRF_RETRIES)
+                {
+                    Log.Warning("[*] Retrying auth ticket request (attempt {0}/{1})...", attempt, MAX_CSRF_RETRIES);
+
+                    await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)));
+                }
+            }
+
+            throw new InvalidOperationException("Failed to retrieve authentication ticket from response headers after all retries.");
         }
 
         public static string BuildLaunchUrl(string authTicket, long browserId, long placeId)
