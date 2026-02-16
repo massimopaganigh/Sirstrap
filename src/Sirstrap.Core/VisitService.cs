@@ -1,6 +1,6 @@
 ﻿namespace Sirstrap.Core
 {
-    public class VisitService
+    public class VisitService : IDisposable
     {
         private const string CSRF_TOKEN_URL = "https://friends.roblox.com/v1/users/1/request-friendship";
         private const string AUTH_TICKET_URL = "https://auth.roblox.com/v1/authentication-ticket";
@@ -8,10 +8,18 @@
         private const string ROBLOX_PLAYER_BETA = "RobloxPlayerBeta";
 
         private readonly HttpClient _httpClient;
+        private readonly bool _ownsHttpClient;
 
         public VisitService(HttpClient? httpClient = null)
         {
+            _ownsHttpClient = httpClient is null;
             _httpClient = httpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(1) };
+        }
+
+        public void Dispose()
+        {
+            if (_ownsHttpClient)
+                _httpClient.Dispose();
         }
 
         public static string[] ReadCookies(string cookiesFilePath)
@@ -69,7 +77,7 @@
 
             string authTicket = await GetAuthTicketAsync(roblosecurityToken, csrfToken, placeId);
 
-            long browserId = Random.Shared.Next(100000, 1000000);
+            long browserId = Random.Shared.NextInt64(100000, 1000000);
             string launchUrl = BuildLaunchUrl(authTicket, browserId, placeId);
 
             configuration.LaunchUri = launchUrl;
@@ -123,8 +131,8 @@
                 {
                     try
                     {
-                        process.Kill();
-                        process.Dispose();
+                        process.Kill(true);
+                        process.WaitForExit(5000);
                     }
                     catch (Exception ex)
                     {
