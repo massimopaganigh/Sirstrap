@@ -1,8 +1,12 @@
 ﻿namespace Sirstrap.CLI
 {
-    internal class Program
+    internal sealed class Program
     {
         private static readonly IpcService _ipcService = new();
+
+        private Program()
+        {
+        }
 
         public static async Task Main(string[] args)
         {
@@ -24,26 +28,23 @@
                     .WriteTo.LastLog()
                     .CreateLogger();
 
-                Log.Information($@"
+                Log.Information(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
   ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
 ▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {SirstrapUpdateService.GetCurrentFullVersion()}
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName}
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {Environment.OSVersion}
-                    ███    ███                            ███    ███ by SirHurt CSR Team
-");
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {0}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {1}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {2}
+                    ███    ███                            ███    ███ by SirHurt CSR Team", SirstrapUpdateService.GetCurrentFullVersion(), AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
                 SirstrapConfigurationService.LoadSettings();
 
                 await _ipcService.StartAsync("SirstrapIpc");
 
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
-#if !DEBUG
                 await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
-#endif
 
                 Environment.ExitCode = 0;
             }
@@ -54,12 +55,10 @@
             }
             finally
             {
-#if !DEBUG
                 await _ipcService.StopAsync();
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(Environment.ExitCode);
-#endif
             }
         }
     }

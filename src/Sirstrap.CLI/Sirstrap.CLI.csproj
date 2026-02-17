@@ -4,16 +4,38 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<PublishAot>true</PublishAot>
-		<InvariantGlobalization>true</InvariantGlobalization>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<ApplicationIcon>favicon.ico</ApplicationIcon>
-		<GenerateDocumentationFile>False</GenerateDocumentationFile>
 		<AssemblyName>Sirstrap</AssemblyName>
+		<ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
+		<PublishAot>False</PublishAot>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<NoWarn>$(NoWarn);IL2104</NoWarn>
+		<Product>Sirstrap</Product>
+		<Description>Sirstrap 2026.x</Description>
+		<Company>ギャップ</Company>
+		<Copyright>Copyright © $([System.DateTime]::Now.Year) ギャップ.</Copyright>
 	</PropertyGroup>
+	<Target Name="SetShaSubject" BeforeTargets="CoreCompile">
+		<Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="Sha" />
+		</Exec>
+		<Exec Command="git log -1 --format=%25%25s" ConsoleToMSBuild="true" StandardOutputImportance="low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="Subject" />
+		</Exec>
+		<WriteLinesToFile File="$(IntermediateOutputPath)ShaSubject.cs" Lines="[assembly: AssemblyMetadata(&quot;ShaSubject&quot;, &quot;$(Sha) - $(Subject)&quot;)]" Overwrite="true" />
+		<ItemGroup>
+			<Compile Include="$(IntermediateOutputPath)ShaSubject.cs" />
+		</ItemGroup>
+	</Target>
 	<ItemGroup>
-		<Content Include="favicon.ico" />
+		<AssemblyMetadata Include="BuildDate" Value="$([System.DateTime]::Now.ToString('o'))" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="SonarAnalyzer.CSharp" Version="10.19.0.132793">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
