@@ -3,20 +3,42 @@
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<PublishAot>False</PublishAot>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<ApplicationIcon>favicon.ico</ApplicationIcon>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<AssemblyName>Sirstrap</AssemblyName>
+		<AssemblyName>ReportAnalyzer</AssemblyName>
+		<ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
+		<PublishAot>False</PublishAot>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 		<NoWarn>$(NoWarn);IL2104</NoWarn>
+		<Product>Sirstrap</Product>
+		<Description>Sirstrap 2026.x</Description>
+		<Company>ギャップ</Company>
+		<Copyright>Copyright © $([System.DateTime]::Now.Year) ギャップ.</Copyright>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugType>portable</DebugType>
+	</PropertyGroup>
+	<Target Name="SetShaSubject" BeforeTargets="CoreCompile">
+		<Exec Command="git rev-parse --short HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="Sha" />
+		</Exec>
+		<Exec Command="git log -1 --format=%25%25s" ConsoleToMSBuild="true" StandardOutputImportance="low">
+			<Output TaskParameter="ConsoleOutput" PropertyName="Subject" />
+		</Exec>
+		<WriteLinesToFile File="$(IntermediateOutputPath)ShaSubject.cs" Lines="[assembly: AssemblyMetadata(&quot;ShaSubject&quot;, &quot;$(Sha) - $(Subject)&quot;)]" Overwrite="true" />
+		<ItemGroup>
+			<Compile Include="$(IntermediateOutputPath)ShaSubject.cs" />
+		</ItemGroup>
+	</Target>
 	<ItemGroup>
-		<AvaloniaResource Include="Assets\**" />
+		<AssemblyMetadata Include="BuildDate" Value="$([System.DateTime]::Now.ToString('o'))" />
 	</ItemGroup>
 	<ItemGroup>
-		<Content Include="Assets\favicon.ico" />
-		<Content Include="favicon.ico" />
+		<AvaloniaResource Include="Assets\**" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="11.3.12" />
@@ -32,17 +54,43 @@
 			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
 			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.19.0.132793">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
 	</ItemGroup>
-	<Target Name="MoveAvaloniaLibsToBinDir" AfterTargets="Publish">
+	<Target Name="MoveConfigFilesToBinDir" AfterTargets="Publish">
 		<ItemGroup>
-			<AvaloniaLibs Include="$(PublishDir)av_libglesv2.dll" />
-			<AvaloniaLibs Include="$(PublishDir)libHarfBuzzSharp.dll" />
-			<AvaloniaLibs Include="$(PublishDir)libSkiaSharp.dll" />
+			<ConfigFiles Include="$(PublishDir)_ReportAnalyzer.ini" />
+			<ConfigFiles Include="$(PublishDir)_LocalStrings.ini" />
 		</ItemGroup>
 		<MakeDir Directories="$(PublishDir)bin" />
-		<Move SourceFiles="@(AvaloniaLibs)" DestinationFolder="$(PublishDir)bin" />
+		<Move SourceFiles="@(ConfigFiles)" DestinationFolder="$(PublishDir)bin" />
+	</Target>
+	<Target Name="MoveAvaloniaLibsToBinDirWin" AfterTargets="MoveConfigFilesToBinDir" Condition="$(RuntimeIdentifier.StartsWith('win'))">
+		<ItemGroup>
+			<AvaloniaLibsWin Include="$(PublishDir)av_libglesv2.dll" />
+			<AvaloniaLibsWin Include="$(PublishDir)libHarfBuzzSharp.dll" />
+			<AvaloniaLibsWin Include="$(PublishDir)libSkiaSharp.dll" />
+		</ItemGroup>
+		<Move SourceFiles="@(AvaloniaLibsWin)" DestinationFolder="$(PublishDir)bin" />
+	</Target>
+	<Target Name="MoveAvaloniaLibsToBinDirLinux" AfterTargets="MoveConfigFilesToBinDir" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
+		<ItemGroup>
+			<AvaloniaLibsLinux Include="$(PublishDir)libHarfBuzzSharp.so" />
+			<AvaloniaLibsLinux Include="$(PublishDir)libSkiaSharp.so" />
+		</ItemGroup>
+		<Move SourceFiles="@(AvaloniaLibsLinux)" DestinationFolder="$(PublishDir)bin" />
+	</Target>
+	<Target Name="MoveAvaloniaLibsToBinDirOsx" AfterTargets="MoveConfigFilesToBinDir" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+		<ItemGroup>
+			<AvaloniaLibsOsx Include="$(PublishDir)libAvaloniaNative.dylib" />
+			<AvaloniaLibsOsx Include="$(PublishDir)libHarfBuzzSharp.dylib" />
+			<AvaloniaLibsOsx Include="$(PublishDir)libSkiaSharp.dylib" />
+		</ItemGroup>
+		<Move SourceFiles="@(AvaloniaLibsOsx)" DestinationFolder="$(PublishDir)bin" />
 	</Target>
 </Project>
