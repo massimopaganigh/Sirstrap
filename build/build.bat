@@ -73,7 +73,11 @@ if %ERRORLEVEL% neq 0 (
 
 echo Building Sirstrap.CLI...
 
-dotnet publish ..\src\Sirstrap.CLI\Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_cli_publish_dir%" -p:Version=%version% -c Release
+powershell -command "(Get-Content '..\src\Sirstrap.CLI\Sirstrap.CLI.csproj' -Encoding UTF8) -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.CLI\Sirstrap.CLI.csproj' -Encoding UTF8"
+
+dotnet publish ..\src\Sirstrap.CLI\Sirstrap.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_cli_publish_dir%" -p:Version=%version% -c Release -r win-x64 -f net10.0
+
+powershell -command "(Get-Content '..\src\Sirstrap.CLI\Sirstrap.CLI.csproj' -Encoding UTF8) -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.CLI\Sirstrap.CLI.csproj' -Encoding UTF8"
 
 if %ERRORLEVEL% neq 0 (
     echo Build of Sirstrap.CLI failed.
@@ -115,11 +119,11 @@ del /f /q "%sirstrap_cli_publish_dir%\_Sirstrap.exe"
 
 echo Building Sirstrap.UI...
 
-powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj' -Encoding UTF8) -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj' -Encoding UTF8"
 
-dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -p:Version=%version% -c Release
+dotnet publish ..\src\Sirstrap.UI\Sirstrap.UI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirstrap_ui_publish_dir%" -p:Version=%version% -c Release -r win-x64 -f net10.0
 
-powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj') -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj'"
+powershell -command "(Get-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj' -Encoding UTF8) -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\Sirstrap.UI\Sirstrap.UI.csproj' -Encoding UTF8"
 
 if %ERRORLEVEL% neq 0 (
     echo Build of Sirstrap.UI failed.

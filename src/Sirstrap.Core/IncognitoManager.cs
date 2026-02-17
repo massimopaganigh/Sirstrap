@@ -2,18 +2,13 @@ namespace Sirstrap.Core
 {
     public static class IncognitoManager
     {
-        private static readonly string _incognitoCachePath;
+        private static readonly string _robloxFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox");
+        private static readonly string _incognitoCachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "IncognitoCache", "Roblox");
         private static bool _isRobloxFolderMoved = false;
         private static readonly Lock _lockObject = new();
-        private static readonly string _robloxFolderPath;
 
         static IncognitoManager()
         {
-            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-
-            _robloxFolderPath = Path.Combine(localAppData, "Roblox");
-            _incognitoCachePath = Path.Combine(localAppData, "Sirstrap", "IncognitoCache", "Roblox");
-
             SingletonManager.InstanceTypeChanged += OnInstanceTypeChanged;
         }
 

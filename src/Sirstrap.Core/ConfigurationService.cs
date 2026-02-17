@@ -40,16 +40,20 @@
         private static void ParseLaunchUrl(string[] arguments, Dictionary<string, string> configuration)
         {
             if (arguments.Length > 0
-                && !IsOption(arguments.First()))
-                configuration["launch-uri"] = arguments.First();
+                && !IsOption(arguments[0]))
+                configuration["launch-uri"] = arguments[0];
         }
 
         private static void ParseOptions(string[] arguments, Dictionary<string, string> configuration)
         {
-            for (int i = 0; i < arguments.Length; i++)
+            int i = 0;
+            while (i < arguments.Length)
             {
                 if (!IsOption(arguments[i]))
+                {
+                    i++;
                     continue;
+                }
 
                 string key = RemoveOptionPrefix(arguments[i]);
 
@@ -62,8 +66,16 @@
                         && !string.IsNullOrEmpty(value))
                     {
                         configuration[key] = value;
+                        i += 2;
+                    }
+                    else
+                    {
                         i++;
                     }
+                }
+                else
+                {
+                    i++;
                 }
             }
         }

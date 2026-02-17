@@ -1,6 +1,6 @@
 ﻿namespace Sirstrap.Core
 {
-    public class SirHurtService
+    public static class SirHurtService
     {
         public static string GetSirHurtPath()
         {

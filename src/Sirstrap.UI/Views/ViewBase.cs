@@ -64,9 +64,9 @@
             }
         }
 
-        private static double EaseInExpo(double x) => x == 0 ? 0 : Math.Pow(2, 10 * (x - 1));
+        private static double EaseInExpo(double x) => x <= 0 ? 0 : Math.Pow(2, 10 * (x - 1));
 
-        private static double EaseOutExpo(double x) => x == 1 ? 1 : 1 - Math.Pow(2, -10 * x);
+        private static double EaseOutExpo(double x) => x >= 1 ? 1 : 1 - Math.Pow(2, -10 * x);
 
         protected async void OnClosing(object? sender, WindowClosingEventArgs e)
         {
