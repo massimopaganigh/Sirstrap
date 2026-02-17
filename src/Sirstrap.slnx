@@ -2,6 +2,7 @@
   <Folder Name="/Tests/">
     <Project Path="Sirstrap.Core.Tests/Sirstrap.Core.Tests.csproj" />
   </Folder>
+  <Project Path="Magenta.Core/Magenta.Core.csproj" />
   <Project Path="Sirstrap.CLI/Sirstrap.CLI.csproj" />
   <Project Path="Sirstrap.Core/Sirstrap.Core.csproj" />
   <Project Path="Sirstrap.UI/Sirstrap.UI.csproj" />
