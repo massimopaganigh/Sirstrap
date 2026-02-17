@@ -21,6 +21,7 @@
         private bool _robloxApi = false;
 
         [ObservableProperty]
+        [SuppressMessage("SonarAnalyzer.CSharp", "S1075", Justification = "Sybau")]
         private string _robloxCdnUri = "https://setup.rbxcdn.com";
 
         [ObservableProperty]

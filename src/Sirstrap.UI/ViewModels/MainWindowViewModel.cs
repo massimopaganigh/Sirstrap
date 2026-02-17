@@ -197,15 +197,6 @@
         {
             try
             {
-                //var settingsFilePath = SirstrapConfigurationService.GetConfigurationPath();
-
-                //if (File.Exists(settingsFilePath))
-                //    Process.Start(new ProcessStartInfo
-                //    {
-                //        FileName = settingsFilePath,
-                //        UseShellExecute = true
-                //    });
-
                 new SettingsWindow { DataContext = new SettingsWindowViewModel() }.ShowDialog(GetMainWindow()!);
             }
             catch (Exception ex)
@@ -239,17 +230,16 @@
                     .WriteTo.LastLog()
                     .CreateLogger();
 
-                Log.Information($@"
+                Log.Information(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
   ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
 ▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {CurrentFullVersion}
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName}
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {Environment.OSVersion}
-                    ███    ███                            ███    ███ by SirHurt CSR Team
-");
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {0}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {1}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {2}
+                    ███    ███                            ███    ███ by SirHurt CSR Team", CurrentFullVersion, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
                 SirstrapConfigurationService.LoadSettings();
 
                 await _ipcService.StartAsync("SirstrapIpc");

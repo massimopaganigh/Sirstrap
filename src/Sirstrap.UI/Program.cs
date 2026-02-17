@@ -2,6 +2,10 @@
 {
     internal sealed class Program
     {
+        private Program()
+        {
+        }
+
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
