@@ -94,16 +94,37 @@
 
             ValidateBinaryType(binaryType);
 
+            string mode = arguments.GetValueOrDefault("mode", string.Empty);
+
             Configuration configuration = new()
             {
                 BinaryType = binaryType,
                 ChannelName = arguments.GetValueOrDefault("channel-name", "LIVE"),
                 VersionHash = arguments.GetValueOrDefault("version-hash", string.Empty),
                 BlobDirectory = GetBlobDirectory(arguments, binaryType),
-                LaunchUri = arguments.GetValueOrDefault("launch-uri", string.Empty)
+                LaunchUri = arguments.GetValueOrDefault("launch-uri", string.Empty),
+                Mode = mode,
+                CookiesFile = arguments.GetValueOrDefault("cookies-file", string.Empty),
+                PlaceId = long.TryParse(arguments.GetValueOrDefault("place-id", "0"), out long placeId) ? placeId : 0,
+                Timeout = int.TryParse(arguments.GetValueOrDefault("timeout", "30"), out int timeout) ? timeout : 30
             };
 
+            if (configuration.IsVisitMode())
+                ValidateVisitConfiguration(configuration);
+
             return configuration;
+        }
+
+        private static void ValidateVisitConfiguration(Configuration configuration)
+        {
+            if (string.IsNullOrEmpty(configuration.CookiesFile))
+                throw new ArgumentException("--cookies-file is required for visit mode. Usage: sirstrap --mode visit --cookies-file <path> --place-id <id> [--timeout <seconds>]");
+
+            if (configuration.PlaceId <= 0)
+                throw new ArgumentException("--place-id is required and must be a positive number. Usage: sirstrap --mode visit --cookies-file <path> --place-id <id> [--timeout <seconds>]");
+
+            if (configuration.Timeout <= 0)
+                throw new ArgumentException("--timeout must be a positive number of seconds.");
         }
 
         public static Dictionary<string, string> ParseConfiguration(string[] arguments)

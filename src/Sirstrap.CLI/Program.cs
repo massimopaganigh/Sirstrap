@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.CLI
+namespace Sirstrap.CLI
 {
     internal class Program
     {
@@ -42,7 +42,16 @@
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
 #if !DEBUG
-                await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
+                using var cts = new CancellationTokenSource();
+
+                Console.CancelKeyPress += (_, e) =>
+                {
+                    e.Cancel = true;
+                    Log.Information("[*] Ctrl+C received, stopping gracefully...");
+                    cts.Cancel();
+                };
+
+                await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI, cts.Token);
 #endif
 
                 Environment.ExitCode = 0;

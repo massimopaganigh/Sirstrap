@@ -39,6 +39,16 @@
 
         public bool IsMacBinary() => BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) || BinaryType.Equals("MacStudio", StringComparison.OrdinalIgnoreCase);
 
+        public bool IsVisitMode() => Mode.Equals("visit", StringComparison.OrdinalIgnoreCase);
+
         public string LaunchUri { get; set; } = string.Empty;
+
+        public string Mode { get; set; } = string.Empty;
+
+        public string CookiesFile { get; set; } = string.Empty;
+
+        public long PlaceId { get; set; }
+
+        public int Timeout { get; set; } = 30;
     }
 }
