@@ -1,6 +1,6 @@
 ﻿namespace Magenta.Core.Services
 {
-    public class VisitsService(CancellationToken cancellationToken)
+    public class VisitsService(CancellationToken cancellationToken) : IVisitsService
     {
         private readonly ConfigurationService _configurationService = new();
         private readonly RobloxService _robloxService = new();
@@ -43,15 +43,32 @@
                 {
                     _configurationService.GetConfiguration();
 
-                    int taskCount = Math.Min(Configuration.RoblosecurityCookies.Count, Configuration.Threads);
-
-                    if (taskCount <= 0)
+                    if (Configuration.Delay <= 0)
                     {
-                        Log.Error("[{0}.{1}] Failed to get visits.", nameof(VisitsService), nameof(GetVisits));
+                        Log.Error("[{0}.{1}] Delay must be greater than 0.", nameof(VisitsService), nameof(GetVisits));
 
-                        break;
+                        return;
+                    }
+                    else if (Configuration.PlaceId <= -1)
+                    {
+                        Log.Error("[{0}.{1}] PlaceId must be greater than -1.", nameof(VisitsService), nameof(GetVisits));
+
+                        return;
+                    }
+                    else if (Configuration.RoblosecurityCookies.Count <= 0)
+                    {
+                        Log.Error("[{0}.{1}] RoblosecurityCookies.Count must be greater than 0.", nameof(VisitsService), nameof(GetVisits));
+
+                        return;
+                    }
+                    else if (Configuration.Threads <= 0)
+                    {
+                        Log.Error("[{0}.{1}] Threads must be greater than 0.", nameof(VisitsService), nameof(GetVisits));
+
+                        return;
                     }
 
+                    int taskCount = Math.Min(Configuration.RoblosecurityCookies.Count, Configuration.Threads);
                     List<Task> tasks = [];
                     List<string> roblosecurityCookies = [.. Configuration.RoblosecurityCookies.OrderBy(_ => Random.Shared.Next())];
 
