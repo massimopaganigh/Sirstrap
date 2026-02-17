@@ -62,15 +62,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
 	</ItemGroup>
-	<Target Name="MoveConfigFilesToBinDir" AfterTargets="Publish">
-		<ItemGroup>
-			<ConfigFiles Include="$(PublishDir)_ReportAnalyzer.ini" />
-			<ConfigFiles Include="$(PublishDir)_LocalStrings.ini" />
-		</ItemGroup>
+	<Target Name="MoveAvaloniaLibsToBinDirWin" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('win'))">
 		<MakeDir Directories="$(PublishDir)bin" />
-		<Move SourceFiles="@(ConfigFiles)" DestinationFolder="$(PublishDir)bin" />
-	</Target>
-	<Target Name="MoveAvaloniaLibsToBinDirWin" AfterTargets="MoveConfigFilesToBinDir" Condition="$(RuntimeIdentifier.StartsWith('win'))">
 		<ItemGroup>
 			<AvaloniaLibsWin Include="$(PublishDir)av_libglesv2.dll" />
 			<AvaloniaLibsWin Include="$(PublishDir)libHarfBuzzSharp.dll" />
@@ -78,14 +71,16 @@
 		</ItemGroup>
 		<Move SourceFiles="@(AvaloniaLibsWin)" DestinationFolder="$(PublishDir)bin" />
 	</Target>
-	<Target Name="MoveAvaloniaLibsToBinDirLinux" AfterTargets="MoveConfigFilesToBinDir" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
+	<Target Name="MoveAvaloniaLibsToBinDirLinux" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
+		<MakeDir Directories="$(PublishDir)bin" />
 		<ItemGroup>
 			<AvaloniaLibsLinux Include="$(PublishDir)libHarfBuzzSharp.so" />
 			<AvaloniaLibsLinux Include="$(PublishDir)libSkiaSharp.so" />
 		</ItemGroup>
 		<Move SourceFiles="@(AvaloniaLibsLinux)" DestinationFolder="$(PublishDir)bin" />
 	</Target>
-	<Target Name="MoveAvaloniaLibsToBinDirOsx" AfterTargets="MoveConfigFilesToBinDir" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+	<Target Name="MoveAvaloniaLibsToBinDirOsx" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
+		<MakeDir Directories="$(PublishDir)bin" />
 		<ItemGroup>
 			<AvaloniaLibsOsx Include="$(PublishDir)libAvaloniaNative.dylib" />
 			<AvaloniaLibsOsx Include="$(PublishDir)libHarfBuzzSharp.dylib" />
