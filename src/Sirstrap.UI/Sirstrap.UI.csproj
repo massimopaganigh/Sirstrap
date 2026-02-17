@@ -6,7 +6,7 @@
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-		<AssemblyName>ReportAnalyzer</AssemblyName>
+		<AssemblyName>Sirstrap</AssemblyName>
 		<ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
 		<PublishAot>False</PublishAot>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
