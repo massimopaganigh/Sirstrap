@@ -36,6 +36,7 @@
         private Timer _logPollingTimer;
 
         private readonly RobloxActivityWatcher _robloxActivityWatcher = new();
+        private readonly RobloxDownloader _robloxDownloader = new();
 
         [ObservableProperty]
         private int _robloxProcesses;
