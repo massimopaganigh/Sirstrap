@@ -34,6 +34,7 @@
                         x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
                         //x.Debug = true;
                         x.AutoSessionTracking = true;
+                        x.EnableLogs = true;
                     })
 #endif
                     .CreateLogger();
