@@ -9,7 +9,7 @@
         private string _channelName = string.Empty;
 
         [ObservableProperty]
-        private string _fontFamily = "Minecraft";
+        private string _fontFamily = "JetBrains Mono";
 
         [ObservableProperty]
         private bool _incognito = false;
@@ -21,6 +21,7 @@
         private bool _robloxApi = false;
 
         [ObservableProperty]
+        [SuppressMessage("SonarAnalyzer.CSharp", "S1075", Justification = "Sybau")]
         private string _robloxCdnUri = "https://setup.rbxcdn.com";
 
         [ObservableProperty]

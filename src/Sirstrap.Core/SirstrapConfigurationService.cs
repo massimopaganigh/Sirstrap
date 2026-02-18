@@ -4,14 +4,12 @@
     {
         private static List<string> GetMissingKeys(HashSet<string> foundKeys)
         {
-            var missingKeys = new List<string>();
             var settingsDefinitions = GetSettingsDefinitions();
 
-            foreach (var setting in settingsDefinitions)
-                if (!foundKeys.Contains(setting.Key))
-                    missingKeys.Add($"{setting.Key}={setting.Value.Getter()}");
-
-            return missingKeys;
+            return settingsDefinitions
+                .Where(setting => !foundKeys.Contains(setting.Key))
+                .Select(setting => $"{setting.Key}={setting.Value.Getter()}")
+                .ToList();
         }
 
         private static Dictionary<string, (Func<string> Getter, Action<string> Setter)> GetSettingsDefinitions() => new()
@@ -26,7 +24,7 @@
             ),
             ["FONT_FAMILY"] = (
                 () => SirstrapConfiguration.FontFamily,
-                value => SirstrapConfiguration.FontFamily = value
+                value => SirstrapConfiguration.FontFamily = value.Equals("Minecraft", StringComparison.OrdinalIgnoreCase) ? "JetBrains Mono" : value
             ),
             ["INCOGNITO"] = (
                 () => SirstrapConfiguration.Incognito.ToString(),
@@ -154,7 +152,8 @@
                 var settingsSectionIndex = -1;
                 var foundKeys = new HashSet<string>();
 
-                for (var i = 0; i < rows.Count; i++)
+                var i = 0;
+                while (i < rows.Count)
                 {
                     var trimmedRow = rows[i].Trim();
 
@@ -177,17 +176,24 @@
                             i += missingKeys.Count;
                         }
 
+                        i++;
                         continue;
                     }
 
                     if (!settingsSection
                         || !trimmedRow.Contains('='))
+                    {
+                        i++;
                         continue;
+                    }
 
                     var parts = trimmedRow.Split('=');
 
                     if (parts.Length != 2)
+                    {
+                        i++;
                         continue;
+                    }
 
                     var key = parts[0].Trim();
 
@@ -195,6 +201,8 @@
 
                     if (settingsDefinitions.TryGetValue(key, out var definition))
                         rows[i] = $"{key}={definition.Getter()}";
+
+                    i++;
                 }
 
                 if (settingsSectionIndex == -1)

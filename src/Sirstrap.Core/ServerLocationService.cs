@@ -1,9 +1,7 @@
 namespace Sirstrap.Core
 {
-    public class ServerLocationService
+    public static class ServerLocationService
     {
-        private const string LOCATION_UNAVAILABLE = "UNKNOWN";
-
         private static readonly HttpClient _httpClient = new()
         {
             Timeout = TimeSpan.FromSeconds(5)
@@ -55,7 +53,7 @@ namespace Sirstrap.Core
 
                 if (string.IsNullOrWhiteSpace(region)
                     || string.IsNullOrWhiteSpace(country))
-                    return LOCATION_UNAVAILABLE;
+                    return string.Empty;
 
                 if (string.IsNullOrWhiteSpace(city)
                     || city.Equals(region, StringComparison.InvariantCultureIgnoreCase))
@@ -67,7 +65,7 @@ namespace Sirstrap.Core
             {
                 Log.Error(ex, "[!] Exception while parsing location JSON: {0}", ex.Message);
 
-                return LOCATION_UNAVAILABLE;
+                return string.Empty;
             }
         }
 
@@ -76,7 +74,7 @@ namespace Sirstrap.Core
         public static async Task<string> GetServerLocationAsync(string ipAddress)
         {
             if (string.IsNullOrWhiteSpace(ipAddress))
-                return LOCATION_UNAVAILABLE;
+                return string.Empty;
 
             if (_locationCache.TryGetValue(ipAddress, out var cachedLocation))
                 return cachedLocation;
@@ -86,7 +84,7 @@ namespace Sirstrap.Core
                 var response = await _httpClient.GetAsync($"https://ipinfo.io/{ipAddress}/json");
 
                 if (!response.IsSuccessStatusCode)
-                    return LOCATION_UNAVAILABLE;
+                    return string.Empty;
 
                 var location = ParseLocationFromJson(await response.Content.ReadAsStringAsync());
 
@@ -100,7 +98,7 @@ namespace Sirstrap.Core
             {
                 Log.Error(ex, "[!] Exception while getting server location for IP {0}: {1}", ipAddress, ex.Message);
 
-                return LOCATION_UNAVAILABLE;
+                return string.Empty;
             }
         }
     }

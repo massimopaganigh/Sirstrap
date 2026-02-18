@@ -155,9 +155,9 @@
 
                 registryKey.SetValue(name, value);
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
-                Log.Error(ex, "[!] Unauthorized access when writing to registry: {0}\\{1}", registryKey.Name, name ?? "(Default)");
+                Log.Error("[!] Unauthorized access when writing to registry: {0}\\{1}", registryKey.Name, name ?? "(Default)");
 
                 throw;
             }

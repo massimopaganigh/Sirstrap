@@ -108,6 +108,7 @@ namespace Sirstrap.Core
             }
             catch (OperationCanceledException)
             {
+                // Expected when cancellation is requested
             }
             catch (Exception ex)
             {

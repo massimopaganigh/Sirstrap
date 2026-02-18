@@ -10,7 +10,7 @@
 
         public static event EventHandler<InstanceType>? InstanceTypeChanged;
 
-        private static bool CloseAllRobloxInstances()
+        private static void CloseAllRobloxInstances()
         {
             try
             {
@@ -24,8 +24,10 @@
                         {
                             process.Kill();
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            // Process may have already exited or access may be denied
+                            Log.Debug(ex, "[!] Failed to kill process {0}: {1}", processName, ex.Message);
                         }
                         finally
                         {
@@ -33,12 +35,10 @@
                         }
                     }
                 }
-
-                return true;
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                Log.Error(ex, "[!] Error closing Roblox instances: {0}", ex.Message);
             }
         }
 

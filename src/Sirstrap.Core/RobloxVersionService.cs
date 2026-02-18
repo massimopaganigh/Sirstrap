@@ -2,8 +2,10 @@
 {
     public class RobloxVersionService(HttpClient httpClient)
     {
+#pragma warning disable S1075 // URIs should not be hardcoded - These are external API endpoints
         private const string ROBLOX_API_URI = "https://clientsettingscdn.roblox.com/v1/client-version/WindowsPlayer";
         private const string SIRHURT_API_URI = "https://sirhurt.net/status/fetch.php?exploit=SirHurt%20V5";
+#pragma warning restore S1075
 
         private readonly HttpClient _httpClient = httpClient;
 
@@ -86,30 +88,6 @@
             }
         }
 
-        private async Task<bool> ValidateVersion(string version)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(version))
-                    return false;
-
-                var response = await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, UriBuilder.GetManifestUri(new Configuration
-                {
-                    ChannelName = SirstrapConfiguration.ChannelName,
-                    VersionHash = version
-                })));
-
-                if (response.IsSuccessStatusCode)
-                    return true;
-
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         public async Task<string> GetLatestVersionAsync()
         {
             string version;
@@ -123,21 +101,6 @@
                 Log.Information("[*] Using version: {0}.", version);
 
                 return version;
-
-                //                if (!await ValidateVersion(version))
-                //                {
-                //                    Log.Error("[!] Validation failed. Invalid Roblox version override.");
-
-                //#pragma warning disable IDE0059 // Assegnazione non necessaria di un valore
-                //                    version = string.Empty;
-                //#pragma warning restore IDE0059 // Assegnazione non necessaria di un valore
-                //                }
-                //                else
-                //                {
-                //                    Log.Information("[*] Using version: {0}.", version);
-
-                //                    return version;
-                //                }
             }
 
             if (SirstrapConfiguration.RobloxApi)

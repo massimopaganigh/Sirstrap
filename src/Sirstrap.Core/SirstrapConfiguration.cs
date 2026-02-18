@@ -6,7 +6,7 @@
 
         public static string ChannelName { get; set; } = "-beta";
 
-        public static string FontFamily { get; set; } = "Minecraft";
+        public static string FontFamily { get; set; } = "JetBrains Mono";
 
         public static bool Incognito { get; set; } = false;
 
