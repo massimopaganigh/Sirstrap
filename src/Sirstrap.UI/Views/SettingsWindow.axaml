@@ -211,44 +211,70 @@
                     Grid.Column="0"
                     Grid.Row="8"
                     Text="SirHurt path:" />
-                <TextBox
-                    Width="200"
+                <Grid
                     Margin="0,5,0,0"
-                    HorizontalAlignment="Left"
-                    BorderThickness="0"
                     Grid.Column="1"
-                    Grid.Row="8"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    Text="{Binding SirHurtPath}"
-                    IsReadOnly="True" />
-                <Button
-                    Height="32"
+                    Grid.Row="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        Margin="0,0,2.5,0"
+                        HorizontalAlignment="Stretch"
+                        BorderThickness="0"
+                        Grid.Column="0"
+                        CornerRadius="999"
+                        DataContext="{Binding Settings}"
+                        Text="{Binding SirHurtPath}"
+                        IsReadOnly="True" />
+                    <Button
+                        Height="32"
+                        Margin="2.5,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        Command="{Binding RunSirHurtCommand}"
+                        Grid.Column="1"
+                        ToolTip.Tip="Run SirHurt"
+                        CornerRadius="999"
+                        IsEnabled="{Binding Settings.RunSirHurtEnabled}">
+                        <Image Margin="2.5" Source="avares://Sirstrap/Assets/run.png" />
+                    </Button>
+                </Grid>
+                <Grid
                     Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    BorderThickness="0"
-                    Command="{Binding RunSirHurtCommand}"
                     Grid.Column="1"
-                    Grid.Row="9"
-                    ToolTip.Tip="Run SirHurt"
-                    CornerRadius="999"
-                    IsEnabled="{Binding Settings.RunSirHurtEnabled}">
-                    <Image Margin="2.5" Source="avares://Sirstrap/Assets/run.png" />
-                </Button>
-                <Button
-                    Height="32"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    BorderThickness="0"
-                    Command="{Binding SaveCommand}"
-                    Grid.Column="1"
-                    Grid.Row="10"
-                    ToolTip.Tip="Save"
-                    CornerRadius="999">
-                    <Image Margin="2.5" Source="avares://Sirstrap/Assets/save.png" />
-                </Button>
+                    Grid.Row="9">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="2*" />
+                    </Grid.ColumnDefinitions>
+                    <Button
+                        Height="32"
+                        Margin="0,0,2.5,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        Command="{Binding OpenIniFileCommand}"
+                        Grid.Column="0"
+                        ToolTip.Tip="Open"
+                        CornerRadius="999">
+                        <Image Margin="2.5" Source="avares://Sirstrap/Assets/open.png" />
+                    </Button>
+                    <Button
+                        Height="32"
+                        Margin="2.5,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        Command="{Binding SaveCommand}"
+                        Grid.Column="1"
+                        ToolTip.Tip="Save"
+                        CornerRadius="999">
+                        <Image Margin="2.5" Source="avares://Sirstrap/Assets/save.png" />
+                    </Button>
+                </Grid>
             </Grid>
         </Border>
         <TextBlock

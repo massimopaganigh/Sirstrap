@@ -32,47 +32,87 @@
         }
 
         [RelayCommand]
-        private void RunSirHurt()
+        private async Task OpenIniFileAsync()
         {
             try
             {
-                var sirHurt = Path.Combine(Settings.SirHurtPath, "bootstrapper.exe");
-
-                if (!File.Exists(sirHurt))
-                    return;
-
-                ProcessStartInfo processStartInfo = new()
+                await Task.Run(() =>
                 {
-                    FileName = sirHurt
-                };
+                    var iniPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Sirstrap.ini");
 
-                using Process process = new()
-                {
-                    StartInfo = processStartInfo
-                };
+                    if (!File.Exists(iniPath))
+                        File.Create(iniPath).Close();
 
-                process.Start();
+                    var processStartInfo = new ProcessStartInfo
+                    {
+                        FileName = iniPath,
+                        UseShellExecute = true,
+                        Verb = "open"
+                    };
+
+                    using var process = new Process
+                    {
+                        StartInfo = processStartInfo
+                    };
+
+                    process.Start();
+                });
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(RunSirHurt));
+                Log.Error(ex, nameof(OpenIniFileAsync));
             }
         }
 
         [RelayCommand]
-        private void Save()
+        private async Task RunSirHurtAsync()
         {
             try
             {
-                Settings.Set();
+                await Task.Run(() =>
+                {
+                    var sirHurt = Path.Combine(Settings.SirHurtPath, "bootstrapper.exe");
 
-                App.ApplyFontFamily();
+                    if (!File.Exists(sirHurt))
+                        return;
 
-                CloseSpecificWindow<SettingsWindow>();
+                    ProcessStartInfo processStartInfo = new()
+                    {
+                        FileName = sirHurt
+                    };
+
+                    using Process process = new()
+                    {
+                        StartInfo = processStartInfo
+                    };
+
+                    process.Start();
+                });
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(Save));
+                Log.Error(ex, nameof(RunSirHurtAsync));
+            }
+        }
+
+
+        [RelayCommand]
+        private async Task SaveAsync()
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Settings.Set();
+
+                    App.ApplyFontFamily();
+
+                    CloseSpecificWindow<SettingsWindow>();
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(SaveAsync));
             }
         }
     }
