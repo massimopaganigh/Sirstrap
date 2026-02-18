@@ -3,29 +3,31 @@
     public partial class SettingsWindowViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private ObservableCollection<string> _fonts = [];
+        private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
+
+        [ObservableProperty]
+        private ObservableCollection<string> _fontFamilies = [];
 
         [ObservableProperty]
         private Settings _settings = new();
 
-        public SettingsWindowViewModel() => GetFonts();
+        public SettingsWindowViewModel() => GetFontFamilies();
 
-        private void GetFonts()
+        private void GetFontFamilies()
         {
             try
             {
-                var fonts = new List<string>
+                var fontFamilies = new List<string>
                 {
-                    "Minecraft"
+                    "JetBrains Mono"
                 };
+                fontFamilies.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
 
-                fonts.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
-
-                Fonts = new ObservableCollection<string>(fonts);
+                FontFamilies = new ObservableCollection<string>(fontFamilies);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(GetFonts));
+                Log.Error(ex, nameof(GetFontFamilies));
             }
         }
 

@@ -9,7 +9,7 @@
         private string _channelName = string.Empty;
 
         [ObservableProperty]
-        private string _fontFamily = "Minecraft";
+        private string _fontFamily = "JetBrains Mono";
 
         [ObservableProperty]
         private bool _incognito = false;
