@@ -12,10 +12,12 @@
         {
             try
             {
-                var logsDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+                var logsDirectory = PathManager.GetLogsPath();
 
                 if (!Directory.Exists(logsDirectory))
                     Directory.CreateDirectory(logsDirectory);
+
+                PathManager.PurgeOldLogs();
 
                 var appGuid = Guid.NewGuid().ToString("N");
 
