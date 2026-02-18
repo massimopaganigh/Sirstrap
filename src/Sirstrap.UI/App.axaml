@@ -27,7 +27,7 @@
         <Style Selector="Button.hover-lift:pointerover">
             <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
         </Style>
-        <Style Selector="SplitButton.hover-lift:pointerover">
+        <Style Selector="Border.hover-lift:pointerover">
             <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
         </Style>
     </Application.Styles>

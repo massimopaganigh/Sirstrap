@@ -107,7 +107,7 @@
 
                     App.ApplyFontFamily();
 
-                    CloseSpecificWindow<SettingsWindow>();
+                    Dispatcher.UIThread.Invoke(() => { CloseSpecificWindow<SettingsWindow>(); });
                 });
             }
             catch (Exception ex)
