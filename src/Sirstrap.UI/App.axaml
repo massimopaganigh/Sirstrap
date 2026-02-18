@@ -8,18 +8,27 @@
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Resources>
-        <FontFamily x:Key="AppFontFamily">avares://Sirstrap/Assets#Minecraft</FontFamily>
+        <FontFamily x:Key="AppFontFamily">avares://Sirstrap/Assets#JetBrains Mono</FontFamily>
     </Application.Resources>
     <Application.Styles>
         <FluentTheme />
         <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         </Style>
         <Style Selector="CheckBox">
+            <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         </Style>
         <Style Selector="TextBox">
+            <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        </Style>
+        <Style Selector="Button.hover-lift:pointerover">
+            <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
+        </Style>
+        <Style Selector="Border.hover-lift:pointerover">
+            <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
         </Style>
     </Application.Styles>
 </Application>

@@ -44,7 +44,9 @@
 
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);
 
+#if !DEBUG
                 await new RobloxDownloader().ExecuteAsync(args, SirstrapType.CLI);
+#endif
 
                 Environment.ExitCode = 0;
             }
@@ -55,10 +57,12 @@
             }
             finally
             {
+#if !DEBUG
                 await _ipcService.StopAsync();
                 await Log.CloseAndFlushAsync();
 
                 Environment.Exit(Environment.ExitCode);
+#endif
             }
         }
     }

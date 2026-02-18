@@ -3,74 +3,116 @@
     public partial class SettingsWindowViewModel : ViewModelBase
     {
         [ObservableProperty]
-        private ObservableCollection<string> _fonts = [];
+        private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
+
+        [ObservableProperty]
+        private ObservableCollection<string> _fontFamilies = [];
 
         [ObservableProperty]
         private Settings _settings = new();
 
-        public SettingsWindowViewModel() => GetFonts();
+        public SettingsWindowViewModel() => GetFontFamilies();
 
-        private void GetFonts()
+        private void GetFontFamilies()
         {
             try
             {
-                var fonts = new List<string>
+                var fontFamilies = new List<string>
                 {
-                    "Minecraft"
+                    "JetBrains Mono"
                 };
+                fontFamilies.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
 
-                fonts.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
-
-                Fonts = new ObservableCollection<string>(fonts);
+                FontFamilies = new ObservableCollection<string>(fontFamilies);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(GetFonts));
+                Log.Error(ex, nameof(GetFontFamilies));
             }
         }
 
         [RelayCommand]
-        private void RunSirHurt()
+        private async Task OpenIniFileAsync()
         {
             try
             {
-                var sirHurt = Path.Combine(Settings.SirHurtPath, "bootstrapper.exe");
-
-                if (!File.Exists(sirHurt))
-                    return;
-
-                ProcessStartInfo processStartInfo = new()
+                await Task.Run(() =>
                 {
-                    FileName = sirHurt
-                };
+                    var iniPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Sirstrap.ini");
 
-                using Process process = new()
-                {
-                    StartInfo = processStartInfo
-                };
+                    if (!File.Exists(iniPath))
+                        File.Create(iniPath).Close();
 
-                process.Start();
+                    var processStartInfo = new ProcessStartInfo
+                    {
+                        FileName = iniPath,
+                        UseShellExecute = true,
+                        Verb = "open"
+                    };
+
+                    using var process = new Process
+                    {
+                        StartInfo = processStartInfo
+                    };
+
+                    process.Start();
+                });
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(RunSirHurt));
+                Log.Error(ex, nameof(OpenIniFileAsync));
             }
         }
 
         [RelayCommand]
-        private void Save()
+        private async Task RunSirHurtAsync()
         {
             try
             {
-                Settings.Set();
+                await Task.Run(() =>
+                {
+                    var sirHurt = Path.Combine(Settings.SirHurtPath, "bootstrapper.exe");
 
-                App.ApplyFontFamily();
+                    if (!File.Exists(sirHurt))
+                        return;
 
-                CloseSpecificWindow<SettingsWindow>();
+                    ProcessStartInfo processStartInfo = new()
+                    {
+                        FileName = sirHurt
+                    };
+
+                    using Process process = new()
+                    {
+                        StartInfo = processStartInfo
+                    };
+
+                    process.Start();
+                });
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(Save));
+                Log.Error(ex, nameof(RunSirHurtAsync));
+            }
+        }
+
+
+        [RelayCommand]
+        private async Task SaveAsync()
+        {
+            try
+            {
+                await Task.Run(() =>
+                {
+                    Settings.Set();
+
+                    App.ApplyFontFamily();
+
+                    Dispatcher.UIThread.Invoke(() => { CloseSpecificWindow<SettingsWindow>(); });
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(SaveAsync));
             }
         }
     }

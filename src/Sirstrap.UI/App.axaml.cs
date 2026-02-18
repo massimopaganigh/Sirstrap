@@ -18,12 +18,14 @@ namespace Sirstrap.UI
                 if (Current is not App app)
                     return;
 
+                SirstrapConfigurationService.LoadSettings();
+
                 var fontFamilyName = SirstrapConfiguration.FontFamily;
 
                 FontFamily fontFamily;
 
-                if (fontFamilyName == "Minecraft")
-                    fontFamily = new FontFamily("avares://Sirstrap/Assets#Minecraft");
+                if (fontFamilyName == "JetBrains Mono")
+                    fontFamily = new FontFamily("avares://Sirstrap/Assets#JetBrains Mono");
                 else
                     fontFamily = new FontFamily(fontFamilyName);
 
