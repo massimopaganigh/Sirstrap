@@ -2,50 +2,26 @@
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private const int LOG_ACTIVITY_THRESHOLD_SECONDS = 30;
-        private const int MAX_POLLING_INTERVAL = 10000;
-        private const int MIN_POLLING_INTERVAL = 100;
-
         [ObservableProperty]
         private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
 
-        [ObservableProperty]
-        private int _currentPollingInterval = MIN_POLLING_INTERVAL;
-
+        private int _currentPollingInterval = 100;
         private readonly IpcService _ipcService = new();
-
-        [ObservableProperty]
         private bool _isMinimized;
-
-        [ObservableProperty]
-        private bool _isRobloxRunning;
-
-        [ObservableProperty]
-        private LogEventLevel? _lastLogLevel;
 
         [ObservableProperty]
         private string _lastLogMessage = "...";
 
-        [ObservableProperty]
         private DateTimeOffset? _lastLogReceived;
-
-        [ObservableProperty]
-        private DateTimeOffset? _lastLogTimestamp;
-
-        [ObservableProperty]
         private Timer _logPollingTimer;
-
         private readonly RobloxActivityWatcher _robloxActivityWatcher = new();
         private readonly RobloxDownloader _robloxDownloader = new();
 
         [ObservableProperty]
-        private int _robloxProcesses;
+        private string _serverLocation = string.Empty;
 
         [ObservableProperty]
-        private string _serverLocation = "...";
-
-        [ObservableProperty]
-        private bool _showServerLocation;
+        private bool _showServerLocation = false;
 
         private bool _wasRobloxRunning;
 
@@ -53,7 +29,7 @@
         {
             _logPollingTimer = new(_currentPollingInterval);
 
-            _logPollingTimer.Elapsed += (s, e) => GetLastLogFromSink();
+            _logPollingTimer.Elapsed += (s, e) => GetLastLogMessageFromLastLogSink();
 
             _logPollingTimer.Start();
 
@@ -66,25 +42,75 @@
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool AllocConsole();
 
-        private void GetLastLogFromSink()
+        private void FindRoblox()
+        {
+            try
+            {
+                var processNames = new[] { "Roblox", "RobloxPlayerBeta" };
+                var isRobloxRunning = false;
+
+                foreach (var processName in processNames)
+                    if (Process.GetProcessesByName(processName).Length > 0)
+                    {
+                        isRobloxRunning = true;
+
+                        break;
+                    }
+
+                if (isRobloxRunning
+                    && !_wasRobloxRunning)
+                {
+                    _robloxActivityWatcher.StartWatching();
+
+                    _wasRobloxRunning = true;
+                }
+                else if (!isRobloxRunning
+                    && _wasRobloxRunning)
+                {
+                    _robloxActivityWatcher.StopWatching();
+
+                    ShowServerLocation = false;
+                    ServerLocation = string.Empty;
+                    _wasRobloxRunning = false;
+                }
+
+                var mainWindow = GetMainWindow();
+
+                if (mainWindow != null
+                    && isRobloxRunning
+                    && !_isMinimized)
+                {
+                    Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        mainWindow.WindowState = WindowState.Minimized;
+                    });
+
+                    _isMinimized = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(FindRoblox));
+            }
+        }
+
+        private void GetLastLogMessageFromLastLogSink()
         {
             try
             {
                 if (!string.IsNullOrWhiteSpace(LastLogSink.LastLog)
                     && !string.Equals(LastLogMessage, LastLogSink.LastLog))
                 {
-                    LastLogReceived = DateTimeOffset.Now;
                     LastLogMessage = LastLogSink.LastLog;
-                    LastLogTimestamp = LastLogSink.LastLogTimestamp;
-                    LastLogLevel = LastLogSink.LastLogLevel;
+                    _lastLogReceived = LastLogSink.LastLogTimestamp;
                 }
 
-                GetRobloxProcesses();
+                FindRoblox();
                 GetPollingInterval();
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(GetLastLogFromSink));
+                Log.Error(ex, nameof(GetLastLogMessageFromLastLogSink));
             }
         }
 
@@ -92,12 +118,12 @@
         {
             try
             {
-                var targetPollingInterval = LastLogReceived.HasValue && (DateTimeOffset.Now - LastLogReceived.Value).TotalSeconds <= LOG_ACTIVITY_THRESHOLD_SECONDS ? MIN_POLLING_INTERVAL : MAX_POLLING_INTERVAL;
+                var targetPollingInterval = _lastLogReceived.HasValue && (DateTimeOffset.Now - _lastLogReceived.Value).TotalSeconds <= 30 ? 100 : 10000;
 
-                if (targetPollingInterval != CurrentPollingInterval)
+                if (targetPollingInterval != _currentPollingInterval)
                 {
-                    CurrentPollingInterval = targetPollingInterval;
-                    LogPollingTimer.Interval = CurrentPollingInterval;
+                    _currentPollingInterval = targetPollingInterval;
+                    _logPollingTimer.Interval = _currentPollingInterval;
                 }
             }
             catch (Exception ex)
@@ -106,57 +132,10 @@
             }
         }
 
-        private void GetRobloxProcesses()
-        {
-            try
-            {
-                RobloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta").Length;
-
-                var robloxIsActuallyRunning = RobloxProcesses > 0;
-
-                IsRobloxRunning = robloxIsActuallyRunning && SirstrapConfiguration.MultiInstance;
-                ShowServerLocation = robloxIsActuallyRunning;
-
-                if (robloxIsActuallyRunning
-                    && !_wasRobloxRunning)
-                {
-                    _robloxActivityWatcher.StartWatching();
-
-                    _wasRobloxRunning = true;
-                }
-                else if (!robloxIsActuallyRunning
-                    && _wasRobloxRunning)
-                {
-                    _robloxActivityWatcher.StopWatching();
-
-                    ServerLocation = "...";
-
-                    _wasRobloxRunning = false;
-                }
-
-                var mainWindow = GetMainWindow();
-
-                if (mainWindow != null
-                    && IsRobloxRunning
-                    && !IsMinimized)
-                {
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        mainWindow.WindowState = WindowState.Minimized;
-                    });
-
-                    IsMinimized = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, nameof(GetRobloxProcesses));
-            }
-        }
-
         private void OnServerLocationChanged(object? sender, string location) => Dispatcher.UIThread.InvokeAsync(() =>
         {
             ServerLocation = location;
+            ShowServerLocation = !string.IsNullOrEmpty(ServerLocation);
         });
 
         [RelayCommand]
@@ -245,12 +224,10 @@
 
                 await _ipcService.StartAsync("SirstrapIpc");
 
-                var args = Program.Args ?? [];
-
-                RegistryManager.RegisterProtocolHandler("roblox-player", args);
+                RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
 
 #if !DEBUG
-                await _robloxDownloader.ExecuteAsync(args, SirstrapType.UI);
+                await _robloxDownloader.ExecuteAsync(Program.Args ?? [], SirstrapType.UI);
 #endif
 
                 Environment.ExitCode = 0;
