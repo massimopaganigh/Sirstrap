@@ -24,7 +24,7 @@
             ),
             ["FONT_FAMILY"] = (
                 () => SirstrapConfiguration.FontFamily,
-                value => SirstrapConfiguration.FontFamily = value
+                value => SirstrapConfiguration.FontFamily = value.Equals("Minecraft", StringComparison.OrdinalIgnoreCase) ? "JetBrains Mono" : value
             ),
             ["INCOGNITO"] = (
                 () => SirstrapConfiguration.Incognito.ToString(),
