@@ -24,5 +24,11 @@
             <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         </Style>
+        <Style Selector="Button.hover-lift:pointerover">
+            <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
+        </Style>
+        <Style Selector="SplitButton.hover-lift:pointerover">
+            <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
+        </Style>
     </Application.Styles>
 </Application>
