@@ -2,10 +2,10 @@ namespace Sirstrap.Core
 {
     public static class IncognitoManager
     {
-        private static readonly string _robloxFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox");
         private static readonly string _incognitoCachePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "IncognitoCache", "Roblox");
         private static bool _isRobloxFolderMoved = false;
         private static readonly Lock _lockObject = new();
+        private static readonly string _robloxFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox");
 
         static IncognitoManager()
         {
@@ -58,9 +58,11 @@ namespace Sirstrap.Core
                         _incognitoCachePath.BetterDirectoryDelete();
                     }
 
+                    SingletonManager.WaitForAllRobloxProcessesToExit();
+
                     Log.Information("[*] Moving Roblox folder to Incognito cache: {0} -> {1}", _robloxFolderPath, _incognitoCachePath);
 
-                    Directory.Move(_robloxFolderPath, _incognitoCachePath);
+                    _robloxFolderPath.BetterDirectoryMove(_incognitoCachePath);
 
                     _isRobloxFolderMoved = true;
 
@@ -110,7 +112,7 @@ namespace Sirstrap.Core
 
                     Log.Information("[*] Restoring Roblox folder from Incognito cache: {0} -> {1}", _incognitoCachePath, _robloxFolderPath);
 
-                    Directory.Move(_incognitoCachePath, _robloxFolderPath);
+                    _incognitoCachePath.BetterDirectoryMove(_robloxFolderPath);
 
                     _isRobloxFolderMoved = false;
 

@@ -58,6 +58,33 @@
             }
         }
 
+        public static void BetterDirectoryMove(this string sourcePath, string destinationPath, int attempts = 5)
+        {
+            try
+            {
+                foreach (int attempt in Enumerable.Range(1, attempts))
+                    try
+                    {
+                        Directory.Move(sourcePath, destinationPath);
+
+                        return;
+                    }
+                    catch (IOException)
+                    {
+                        if (attempt == attempts)
+                            throw;
+
+                        Thread.Sleep(100 * attempt);
+                    }
+            }
+            catch (Exception)
+            {
+                Log.Error("[!] Error moving directory: {0} -> {1}.", sourcePath, destinationPath);
+
+                throw;
+            }
+        }
+
         public static void BetterFileDelete(this string filePath, int attempts = 5)
         {
             try

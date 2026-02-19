@@ -57,7 +57,7 @@
 
         private static bool IsAlreadyInstalled(Configuration configuration)
         {
-            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && Directory.Exists(PathManager.GetExtractionPath(configuration.VersionHash));
+            return configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase) && File.Exists(Path.Combine(PathManager.GetExtractionPath(configuration.VersionHash), "RobloxPlayerBeta.exe"));
         }
 
         private static bool LaunchApplication(Configuration configuration)
