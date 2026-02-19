@@ -42,6 +42,100 @@
             }
         }
 
+        public static bool CaptureSingleton()
+        {
+            Log.Information("[*] Attempting to capture Roblox singleton...");
+
+            lock (_lockObject)
+            {
+                if (_robloxMutex != null)
+                {
+                    Log.Warning("[*] Singleton already captured by this instance.");
+
+                    return true;
+                }
+                try
+                {
+                    _robloxMutex = new Mutex(true, ROBLOX_MUTEX_NAME, out bool createdNew);
+
+                    if (createdNew)
+                    {
+                        Log.Information("[*] Successfully captured Roblox singleton.");
+
+                        CurrentInstanceType = InstanceType.Master;
+
+                        CloseAllRobloxInstances();
+
+                        return true;
+                    }
+                    else
+                    {
+                        Log.Warning("[*] Cannot to capture singleton - another instance is already running.");
+
+                        CurrentInstanceType = InstanceType.Slave;
+
+                        _robloxMutex.Dispose();
+
+                        _robloxMutex = null;
+                    }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    Log.Warning(ex, "[*] Cannot capture singleton - access denied (another instance may be running at a different privilege level): {0}.", ex.Message);
+
+                    CurrentInstanceType = InstanceType.Slave;
+
+                    _robloxMutex?.Dispose();
+
+                    _robloxMutex = null;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[!] Error occurred while attempting to capture singleton: {0}.", ex.Message);
+
+                    CurrentInstanceType = InstanceType.Slave;
+
+                    _robloxMutex?.Dispose();
+
+                    _robloxMutex = null;
+                }
+
+                return false;
+            }
+        }
+
+        public static bool ReleaseSingleton()
+        {
+            Log.Information("[*] Attempting to release Roblox singleton...");
+
+            lock (_lockObject)
+            {
+                if (_robloxMutex == null)
+                {
+                    Log.Warning("[*] Cannot release singleton - not currently captured.");
+
+                    return false;
+                }
+                try
+                {
+                    _robloxMutex.Dispose();
+                    _robloxMutex = null;
+
+                    CurrentInstanceType = InstanceType.None;
+
+                    Log.Information("[*] Successfully released Roblox singleton.");
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "[!] Error occurred while attempting to release singleton: {0}.", ex.Message);
+
+                    return false;
+                }
+            }
+        }
+
         public static bool WaitForAllRobloxProcessesToExit(int timeoutMs = 5000)
         {
             try
@@ -80,85 +174,6 @@
                 Log.Error(ex, "[!] Error while waiting for Roblox processes to exit: {0}.", ex.Message);
 
                 return false;
-            }
-        }
-
-        public static bool CaptureSingleton()
-        {
-            Log.Information("[*] Attempting to capture Roblox singleton...");
-
-            lock (_lockObject)
-            {
-                if (_robloxMutex != null)
-                {
-                    Log.Warning("[*] Singleton already captured by this instance.");
-
-                    return true;
-                }
-                try
-                {
-                    _robloxMutex = new Mutex(true, ROBLOX_MUTEX_NAME, out bool createdNew);
-
-                    if (createdNew)
-                    {
-                        Log.Information("[*] Successfully captured Roblox singleton.");
-
-                        CurrentInstanceType = InstanceType.Master;
-
-                        CloseAllRobloxInstances();
-
-                        return true;
-                    }
-                    else
-                    {
-                        Log.Warning("[*] Cannot to capture singleton - another instance is already running.");
-
-                        CurrentInstanceType = InstanceType.Slave;
-
-                        _robloxMutex.Dispose();
-                        _robloxMutex = null;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "[!] Error occurred while attempting to capture singleton: {0}.", ex.Message);
-
-                    CurrentInstanceType = InstanceType.Slave;
-                }
-
-                return false;
-            }
-        }
-
-        public static bool ReleaseSingleton()
-        {
-            Log.Information("[*] Attempting to release Roblox singleton...");
-
-            lock (_lockObject)
-            {
-                if (_robloxMutex == null)
-                {
-                    Log.Warning("[*] Cannot release singleton - not currently captured.");
-
-                    return false;
-                }
-                try
-                {
-                    _robloxMutex.Dispose();
-                    _robloxMutex = null;
-
-                    CurrentInstanceType = InstanceType.None;
-
-                    Log.Information("[*] Successfully released Roblox singleton.");
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "[!] Error occurred while attempting to release singleton: {0}.", ex.Message);
-
-                    return false;
-                }
             }
         }
 
