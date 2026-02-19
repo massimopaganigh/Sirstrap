@@ -116,11 +116,11 @@ namespace Sirstrap.Core
                     {
                         string entryPath = $"{value}{entry.FullName.Replace('\\', '/')}";
 
-#pragma warning disable S6966 // Awaitable method should be used - ZipArchiveEntry.Open() does not have an async version
-                        await using Stream sourceStream = entry.Open();
+                        await using Stream sourceStream = await entry.OpenAsync();
+
                         ZipArchiveEntry targetEntry = archive.CreateEntry(entryPath, CompressionLevel.Fastest);
-                        await using Stream targetStream = targetEntry.Open();
-#pragma warning restore S6966
+
+                        await using Stream targetStream = await targetEntry.OpenAsync();
 
                         await sourceStream.CopyToAsync(targetStream);
                     }
@@ -136,10 +136,9 @@ namespace Sirstrap.Core
 
                 try
                 {
-#pragma warning disable S6966 // Awaitable method should be used - ZipArchiveEntry.Open() does not have an async version
                     ZipArchiveEntry entry = archive.CreateEntry(package, CompressionLevel.Fastest);
-                    await using Stream entryStream = entry.Open();
-#pragma warning restore S6966
+
+                    await using Stream entryStream = await entry.OpenAsync();
 
                     await entryStream.WriteAsync(packageBytes);
                 }
@@ -152,10 +151,9 @@ namespace Sirstrap.Core
 
         private static async Task ExtractPackageContentAsync(string content, string package, ZipArchive archive)
         {
-#pragma warning disable S6966 // Awaitable method should be used - ZipArchiveEntry.Open() does not have an async version
             ZipArchiveEntry entry = archive.CreateEntry(package, CompressionLevel.Optimal);
-            await using StreamWriter writer = new(entry.Open());
-#pragma warning restore S6966
+
+            await using StreamWriter writer = new(await entry.OpenAsync());
 
             await writer.WriteAsync(content);
         }
@@ -204,9 +202,11 @@ namespace Sirstrap.Core
                 if (!manifest.IsValid)
                     return;
 
-#pragma warning disable S6966 // Awaitable method should be used - ZipFile.Open() does not have an async version in .NET
-                using ZipArchive archive = ZipFile.Open(configuration.GetOutputPath(), ZipArchiveMode.Create);
-#pragma warning restore S6966
+                string outputPath = configuration.GetOutputPath();
+
+                outputPath.BetterFileDelete();
+
+                using ZipArchive archive = await ZipFile.OpenAsync(outputPath, ZipArchiveMode.Create);
 
                 await ExtractPackageContentAsync(APP_SETTINGS_XML, "AppSettings.xml", archive);
 
