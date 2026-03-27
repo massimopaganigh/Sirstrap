@@ -5,6 +5,7 @@ global using Avalonia.Controls.Templates;
 global using Avalonia.Data.Core.Plugins;
 global using Avalonia.Interactivity;
 global using Avalonia.Markup.Xaml;
+global using Avalonia.Platform.Storage;
 global using Avalonia.Media;
 global using Avalonia.Styling;
 global using Avalonia.Threading;

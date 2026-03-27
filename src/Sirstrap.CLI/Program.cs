@@ -51,6 +51,8 @@
                     ███    ███                            ███    ███ by SirHurt CSR Team", SirstrapUpdateService.GetCurrentFullVersion(), AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
                 SirstrapConfigurationService.LoadSettings();
 
+                PathManager.PurgePreviousInstallationPath();
+
                 await _ipcService.StartAsync("SirstrapIpc");
 
                 RegistryManager.RegisterProtocolHandler("roblox-player", args);

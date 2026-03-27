@@ -30,9 +30,17 @@
                 () => SirstrapConfiguration.Incognito.ToString(),
                 value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.Incognito = v; }
             ),
+            ["INSTALLATION_PATH"] = (
+                () => SirstrapConfiguration.InstallationPath,
+                value => SirstrapConfiguration.InstallationPath = string.IsNullOrWhiteSpace(value) ? SirstrapConfiguration.GetDefaultInstallationPath() : value
+            ),
             ["MULTI_INSTANCE"] = (
                 () => SirstrapConfiguration.MultiInstance.ToString(),
                 value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.MultiInstance = v; }
+            ),
+            ["PREVIOUS_INSTALLATION_PATH"] = (
+                () => SirstrapConfiguration.PreviousInstallationPath,
+                value => SirstrapConfiguration.PreviousInstallationPath = value
             ),
             ["ROBLOX_API"] = (
                 () => SirstrapConfiguration.RobloxApi.ToString(),

@@ -10,7 +10,11 @@
 
         public static bool Incognito { get; set; } = false;
 
+        public static string InstallationPath { get; set; } = GetDefaultInstallationPath();
+
         public static bool MultiInstance { get; set; } = true;
+
+        public static string PreviousInstallationPath { get; set; } = string.Empty;
 
         public static bool RobloxApi { get; set; } = false;
 
@@ -19,5 +23,7 @@
         public static string RobloxVersionOverride { get; set; } = string.Empty;
 
         public static string SirHurtPath => SirHurtService.GetSirHurtPath();
+
+        public static string GetDefaultInstallationPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Versions");
     }
 }

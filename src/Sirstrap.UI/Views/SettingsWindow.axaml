@@ -55,6 +55,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -210,9 +211,49 @@
                     Margin="0,5,5,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Text="SirHurt path:" />
+                    Text="Roblox installation path:" />
                 <Grid
                     Grid.Row="8"
+                    Grid.Column="1"
+                    Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        Grid.Column="0"
+                        Margin="0,0,2.5,0"
+                        HorizontalAlignment="Stretch"
+                        BorderThickness="0"
+                        CornerRadius="999"
+                        DataContext="{Binding Settings}"
+                        Text="{Binding InstallationPath}" />
+                    <Button
+                        Grid.Column="1"
+                        Height="32"
+                        Margin="2.5,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        Classes="hover-lift"
+                        Command="{Binding BrowseInstallationPathCommand}"
+                        CornerRadius="999"
+                        ToolTip.Tip="Browse for installation folder">
+                        <Image
+                            Margin="2.5"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="avares://Sirstrap/Assets/open.png" />
+                    </Button>
+                </Grid>
+                <TextBlock
+                    Grid.Row="9"
+                    Grid.Column="0"
+                    Margin="0,5,5,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="SirHurt path:" />
+                <Grid
+                    Grid.Row="9"
                     Grid.Column="1"
                     Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
@@ -247,7 +288,7 @@
                     </Button>
                 </Grid>
                 <Grid
-                    Grid.Row="9"
+                    Grid.Row="10"
                     Grid.Column="1"
                     Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
