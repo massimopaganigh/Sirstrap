@@ -32,6 +32,36 @@
         }
 
         [RelayCommand]
+        private async Task BrowseInstallationPathAsync()
+        {
+            try
+            {
+                var mainWindow = GetMainWindow();
+
+                if (mainWindow == null)
+                    return;
+
+                var storageProvider = mainWindow.StorageProvider;
+
+                var startFolder = await storageProvider.TryGetFolderFromPathAsync(Settings.InstallationPath);
+
+                var result = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+                {
+                    Title = "Select Roblox installation path",
+                    AllowMultiple = false,
+                    SuggestedStartLocation = startFolder
+                });
+
+                if (result.Count > 0)
+                    Settings.InstallationPath = result[0].Path.LocalPath;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(BrowseInstallationPathAsync));
+            }
+        }
+
+        [RelayCommand]
         private async Task OpenIniFileAsync()
         {
             try

@@ -2,9 +2,37 @@
 {
     public static class PathManager
     {
-        public static string GetExtractionPath(string versionHash) => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Versions", versionHash);
+        public static string GetExtractionPath(string versionHash) => Path.Combine(SirstrapConfiguration.InstallationPath, versionHash);
 
         public static string GetLogsPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
+
+        public static void PurgePreviousInstallationPath()
+        {
+            try
+            {
+                var previousPath = SirstrapConfiguration.PreviousInstallationPath;
+
+                if (string.IsNullOrWhiteSpace(previousPath)
+                    || !Directory.Exists(previousPath))
+                    return;
+
+                if (string.Equals(previousPath, SirstrapConfiguration.InstallationPath, StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                Log.Information("[*] Purging previous installation path: {0}...", previousPath);
+
+                previousPath.BetterDirectoryDelete();
+
+                SirstrapConfiguration.PreviousInstallationPath = string.Empty;
+                SirstrapConfigurationService.SaveSettings();
+
+                Log.Information("[*] Previous installation path purged successfully.");
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, nameof(PurgePreviousInstallationPath));
+            }
+        }
 
         public static void PurgeOldLogs(int maxFiles = 100)
         {

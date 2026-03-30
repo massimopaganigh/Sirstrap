@@ -6,11 +6,11 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="PeanutButter.INI" Version="3.0.418" />
-		<PackageReference Include="Sentry.Serilog" Version="6.1.0" />
+		<PackageReference Include="Sentry.Serilog" Version="6.3.0" />
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.20.0.135146">
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.22.0.136894">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

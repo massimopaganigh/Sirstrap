@@ -15,6 +15,9 @@
         private bool _incognito = false;
 
         [ObservableProperty]
+        private string _installationPath = string.Empty;
+
+        [ObservableProperty]
         private bool _multiInstance = true;
 
         [ObservableProperty]
@@ -41,6 +44,7 @@
             ChannelName = SirstrapConfiguration.ChannelName;
             FontFamily = SirstrapConfiguration.FontFamily;
             Incognito = SirstrapConfiguration.Incognito;
+            InstallationPath = SirstrapConfiguration.InstallationPath;
             MultiInstance = SirstrapConfiguration.MultiInstance;
             RobloxApi = SirstrapConfiguration.RobloxApi;
             RobloxCdnUri = SirstrapConfiguration.RobloxCdnUri;
@@ -58,10 +62,14 @@
 
         public void Set()
         {
+            if (!string.Equals(SirstrapConfiguration.InstallationPath, InstallationPath, StringComparison.OrdinalIgnoreCase))
+                SirstrapConfiguration.PreviousInstallationPath = SirstrapConfiguration.InstallationPath;
+
             SirstrapConfiguration.AutoUpdate = AutoUpdate;
             SirstrapConfiguration.ChannelName = ChannelName;
             SirstrapConfiguration.FontFamily = FontFamily;
             SirstrapConfiguration.Incognito = Incognito;
+            SirstrapConfiguration.InstallationPath = InstallationPath;
             SirstrapConfiguration.MultiInstance = MultiInstance;
             SirstrapConfiguration.RobloxApi = RobloxApi;
             SirstrapConfiguration.RobloxCdnUri = RobloxCdnUri;
@@ -69,6 +77,8 @@
 
             SirstrapConfigurationService.SaveSettings();
             SirstrapConfigurationService.LoadSettings();
+
+            PathManager.PurgePreviousInstallationPath();
         }
     }
 }
