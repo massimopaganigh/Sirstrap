@@ -148,6 +148,7 @@
                     FileName = "https://github.com/massimopaganigh/Sirstrap",
                     UseShellExecute = true
                 });
+                Sentry.SentrySdk.Metrics.EmitCounter(nameof(OpenGitHub), 1);
             }
             catch (Exception ex)
             {
@@ -165,6 +166,7 @@
                     FileName = "https://github.com/massimopaganigh/Sirstrap/issues/new",
                     UseShellExecute = true
                 });
+                Sentry.SentrySdk.Metrics.EmitCounter(nameof(OpenIssue), 1);
             }
             catch (Exception ex)
             {
@@ -178,6 +180,7 @@
             try
             {
                 new SettingsWindow { DataContext = new SettingsWindowViewModel() }.ShowDialog(GetMainWindow()!);
+                Sentry.SentrySdk.Metrics.EmitCounter(nameof(OpenSettings), 1);
             }
             catch (Exception ex)
             {
