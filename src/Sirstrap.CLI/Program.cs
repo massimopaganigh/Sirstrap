@@ -35,6 +35,10 @@
                         //x.Debug = true;
                         x.AutoSessionTracking = true;
                         x.EnableLogs = true;
+
+                        x.TracesSampleRate = 0.5;
+                        x.ProfilesSampleRate = 0.5;
+                        x.AddIntegration(new Sentry.Profiling.ProfilingIntegration(/*TimeSpan.FromMilliseconds(500)*/));
                     })
 #endif
                     .CreateLogger();
