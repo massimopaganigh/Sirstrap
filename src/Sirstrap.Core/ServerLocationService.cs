@@ -79,12 +79,18 @@ namespace Sirstrap.Core
             if (_locationCache.TryGetValue(ipAddress, out var cachedLocation))
                 return cachedLocation;
 
+            var span = SentrySdk.GetSpan()?.StartChild("server.location", $"Resolve server location for {ipAddress}");
+
             try
             {
                 var response = await _httpClient.GetAsync($"https://ipinfo.io/{ipAddress}/json");
 
                 if (!response.IsSuccessStatusCode)
+                {
+                    span?.Finish(SpanStatus.NotFound);
+
                     return string.Empty;
+                }
 
                 var location = ParseLocationFromJson(await response.Content.ReadAsStringAsync());
 
@@ -92,11 +98,15 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] Server location for IP {0}: {1}", ipAddress, location);
 
+                span?.Finish(SpanStatus.Ok);
+
                 return location;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Exception while getting server location for IP {0}: {1}", ipAddress, ex.Message);
+
+                span?.Finish(SpanStatus.InternalError);
 
                 return string.Empty;
             }
