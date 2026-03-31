@@ -6,11 +6,15 @@
 
         public static bool Launch(Configuration configuration)
         {
+            var span = SentrySdk.GetSpan()?.StartChild("roblox.launch", "Launch Roblox");
+
             string robloxPlayerBetaExePath = Path.Combine(PathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {
                 Log.Error("[!] Roblox not found in: {0}.", robloxPlayerBetaExePath);
+
+                span?.Finish(SpanStatus.NotFound);
 
                 return false;
             }
@@ -54,6 +58,8 @@
                 {
                     Log.Error("[!] Failed to launch Roblox.");
 
+                    span?.Finish(SpanStatus.InternalError);
+
                     return false;
                 }
 
@@ -71,11 +77,15 @@
                         Thread.Sleep(100);
                 }
 
+                span?.Finish(SpanStatus.Ok);
+
                 return true;
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Exception while launching Roblox: {0}.", ex.Message);
+
+                span?.Finish(SpanStatus.InternalError);
 
                 return false;
             }

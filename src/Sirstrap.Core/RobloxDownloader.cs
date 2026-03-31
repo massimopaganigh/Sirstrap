@@ -67,6 +67,10 @@
 
         public async Task ExecuteAsync(string[] args, SirstrapType sirstrapType)
         {
+            var transaction = SentrySdk.StartTransaction("sirstrap.execute", "task");
+
+            SentrySdk.ConfigureScope(x => x.Transaction = transaction);
+
             try
             {
                 using var updateService = new SirstrapUpdateService();
@@ -95,10 +99,14 @@
                 await DownloadAndProcessFilesAsync(configuration).ConfigureAwait(false);
 
                 InstallAndLaunchApplication(configuration);
+
+                transaction.Finish(SpanStatus.Ok);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Error: {0}", ex.Message);
+
+                transaction.Finish(SpanStatus.InternalError);
 
                 Environment.ExitCode = 1;
             }

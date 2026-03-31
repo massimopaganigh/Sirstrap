@@ -2,11 +2,6 @@
 {
     public class RobloxVersionService(HttpClient httpClient)
     {
-#pragma warning disable S1075 // URIs should not be hardcoded - These are external API endpoints
-        private const string ROBLOX_API_URI = "https://clientsettingscdn.roblox.com/v1/client-version/WindowsPlayer";
-        private const string SIRHURT_API_URI = "https://sirhurt.net/status/fetch.php?exploit=SirHurt%20V5";
-#pragma warning restore S1075
-
         private readonly HttpClient _httpClient = httpClient;
 
         private async Task<string> GetRobloxVersionAsync()
@@ -90,6 +85,7 @@
 
         public async Task<string> GetLatestVersionAsync()
         {
+            var span = SentrySdk.GetSpan()?.StartChild("version.resolve", "Resolve Roblox version");
             string version;
 
             if (!string.IsNullOrWhiteSpace(SirstrapConfiguration.RobloxVersionOverride))
@@ -146,7 +142,14 @@
 
             Log.Information("[*] Using version: {0}.", version);
 
+            span?.Finish(string.IsNullOrEmpty(version) ? SpanStatus.NotFound : SpanStatus.Ok);
+
             return version;
         }
+
+#pragma warning disable S1075 // URIs should not be hardcoded - These are external API endpoints
+        private const string ROBLOX_API_URI = "https://clientsettingscdn.roblox.com/v1/client-version/WindowsPlayer";
+        private const string SIRHURT_API_URI = "https://sirhurt.net/status/fetch.php?exploit=SirHurt%20V5";
+#pragma warning restore S1075
     }
 }

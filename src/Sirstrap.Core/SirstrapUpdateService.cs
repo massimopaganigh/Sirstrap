@@ -319,21 +319,29 @@ exit
 
         public async Task UpdateAsync(SirstrapType sirstrapType, string[] args)
         {
+            var span = SentrySdk.GetSpan()?.StartChild("update.check", "Check for updates");
+
             try
             {
                 if (!SirstrapConfiguration.AutoUpdate)
                 {
                     Log.Information("[*] AutoUpdate is disabled. Skipping...");
 
+                    span?.Finish(SpanStatus.Ok);
+
                     return;
                 }
 
                 if (!await IsUpToDateAsync(sirstrapType))
                     await DownloadAndApplyUpdateAsync(sirstrapType, args);
+
+                span?.Finish(SpanStatus.Ok);
             }
             catch (Exception ex)
             {
                 Log.Error(ex, nameof(UpdateAsync));
+
+                span?.Finish(SpanStatus.InternalError);
             }
         }
     }

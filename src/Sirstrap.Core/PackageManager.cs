@@ -86,9 +86,9 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] The package has been downloaded successfully: {0}.", package);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] An error occurred while downloading the package: {0}.", package);
+                Log.Error(ex, "[!] An error occurred while downloading the package: {0}.", package);
 
                 throw;
             }
@@ -170,6 +170,8 @@ namespace Sirstrap.Core
 
         public async Task Download4MacAsync(Configuration configuration)
         {
+            var span = SentrySdk.GetSpan()?.StartChild("packages.download", "Download Mac packages");
+
             try
             {
                 string archiveName = configuration.BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
@@ -182,10 +184,14 @@ namespace Sirstrap.Core
                     await File.WriteAllBytesAsync(configuration.GetOutputPath(), archiveBytes);
 
                 Log.Information("[*] The package has been downloaded successfully for Mac: {0}.", archiveName);
+
+                span?.Finish(SpanStatus.Ok);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] An error occurred while downloading the package for Mac.");
+                Log.Error(ex, "[!] An error occurred while downloading the package for Mac.");
+
+                span?.Finish(SpanStatus.InternalError);
 
                 throw;
             }
@@ -193,6 +199,8 @@ namespace Sirstrap.Core
 
         public async Task Download4WindowsAsync(Configuration configuration)
         {
+            var span = SentrySdk.GetSpan()?.StartChild("packages.download", "Download Windows packages");
+
             try
             {
                 Log.Information("[*] Downloading packages for Windows...");
@@ -229,10 +237,14 @@ namespace Sirstrap.Core
                 await Task.WhenAll(downloadTasks);
 
                 Log.Information("[*] All packages have been downloaded successfully for Windows.");
+
+                span?.Finish(SpanStatus.Ok);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] An error occurred while downloading packages for Windows.");
+                Log.Error(ex, "[!] An error occurred while downloading packages for Windows.");
+
+                span?.Finish(SpanStatus.InternalError);
 
                 throw;
             }
