@@ -37,9 +37,9 @@ namespace SirHurt.Cleaner.CLI
                 var config = new CleanerConfig();
                 Console.Write("Would you like to clean temporary folders? (Y/N, default: Y): ");
                 var response = Console.ReadLine();
-                
-                config.CleanTempFolders = response == null || 
-                                         response.Trim().Equals("", StringComparison.OrdinalIgnoreCase) || 
+
+                config.CleanTempFolders = response == null ||
+                                         response.Trim().Equals("", StringComparison.OrdinalIgnoreCase) ||
                                          response.Trim().Equals("y", StringComparison.OrdinalIgnoreCase) ||
                                          response.Trim().Equals("yes", StringComparison.OrdinalIgnoreCase);
 
