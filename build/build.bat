@@ -86,6 +86,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
+del /f /q "%sirhurt_cleaner_cli_publish_dir%\*.pdb"
+
 echo Copying SirHurt.Cleaner.CLI to SirHurt.Cleaner.CLI_fat...
 
 mkdir "%sirhurt_cleaner_cli_fat_publish_dir%"

@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
-		<AssemblyName>SirHurt Cleaner</AssemblyName>
+		<AssemblyName>SirHurtCleaner</AssemblyName>
 		<ApplicationIcon>Assets\favicon.ico</ApplicationIcon>
 		<PublishAot>False</PublishAot>
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
