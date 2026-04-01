@@ -7,7 +7,7 @@ on:
     branches: [ main ]
   workflow_dispatch:
   schedule:
-    - cron: '0 * * * *'
+    - cron: '0 0 * * 0'
 
 permissions:
   id-token: write
@@ -50,6 +50,18 @@ jobs:
       #   uses: github/codeql-action/upload-sarif@v3
       #   with:
       #     sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+
+      - name: Upload artifact SirHurt.Cleaner.CLI
+        uses: actions/upload-artifact@v7
+        with:
+          name: SirHurt.Cleaner.CLI
+          path: out/SirHurt.Cleaner.CLI
+
+      - name: Upload artifact SirHurt.Cleaner.CLI_fat
+        uses: actions/upload-artifact@v7
+        with:
+          name: SirHurt.Cleaner.CLI_fat
+          path: out/SirHurt.Cleaner.CLI_fat
 
       - name: Upload artifact Sirstrap.CLI
         uses: actions/upload-artifact@v7

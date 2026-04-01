@@ -4,10 +4,46 @@ setlocal enabledelayedexpansion
 
 set "release_dir=..\out\release"
 set "sircab_path=..\src\ext\SirCab\SirCab.exe"
+set "sirhurt_cleaner_cli_publish_dir=..\out\SirHurt.Cleaner.CLI"
+set "sirhurt_cleaner_cli_fat_publish_dir=..\out\SirHurt.Cleaner.CLI_fat"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
 set "sirstrap_cli_fat_publish_dir=..\out\Sirstrap.CLI_fat"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
 set "sirstrap_ui_fat_publish_dir=..\out\Sirstrap.UI_fat"
+
+echo Archiving SirHurt.Cleaner.CLI_fat...
+
+powershell Compress-Archive -Path "%sirhurt_cleaner_cli_fat_publish_dir%\*" -DestinationPath "%sirhurt_cleaner_cli_fat_publish_dir%.zip" -Force
+
+if %ERRORLEVEL% neq 0 (
+    echo Archiving of SirHurt.Cleaner.CLI_fat failed.
+    exit /b %ERRORLEVEL%
+)
+
+echo Archiving SirHurt.Cleaner.CLI_fat - SirCab...
+
+"%sircab_path%" "%sirhurt_cleaner_cli_fat_publish_dir%" "%release_dir%" "SirHurt.Cleaner.CLI_fat" "Cab" "LZX" "False"
+
+if %ERRORLEVEL% neq 0 (
+    echo Archiving of SirHurt.Cleaner.CLI_fat failed - SirCab.
+    exit /b %ERRORLEVEL%
+)
+
+echo Archiving SirHurt.Cleaner.CLI...
+
+powershell Compress-Archive -Path "%sirhurt_cleaner_cli_publish_dir%\*" -DestinationPath "%sirhurt_cleaner_cli_publish_dir%.zip" -Force
+
+if %ERRORLEVEL% neq 0 (
+    echo Archiving of SirHurt.Cleaner.CLI failed.
+    exit /b %ERRORLEVEL%
+)
+
+"%sircab_path%" "%sirhurt_cleaner_cli_publish_dir%" "%release_dir%" "SirHurt.Cleaner.CLI" "Cab" "LZX" "False"
+
+if %ERRORLEVEL% neq 0 (
+    echo Archiving of SirHurt.Cleaner.CLI failed - SirCab.
+    exit /b %ERRORLEVEL%
+)
 
 echo Archiving Sirstrap.CLI_fat...
 
@@ -83,6 +119,8 @@ if %ERRORLEVEL% neq 0 (
 
 echo Moving archives...
 
+move /y "%sirhurt_cleaner_cli_publish_dir%.zip" "%release_dir%\SirHurt.Cleaner.CLI.zip"
+move /y "%sirhurt_cleaner_cli_fat_publish_dir%.zip" "%release_dir%\SirHurt.Cleaner.CLI_fat.zip"
 move /y "%sirstrap_cli_publish_dir%.zip" "%release_dir%\Sirstrap.CLI.zip"
 move /y "%sirstrap_cli_fat_publish_dir%.zip" "%release_dir%\Sirstrap.CLI_fat.zip"
 move /y "%sirstrap_ui_publish_dir%.zip" "%release_dir%\Sirstrap.UI.zip"
