@@ -13,6 +13,8 @@ set "version=%raw_version:v=%"
 set "version=%version:-beta=%"
 set "release_dir=..\out\release"
 set "upx_path=..\src\ext\upx-5.0.2-win64\upx.exe"
+set "sirhurt_cleaner_cli_publish_dir=..\out\SirHurt.Cleaner.CLI"
+set "sirhurt_cleaner_cli_fat_publish_dir=..\out\SirHurt.Cleaner.CLI_fat"
 set "sirstrap_cli_publish_dir=..\out\Sirstrap.CLI"
 set "sirstrap_cli_fat_publish_dir=..\out\Sirstrap.CLI_fat"
 set "sirstrap_ui_publish_dir=..\out\Sirstrap.UI"
@@ -21,7 +23,7 @@ set "sirstrap_cli_test_log=..\out\Sirstrap.CLI_test.log"
 
 echo Cleaning directories...
 
-for %%d in ("%release_dir%" "%sirstrap_cli_publish_dir%" "%sirstrap_cli_fat_publish_dir%" "%sirstrap_ui_publish_dir%" "%sirstrap_ui_fat_publish_dir%") do (
+for %%d in ("%release_dir%" "%sirhurt_cleaner_cli_publish_dir%" "%sirhurt_cleaner_cli_fat_publish_dir%" "%sirstrap_cli_publish_dir%" "%sirstrap_cli_fat_publish_dir%" "%sirstrap_ui_publish_dir%" "%sirstrap_ui_fat_publish_dir%") do (
     if exist "%%d" (
         echo Cleaning %%d...
         rmdir /s /q "%%d"
@@ -70,6 +72,50 @@ if %ERRORLEVEL% neq 0 (
     echo Test of Sirstrap.Core failed.
     exit /b %ERRORLEVEL%
 )
+
+echo Building SirHurt.Cleaner.CLI...
+
+powershell -command "(Get-Content '..\src\SirHurt.Cleaner.CLI\SirHurt.Cleaner.CLI.csproj' -Encoding UTF8) -replace '<PublishAot>False</PublishAot>', '<PublishAot>True</PublishAot>' | Set-Content '..\src\SirHurt.Cleaner.CLI\SirHurt.Cleaner.CLI.csproj' -Encoding UTF8"
+
+dotnet publish ..\src\SirHurt.Cleaner.CLI\SirHurt.Cleaner.CLI.csproj -p:PublishProfile=FolderProfile -p:PublishDir="..\%sirhurt_cleaner_cli_publish_dir%" -p:Version=%version% -c Release -r win-x64 -f net10.0
+
+powershell -command "(Get-Content '..\src\SirHurt.Cleaner.CLI\SirHurt.Cleaner.CLI.csproj' -Encoding UTF8) -replace '<PublishAot>True</PublishAot>', '<PublishAot>False</PublishAot>' | Set-Content '..\src\SirHurt.Cleaner.CLI\SirHurt.Cleaner.CLI.csproj' -Encoding UTF8"
+
+if %ERRORLEVEL% neq 0 (
+    echo Build of SirHurt.Cleaner.CLI failed.
+    exit /b %ERRORLEVEL%
+)
+
+echo Copying SirHurt.Cleaner.CLI to SirHurt.Cleaner.CLI_fat...
+
+mkdir "%sirhurt_cleaner_cli_fat_publish_dir%"
+
+xcopy /e /i /y "%sirhurt_cleaner_cli_publish_dir%\*" "%sirhurt_cleaner_cli_fat_publish_dir%"
+
+if %ERRORLEVEL% neq 0 (
+    echo Copy of SirHurt.Cleaner.CLI to SirHurt.Cleaner.CLI_fat failed.
+    exit /b %ERRORLEVEL%
+)
+
+echo Compressing SirHurt.Cleaner.CLI...
+
+ren "%sirhurt_cleaner_cli_publish_dir%\SirHurtCleaner.exe" "_SirHurtCleaner.exe"
+
+"%upx_path%" --best --ultra-brute "%sirhurt_cleaner_cli_publish_dir%\_SirHurtCleaner.exe" -o "%sirhurt_cleaner_cli_publish_dir%\SirHurtCleaner.exe"
+
+if %ERRORLEVEL% neq 0 (
+    echo Compression of SirHurt.Cleaner.CLI failed.
+    exit /b %ERRORLEVEL%
+)
+
+"%upx_path%" -t "%sirhurt_cleaner_cli_publish_dir%\SirHurtCleaner.exe"
+
+if %ERRORLEVEL% neq 0 (
+    echo Verification of SirHurt.Cleaner.CLI compression failed.
+    exit /b %ERRORLEVEL%
+)
+
+del /f /q "%sirhurt_cleaner_cli_publish_dir%\_SirHurtCleaner.exe"
 
 echo Building Sirstrap.CLI...
 
