@@ -32,9 +32,9 @@
 
                 Log.Information("[*] Archive successfully extracted to: {0}", targetDirectory);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] Installation error.");
+                Log.Error(ex, "[!] Installation error: {0}", ex.Message);
 
                 throw;
             }
