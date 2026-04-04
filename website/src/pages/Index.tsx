@@ -1,5 +1,6 @@
 import { useState } from "react";
 import WavyBackground from "@/components/WavyBackground";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const REPO = "https://github.com/massimopaganigh/Sirstrap";
 
@@ -48,41 +49,49 @@ const accentBorder: Record<string, string> = {
 };
 
 const Index = () => {
-  const [hovered, setHovered] = useState<number | null>(null);
+  const isMobile = useIsMobile();
+  const [active, setActive] = useState<number | null>(null);
 
   const getFlex = (i: number) => {
-    if (hovered === null) return 1;
-    return hovered === i ? 2 : 0.5;
+    if (active === null) return 1;
+    return active === i ? 2 : 0.5;
   };
 
-  const isCollapsed = (i: number) => hovered !== null && hovered !== i;
+  const isCollapsed = (i: number) => active !== null && active !== i;
+
+  const handleMouseEnter = (i: number) => { if (!isMobile) setActive(i); };
+  const handleMouseLeave = () => { if (!isMobile) setActive(null); };
+  const handleClick = (i: number) => { if (isMobile) setActive(prev => prev === i ? null : i); };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
+    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden">
       {products.map((p, i) => (
         <section
           key={p.name}
-          onMouseEnter={() => setHovered(i)}
-          onMouseLeave={() => setHovered(null)}
+          onMouseEnter={() => handleMouseEnter(i)}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleClick(i)}
           style={{
             flex: getFlex(i),
             opacity: isCollapsed(i) ? 0.5 : 1,
             transition: "flex 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease",
           }}
-          className="relative flex flex-col justify-between border-r border-border last:border-r-0 bg-background px-8 py-12 lg:px-12 overflow-hidden"
+          className="relative flex flex-col justify-between border-b border-border last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 bg-background px-8 py-12 lg:px-12 overflow-hidden"
         >
           {/* Top accent line */}
           <div className={`absolute inset-x-0 top-0 h-[2px] ${accentLine[p.accent]} opacity-60`} />
 
           {/* Animated wavy lines background */}
-          <WavyBackground accent={p.accent} active={hovered === i} />
+          <WavyBackground accent={p.accent} active={active === i} />
 
-          {/* Fade overlay on right edge for collapsed panels */}
+          {/* Fade overlay on collapsed edge */}
           <div
-            className="pointer-events-none absolute inset-y-0 right-0 w-16 z-10"
+            className={`pointer-events-none absolute z-10 ${isMobile ? "inset-x-0 bottom-0 h-16" : "inset-y-0 right-0 w-16"}`}
             style={{
               background: isCollapsed(i)
-                ? "linear-gradient(to right, transparent, hsl(220 20% 6%))"
+                ? isMobile
+                  ? "linear-gradient(to bottom, transparent, hsl(220 20% 6%))"
+                  : "linear-gradient(to right, transparent, hsl(220 20% 6%))"
                 : "none",
               transition: "background 0.5s ease",
             }}
