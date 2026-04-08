@@ -73,7 +73,7 @@ const Index = () => {
           onClick={() => handleClick(i)}
           style={{
             flex: getFlex(i),
-            opacity: isCollapsed(i) ? 0.5 : 1,
+            opacity: active === null ? 0.7 : active === i ? 1 : 0.5,
             transition: "flex 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease",
           }}
           className="relative flex flex-col justify-between border-b border-border last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 bg-background px-8 py-12 lg:px-12 overflow-hidden"
@@ -84,11 +84,11 @@ const Index = () => {
           {/* Animated wavy lines background */}
           <WavyBackground accent={p.accent} active={active === i} />
 
-          {/* Fade overlay on collapsed edge */}
+          {/* Fade overlay — visible on all when idle, hidden on expanded */}
           <div
             className={`pointer-events-none absolute z-10 ${isMobile ? "inset-x-0 bottom-0 h-16" : "inset-y-0 right-0 w-16"}`}
             style={{
-              background: isCollapsed(i)
+              background: active !== i
                 ? isMobile
                   ? "linear-gradient(to bottom, transparent, hsl(220 20% 6%))"
                   : "linear-gradient(to right, transparent, hsl(220 20% 6%))"
