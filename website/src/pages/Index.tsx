@@ -114,8 +114,15 @@ const Index = () => {
             )}
           </div>
 
-          {/* Download & Source buttons */}
-          <div className="mt-12 flex flex-col gap-3">
+          {/* Download & Source buttons — visible only in expanded section */}
+          <div
+            className="mt-12 flex flex-col gap-3 transition-all duration-300"
+            style={{
+              opacity: active === i ? 1 : 0,
+              transform: active === i ? "translateY(0)" : "translateY(8px)",
+              pointerEvents: active === i ? "auto" : "none",
+            }}
+          >
             <a
               href={`${REPO}/releases/latest/download/${p.asset}`}
               target="_blank"
