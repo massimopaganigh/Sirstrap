@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import WavyBackground from "@/components/WavyBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
+import iconCleaner from "../../../src/SirHurt.Cleaner.CLI/Assets/favicon.ico";
+import iconCli from "../../../src/Sirstrap.CLI/Assets/favicon.ico";
+import iconUi from "../../../src/Sirstrap.UI/Assets/favicon.ico";
 
 const REPO = "https://github.com/massimopaganigh/Sirstrap";
 
@@ -12,6 +15,7 @@ const products = [
     variants: ["SirHurt.Cleaner.CLI_fat.zip", "SirHurt.Cleaner.CLI.cab", "SirHurt.Cleaner.CLI_fat.cab"],
     externalDownloads: [{ repo: "massimopaganigh/sirhurt.cleaner", asset: "SirHurt.Cleaner.exe" }],
     recommended: false,
+    icon: iconCleaner,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/SirHurt.Cleaner.CLI",
     accent: "blue" as const,
   },
@@ -23,6 +27,7 @@ const products = [
     variants: ["Sirstrap.CLI_fat.zip", "Sirstrap.CLI.cab", "Sirstrap.CLI_fat.cab", "Sirstrap.exe"],
     externalDownloads: [],
     recommended: false,
+    icon: iconCli,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.CLI",
     accent: "green" as const,
   },
@@ -34,6 +39,7 @@ const products = [
     variants: ["Sirstrap.UI_fat.zip", "Sirstrap.UI.cab", "Sirstrap.UI_fat.cab"],
     externalDownloads: [],
     recommended: true,
+    icon: iconUi,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.UI",
     accent: "purple" as const,
   },
@@ -293,15 +299,21 @@ const Index = () => {
               </span>
 
               {p.accent === 'purple' ? (
-                <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
-                  {p.name.replace('.UI', '')}
-                  <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
-                </h2>
+                <div className="flex items-center gap-3 whitespace-nowrap">
+                  <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0" />
+                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`}>
+                    {p.name.replace('.UI', '')}
+                    <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
+                  </h2>
+                </div>
               ) : (
-                <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
-                  {p.name.replace('.CLI', '')}
-                  <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
-                </h2>
+                <div className="flex items-center gap-3 whitespace-nowrap">
+                  <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0" />
+                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`}>
+                    {p.name.replace('.CLI', '')}
+                    <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
+                  </h2>
+                </div>
               )}
 
               <div className="flex flex-wrap items-center gap-2">
