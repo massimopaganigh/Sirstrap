@@ -298,23 +298,34 @@ const Index = () => {
                 0{i + 1}
               </span>
 
-              {p.accent === 'purple' ? (
-                <div className="flex items-center gap-3 whitespace-nowrap">
-                  <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0" />
-                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`}>
+              <div className="grid gap-x-3" style={{ gridTemplateColumns: 'auto minmax(0, 1fr)' }}>
+                <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0 row-span-2 self-center" />
+                {p.accent === 'purple' ? (
+                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap overflow-hidden ${accentText[p.accent]}`}>
                     {p.name.replace('.UI', '')}
                     <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
                   </h2>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3 whitespace-nowrap">
-                  <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0" />
-                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`}>
+                ) : (
+                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap overflow-hidden ${accentText[p.accent]}`}>
                     {p.name.replace('.CLI', '')}
                     <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
                   </h2>
-                </div>
-              )}
+                )}
+                <a
+                  href="https://github.com/massimopaganigh"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <span className="font-body text-[0.85rem] leading-[1.55] text-muted-foreground">made by ギャップ</span>
+                  <img
+                    src="https://github.com/massimopaganigh.png"
+                    alt="massimopaganigh"
+                    className="h-5 w-5 rounded-full border border-border/60 hover:border-border transition-colors duration-200"
+                  />
+                </a>
+              </div>
 
               <div className="flex flex-wrap items-center gap-2">
                 {downloads[p.asset] != null && (
