@@ -6,8 +6,8 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="PeanutButter.INI" Version="3.0.418" />
-		<PackageReference Include="Sentry.Profiling" Version="6.3.0" />
-		<PackageReference Include="Sentry.Serilog" Version="6.3.0" />
+		<PackageReference Include="Sentry.Profiling" Version="6.3.1" />
+		<PackageReference Include="Sentry.Serilog" Version="6.3.1" />
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
