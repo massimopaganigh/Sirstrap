@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import WavyBackground from "@/components/WavyBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -9,6 +9,7 @@ const products = [
     name: "SirHurt.Cleaner.CLI",
     description: "A complete cleanup utility that wipes Roblox, SirHurt, and Sirstrap from your filesystem and registry — built by exploiters, for exploiters.",
     asset: "SirHurt.Cleaner.CLI.zip",
+    variants: ["SirHurt.Cleaner.CLI_fat.zip", "SirHurt.Cleaner.CLI.cab", "SirHurt.Cleaner.CLI_fat.cab"],
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/SirHurt.Cleaner.CLI",
     accent: "blue" as const,
   },
@@ -17,6 +18,7 @@ const products = [
     description:
       "An alternative Roblox bootstrapper CLI packed with additional features — built by exploiters, for exploiters.",
     asset: "Sirstrap.CLI.zip",
+    variants: ["Sirstrap.CLI_fat.zip", "Sirstrap.CLI.cab", "Sirstrap.CLI_fat.cab", "Sirstrap.exe"],
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.CLI",
     accent: "green" as const,
   },
@@ -25,6 +27,7 @@ const products = [
     description:
       "An alternative Roblox bootstrapper UI packed with additional features — built by exploiters, for exploiters.",
     asset: "Sirstrap.UI.zip",
+    variants: ["Sirstrap.UI_fat.zip", "Sirstrap.UI.cab", "Sirstrap.UI_fat.cab"],
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.UI",
     accent: "purple" as const,
   },
@@ -48,7 +51,71 @@ const accentBorder: Record<string, string> = {
   purple: "border-glow-purple/40 hover:border-glow-purple",
 };
 
-// Shared icon props
+
+const useTypewriter = (text: string, enabled: boolean) => {
+  const [displayed, setDisplayed] = useState(text);
+  const phase = useRef<'typing' | 'wait' | 'deleting' | 'wait2'>('wait');
+
+  useEffect(() => {
+    if (!enabled) {
+      setDisplayed(text);
+      phase.current = 'wait';
+      return;
+    }
+
+    setDisplayed(text);
+    phase.current = 'wait';
+
+    let t: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      if (phase.current === 'typing') {
+        setDisplayed(prev => {
+          const next = text.slice(0, prev.length + 1);
+          if (next === text) {
+            phase.current = 'wait';
+            t = setTimeout(tick, 5000);
+          } else {
+            t = setTimeout(tick, 125 + Math.random() * 25);
+          }
+          return next;
+        });
+      } else if (phase.current === 'wait') {
+        phase.current = 'deleting';
+        t = setTimeout(tick, 0);
+      } else if (phase.current === 'deleting') {
+        setDisplayed(prev => {
+          const next = prev.slice(0, -1);
+          if (next === '') {
+            phase.current = 'wait2';
+            t = setTimeout(tick, 2500);
+          } else {
+            t = setTimeout(tick, 25 + Math.random() * 25);
+          }
+          return next;
+        });
+      } else {
+        phase.current = 'typing';
+        t = setTimeout(tick, 0);
+      }
+    };
+
+    t = setTimeout(tick, 5000);
+    return () => clearTimeout(t);
+  }, [enabled, text]);
+
+  return displayed;
+};
+
+const TypewriterSpan = ({ text, className, enabled }: { text: string; className?: string; enabled: boolean }) => {
+  const displayed = useTypewriter(text, enabled);
+  return (
+    <span className={className}>
+      {displayed}{enabled && <span className="title-caret">▌</span>}
+    </span>
+  );
+};
+
 const iconProps = {
   fill: "none" as const,
   viewBox: "0 0 24 24",
@@ -111,11 +178,20 @@ const Index = () => {
     ])
       .then(([latest, all]) => {
         if (latest.tag_name) setVersion(latest.tag_name);
-        const map: Record<string, number> = {};
+        const raw: Record<string, number> = {};
         for (const release of all as { assets?: { name: string; download_count: number }[] }[]) {
           if (!Array.isArray(release.assets)) continue;
           for (const a of release.assets) {
-            map[a.name] = (map[a.name] ?? 0) + a.download_count;
+            raw[a.name] = (raw[a.name] ?? 0) + a.download_count;
+          }
+        }
+        const map: Record<string, number> = { ...raw };
+        for (const p of products) {
+          for (const variant of p.variants) {
+            if (raw[variant]) {
+              map[p.asset] = (map[p.asset] ?? 0) + raw[variant];
+              delete map[variant];
+            }
           }
         }
         setDownloads(map);
@@ -153,13 +229,10 @@ const Index = () => {
           }}
           className="relative flex flex-col border-b border-border last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0 bg-background px-8 py-12 lg:px-12 overflow-hidden"
         >
-          {/* Top accent line */}
           <div className={`absolute inset-x-0 top-0 h-[2px] ${accentLine[p.accent]} opacity-60`} />
 
-          {/* Animated wavy lines background */}
           <WavyBackground accent={p.accent} active={active === i} />
 
-          {/* Fade overlay — visible on all when idle, hidden on expanded */}
           <div
             className={`pointer-events-none absolute z-10 ${isMobile ? "inset-x-0 bottom-0 h-16" : "inset-y-0 right-0 w-16"}`}
             style={{
@@ -172,9 +245,7 @@ const Index = () => {
             }}
           />
 
-          {/* Content — clipped with fade so buttons always stay visible */}
           <div className="relative flex-1 min-h-0 overflow-hidden min-w-0">
-            {/* Bottom fade — only when buttons are visible */}
             <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-12 z-10"
               style={{
@@ -183,44 +254,51 @@ const Index = () => {
                 transition: "opacity 0.5s ease",
               }}
             />
-          <div className="min-w-0 flex flex-col gap-4">
-            <span className="block font-body text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground whitespace-nowrap">
-              0{i + 1}
-            </span>
+            <div className="min-w-0 flex flex-col gap-4">
+              <span className="block font-body text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground whitespace-nowrap">
+                0{i + 1}
+              </span>
 
-            <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
-              {p.name}
-            </h2>
+              {p.accent === 'purple' ? (
+                <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
+                  {p.name.replace('.UI', '')}
+                  <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
+                </h2>
+              ) : (
+                <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
+                  {p.name.replace('.CLI', '')}
+                  <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
+                </h2>
+              )}
 
-            <div className="flex flex-wrap items-center gap-2">
-              {downloads[p.asset] != null && (
-                <span className={badgeClass}>
-                  <IconDownloadCount />
-                  {downloads[p.asset].toLocaleString()}
-                </span>
-              )}
-              {version && (
-                <span className={badgeClass}>
-                  {version}
-                </span>
-              )}
-              {mostPopularAsset === p.asset && (
-                <span className="inline-flex items-center gap-1 self-start border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm px-[0.55rem] py-[0.2rem] font-body text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-amber-400 rounded-[3px] whitespace-nowrap">
-                  <IconStar />
-                  Most popular
-                </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {downloads[p.asset] != null && (
+                  <span className={badgeClass}>
+                    <IconDownloadCount />
+                    {downloads[p.asset].toLocaleString()}
+                  </span>
+                )}
+                {version && (
+                  <span className={badgeClass}>
+                    {version}
+                  </span>
+                )}
+                {mostPopularAsset === p.asset && (
+                  <span className="inline-flex items-center gap-1 self-start border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm px-[0.55rem] py-[0.2rem] font-body text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-amber-400 rounded-[3px] whitespace-nowrap">
+                    <IconStar />
+                    Most popular
+                  </span>
+                )}
+              </div>
+
+              {p.description && (
+                <p className="font-body text-[0.85rem] leading-[1.55] text-muted-foreground max-w-xs">
+                  {p.description}
+                </p>
               )}
             </div>
-
-            {p.description && (
-              <p className="font-body text-[0.85rem] leading-[1.55] text-muted-foreground max-w-xs">
-                {p.description}
-              </p>
-            )}
-          </div>
           </div>
 
-          {/* Download & Source buttons — collapse when not active so content has full height */}
           <div
             className="flex-shrink-0 flex flex-col gap-4 overflow-hidden"
             style={{
