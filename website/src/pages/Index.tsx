@@ -116,10 +116,10 @@ const Index = () => {
 
           {/* Download & Source buttons — visible only in expanded section */}
           <div
-            className="mt-12 flex flex-col gap-3 transition-all duration-300"
+            className="mt-12 flex flex-col gap-3"
             style={{
               opacity: active === i ? 1 : 0,
-              transform: active === i ? "translateY(0)" : "translateY(8px)",
+              transition: "opacity 0.5s ease",
               pointerEvents: active === i ? "auto" : "none",
             }}
           >
