@@ -26,7 +26,8 @@
             Margin="0,4,0,9"
             HorizontalAlignment="Center"
             FontSize="10"
-            Text="Sirstrap" />
+            Text="Sirstrap"
+            Opacity="0"/>
         <Border
             Grid.Row="1"
             HorizontalAlignment="Stretch"

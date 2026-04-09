@@ -2,14 +2,7 @@ namespace Sirstrap.UI
 {
     public partial class App : Application
     {
-        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "<In sospeso>")]
-        private void DisableAvaloniaDataAnnotationValidation()
-        {
-            var dataValidationPluginsToRemove = BindingPlugins.DataValidators.OfType<DataAnnotationsValidationPlugin>().ToArray();
-
-            foreach (var plugin in dataValidationPluginsToRemove)
-                BindingPlugins.DataValidators.Remove(plugin);
-        }
+        private static TrayIcon? _trayIcon;
 
         public static void ApplyFontFamily()
         {
@@ -50,14 +43,91 @@ namespace Sirstrap.UI
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                DisableAvaloniaDataAnnotationValidation();
-
                 desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
 
                 ApplyFontFamily();
+
+                if (SirstrapConfiguration.TrayMode != TrayMode.None)
+                    SetTray(true);
+
+                if (SirstrapConfiguration.TrayMode == TrayMode.OnLaunch)
+                {
+                    void OnFirstOpen(object? sender, EventArgs e)
+                    {
+                        desktop.MainWindow!.Opened -= OnFirstOpen;
+
+                        desktop.MainWindow.Hide();
+
+                        SetTrayIconVisible(true);
+                    }
+
+                    desktop.MainWindow.Opened += OnFirstOpen;
+                }
             }
 
             base.OnFrameworkInitializationCompleted();
         }
+
+        public static void SetTray(bool enabled)
+        {
+            if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                return;
+
+            if (enabled
+                && _trayIcon == null)
+            {
+                var showNativeMenuItem = new NativeMenuItem("Show");
+
+                showNativeMenuItem.Click += (_, _) =>
+                {
+                    if (desktop.MainWindow is { } window)
+                    {
+                        SetTrayIconVisible(false);
+
+                        window.Show();
+
+                        window.WindowState = WindowState.Normal;
+                    }
+                };
+
+                var exitNativeMenuItem = new NativeMenuItem("Exit");
+
+                exitNativeMenuItem.Click += (_, _) =>
+                {
+                    _trayIcon?.Dispose();
+
+                    _trayIcon = null;
+
+                    desktop.Shutdown();
+                };
+
+                var trayNativeMenu = new NativeMenu();
+
+                trayNativeMenu.Items.Add(showNativeMenuItem);
+                trayNativeMenu.Items.Add(new NativeMenuItemSeparator());
+                trayNativeMenu.Items.Add(exitNativeMenuItem);
+
+                _trayIcon = new TrayIcon
+                {
+                    Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://Sirstrap/Assets/favicon.ico"))),
+                    IsVisible = false,
+                    Menu = trayNativeMenu,
+                    ToolTipText = "Sirstrap"
+                };
+
+                desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+            }
+            else if (!enabled
+                && _trayIcon != null)
+            {
+                _trayIcon.Dispose();
+
+                _trayIcon = null;
+
+                desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+            }
+        }
+
+        public static void SetTrayIconVisible(bool visible) => _trayIcon?.IsVisible = visible;
     }
 }

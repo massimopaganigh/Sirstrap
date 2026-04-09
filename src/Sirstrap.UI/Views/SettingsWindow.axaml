@@ -11,7 +11,7 @@
     ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/favicon.ico"
     SizeToContent="WidthAndHeight"
-    Title="Settings"
+    Title="Sirstrap"
     TransparencyLevelHint="AcrylicBlur"
     WindowStartupLocation="CenterOwner"
     x:DataType="vm:SettingsWindowViewModel">
@@ -27,7 +27,8 @@
             Margin="0,4,0,9"
             HorizontalAlignment="Center"
             FontSize="10"
-            Text="Sirstrap" />
+            Text="Sirstrap"
+            Opacity="0" />
         <TextBlock
             Grid.Row="1"
             FontSize="28"
@@ -283,8 +284,31 @@
                             Source="avares://Sirstrap/Assets/run.png" />
                     </Button>
                 </Grid>
-                <Grid
+                <TextBlock
                     Grid.Row="10"
+                    Grid.Column="0"
+                    Margin="0,5,5,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Text="Tray icon mode:" />
+                <ComboBox
+                    Grid.Row="10"
+                    Grid.Column="1"
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Stretch"
+                    BorderThickness="0"
+                    CornerRadius="999"
+                    ItemsSource="{Binding TrayModes}"
+                    SelectedItem="{Binding Settings.TrayMode}">
+                    <ComboBox.Styles>
+                        <Style Selector="ComboBox /template/ Popup">
+                            <Setter Property="HorizontalOffset" Value="0" />
+                            <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                        </Style>
+                    </ComboBox.Styles>
+                </ComboBox>
+                <Grid
+                    Grid.Row="11"
                     Grid.Column="1"
                     Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>

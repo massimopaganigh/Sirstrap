@@ -80,10 +80,18 @@
                     && isRobloxRunning
                     && !_isMinimized)
                 {
-                    Dispatcher.UIThread.InvokeAsync(() =>
-                    {
-                        mainWindow.WindowState = WindowState.Minimized;
-                    });
+                    if (SirstrapConfiguration.TrayMode == TrayMode.OnRoblox)
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            mainWindow.Hide();
+
+                            App.SetTrayIconVisible(true);
+                        });
+                    else
+                        Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            mainWindow.WindowState = WindowState.Minimized;
+                        });
 
                     _isMinimized = true;
                 }
