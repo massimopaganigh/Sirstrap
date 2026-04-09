@@ -36,6 +36,9 @@
         [ObservableProperty]
         private string _sirHurtPath = string.Empty;
 
+        [ObservableProperty]
+        private TrayMode _trayMode = TrayMode.None;
+
         public Settings()
         {
             SirstrapConfigurationService.LoadSettings();
@@ -51,6 +54,7 @@
             RobloxVersionOverride = SirstrapConfiguration.RobloxVersionOverride;
             RunSirHurtEnabled = File.Exists(Path.Combine(SirstrapConfiguration.SirHurtPath, "bootstrapper.exe"));
             SirHurtPath = SirstrapConfiguration.SirHurtPath;
+            TrayMode = SirstrapConfiguration.TrayMode;
         }
 
         partial void OnMultiInstanceChanged(bool value)
@@ -74,6 +78,7 @@
             SirstrapConfiguration.RobloxApi = RobloxApi;
             SirstrapConfiguration.RobloxCdnUri = RobloxCdnUri;
             SirstrapConfiguration.RobloxVersionOverride = RobloxVersionOverride;
+            SirstrapConfiguration.TrayMode = TrayMode;
 
             SirstrapConfigurationService.SaveSettings();
             SirstrapConfigurationService.LoadSettings();

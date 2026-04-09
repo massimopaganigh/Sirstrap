@@ -53,6 +53,10 @@
             ["ROBLOX_VERSION_OVERRIDE"] = (
                 () => SirstrapConfiguration.RobloxVersionOverride,
                 value => SirstrapConfiguration.RobloxVersionOverride = value
+            ),
+            ["TRAY_MODE"] = (
+                () => SirstrapConfiguration.TrayMode.ToString(),
+                value => { if (Enum.TryParse<TrayMode>(value, true, out var v)) SirstrapConfiguration.TrayMode = v; }
             )
         };
 

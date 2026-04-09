@@ -13,24 +13,6 @@
 
         public SettingsWindowViewModel() => GetFontFamilies();
 
-        private void GetFontFamilies()
-        {
-            try
-            {
-                var fontFamilies = new List<string>
-                {
-                    "JetBrains Mono"
-                };
-                fontFamilies.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
-
-                FontFamilies = new ObservableCollection<string>(fontFamilies);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, nameof(GetFontFamilies));
-            }
-        }
-
         [RelayCommand]
         private async Task BrowseInstallationPathAsync()
         {
@@ -58,6 +40,25 @@
             catch (Exception ex)
             {
                 Log.Error(ex, nameof(BrowseInstallationPathAsync));
+            }
+        }
+
+        private void GetFontFamilies()
+        {
+            try
+            {
+                var fontFamilies = new List<string>
+                {
+                    "JetBrains Mono"
+                };
+
+                fontFamilies.AddRange(FontManager.Current.SystemFonts.Select(x => x.Name).Distinct().OrderBy(x => x));
+
+                FontFamilies = new ObservableCollection<string>(fontFamilies);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(GetFontFamilies));
             }
         }
 
@@ -137,7 +138,12 @@
 
                     App.ApplyFontFamily();
 
-                    Dispatcher.UIThread.Invoke(() => { CloseSpecificWindow<SettingsWindow>(); });
+                    Dispatcher.UIThread.Invoke(() =>
+                    {
+                        App.SetTray(Settings.TrayMode != TrayMode.None);
+
+                        CloseSpecificWindow<SettingsWindow>();
+                    });
                 });
             }
             catch (Exception ex)
@@ -145,5 +151,7 @@
                 Log.Error(ex, nameof(SaveAsync));
             }
         }
+
+        public IReadOnlyList<TrayMode> TrayModes { get; } = Enum.GetValues<TrayMode>();
     }
 }
