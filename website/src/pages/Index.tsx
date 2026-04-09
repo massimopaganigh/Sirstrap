@@ -128,6 +128,35 @@ const TypewriterSpan = ({ text, className, enabled }: { text: string; className?
   );
 };
 
+const FadingTitle = ({ children }: { children: React.ReactNode }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [overflows, setOverflows] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const check = () => setOverflows(el.scrollWidth > el.clientWidth);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="relative overflow-hidden min-w-0">
+      {children}
+      <div
+        className="absolute inset-y-0 right-0 w-14 pointer-events-none"
+        style={{
+          background: 'linear-gradient(to right, transparent, hsl(220 20% 6%))',
+          opacity: overflows ? 1 : 0,
+          transition: 'opacity 0.5s ease',
+        }}
+      />
+    </div>
+  );
+};
+
 const iconProps = {
   fill: "none" as const,
   viewBox: "0 0 24 24",
@@ -300,7 +329,7 @@ const Index = () => {
 
               <div className="grid gap-x-3" style={{ gridTemplateColumns: 'auto minmax(0, 1fr)' }}>
                 <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0 row-span-2 self-center" />
-                <div className="relative overflow-hidden min-w-0">
+                <FadingTitle>
                   {p.accent === 'purple' ? (
                     <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
                       {p.name.replace('.UI', '')}
@@ -312,29 +341,23 @@ const Index = () => {
                       <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
                     </h2>
                   )}
-                  <div
-                    className="absolute inset-y-0 right-0 w-14 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(to right, transparent, hsl(220 20% 6%))',
-                      opacity: active !== null && active !== i ? 1 : 0,
-                      transition: 'opacity 0.5s ease',
-                    }}
-                  />
-                </div>
-                <a
-                  href="https://github.com/massimopaganigh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 whitespace-nowrap overflow-hidden"
-                  onClick={e => e.stopPropagation()}
-                >
-                  <span className="font-body text-[0.85rem] leading-[1.55] text-muted-foreground">made by ギャップ</span>
-                  <img
-                    src="https://github.com/massimopaganigh.png"
-                    alt="massimopaganigh"
-                    className="h-5 w-5 rounded-full border border-border/60 hover:border-border transition-colors duration-200"
-                  />
-                </a>
+                </FadingTitle>
+                <FadingTitle>
+                  <a
+                    href="https://github.com/massimopaganigh"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 whitespace-nowrap"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <span className="font-body text-[0.85rem] leading-[1.55] text-muted-foreground">made by ギャップ</span>
+                    <img
+                      src="https://github.com/massimopaganigh.png"
+                      alt="massimopaganigh"
+                      className="h-5 w-5 rounded-full border border-border/60 hover:border-border transition-colors duration-200"
+                    />
+                  </a>
+                </FadingTitle>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
