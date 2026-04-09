@@ -60,6 +60,7 @@
 		</PackageReference>
 	</ItemGroup>
 	<ItemGroup>
+  	<PackageReference Include="Tmds.DBus.Protocol" Version="0.92.0" />
 		<ProjectReference Include="..\Sirstrap.Core\Sirstrap.Core.csproj" />
 	</ItemGroup>
 	<Target Name="MoveAvaloniaLibsToBinDirWin" AfterTargets="Publish" Condition="$(RuntimeIdentifier.StartsWith('win'))">
