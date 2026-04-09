@@ -10,6 +10,8 @@ const products = [
     description: "A complete cleanup utility that wipes Roblox, SirHurt, and Sirstrap from your filesystem and registry — built by exploiters, for exploiters.",
     asset: "SirHurt.Cleaner.CLI.zip",
     variants: ["SirHurt.Cleaner.CLI_fat.zip", "SirHurt.Cleaner.CLI.cab", "SirHurt.Cleaner.CLI_fat.cab"],
+    externalDownloads: [{ repo: "massimopaganigh/sirhurt.cleaner", asset: "SirHurt.Cleaner.exe" }],
+    recommended: false,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/SirHurt.Cleaner.CLI",
     accent: "blue" as const,
   },
@@ -19,6 +21,8 @@ const products = [
       "An alternative Roblox bootstrapper CLI packed with additional features — built by exploiters, for exploiters.",
     asset: "Sirstrap.CLI.zip",
     variants: ["Sirstrap.CLI_fat.zip", "Sirstrap.CLI.cab", "Sirstrap.CLI_fat.cab", "Sirstrap.exe"],
+    externalDownloads: [],
+    recommended: false,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.CLI",
     accent: "green" as const,
   },
@@ -28,6 +32,8 @@ const products = [
       "An alternative Roblox bootstrapper UI packed with additional features — built by exploiters, for exploiters.",
     asset: "Sirstrap.UI.zip",
     variants: ["Sirstrap.UI_fat.zip", "Sirstrap.UI.cab", "Sirstrap.UI_fat.cab"],
+    externalDownloads: [],
+    recommended: true,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.UI",
     accent: "purple" as const,
   },
@@ -148,6 +154,12 @@ const IconStar = () => (
   </svg>
 );
 
+const IconRecommended = () => (
+  <svg {...iconProps}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
 const badgeClass =
   "inline-flex items-center gap-1 self-start border border-border/60 bg-background/80 backdrop-blur-sm px-[0.55rem] py-[0.2rem] font-body text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-muted-foreground rounded-[3px] whitespace-nowrap";
 
@@ -158,9 +170,9 @@ const Index = () => {
   const [downloads, setDownloads] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    const fetchAllReleases = async () => {
+    const fetchAllReleases = async (repo: string) => {
       const all: unknown[] = [];
-      let url: string | null = `https://api.github.com/repos/massimopaganigh/Sirstrap/releases?per_page=100`;
+      let url: string | null = `https://api.github.com/repos/${repo}/releases?per_page=100`;
       while (url) {
         const res = await fetch(url);
         const page = await res.json();
@@ -172,11 +184,14 @@ const Index = () => {
       return all;
     };
 
+    const externalRepos = [...new Set(products.flatMap(p => p.externalDownloads.map(e => e.repo)))];
+
     Promise.all([
       fetch("https://api.github.com/repos/massimopaganigh/Sirstrap/releases/latest").then(r => r.json()),
-      fetchAllReleases(),
+      fetchAllReleases("massimopaganigh/Sirstrap"),
+      ...externalRepos.map(repo => fetchAllReleases(repo).then(releases => ({ repo, releases }))),
     ])
-      .then(([latest, all]) => {
+      .then(([latest, all, ...externalResults]) => {
         if (latest.tag_name) setVersion(latest.tag_name);
         const raw: Record<string, number> = {};
         for (const release of all as { assets?: { name: string; download_count: number }[] }[]) {
@@ -185,12 +200,30 @@ const Index = () => {
             raw[a.name] = (raw[a.name] ?? 0) + a.download_count;
           }
         }
+
+        const externalCounts: Record<string, Record<string, number>> = {};
+        for (const ext of externalResults as { repo: string; releases: { assets?: { name: string; download_count: number }[] }[] }[]) {
+          externalCounts[ext.repo] = {};
+          for (const release of ext.releases) {
+            if (!Array.isArray(release.assets)) continue;
+            for (const a of release.assets) {
+              externalCounts[ext.repo][a.name] = (externalCounts[ext.repo][a.name] ?? 0) + a.download_count;
+            }
+          }
+        }
+
         const map: Record<string, number> = { ...raw };
         for (const p of products) {
           for (const variant of p.variants) {
             if (raw[variant]) {
               map[p.asset] = (map[p.asset] ?? 0) + raw[variant];
               delete map[variant];
+            }
+          }
+          for (const ext of p.externalDownloads) {
+            const count = externalCounts[ext.repo]?.[ext.asset] ?? 0;
+            if (count > 0) {
+              map[p.asset] = (map[p.asset] ?? 0) + count;
             }
           }
         }
@@ -287,6 +320,12 @@ const Index = () => {
                   <span className="inline-flex items-center gap-1 self-start border border-amber-500/40 bg-amber-500/10 backdrop-blur-sm px-[0.55rem] py-[0.2rem] font-body text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-amber-400 rounded-[3px] whitespace-nowrap">
                     <IconStar />
                     Most popular
+                  </span>
+                )}
+                {p.recommended && (
+                  <span className="inline-flex items-center gap-1 self-start border border-emerald-500/40 bg-emerald-500/10 backdrop-blur-sm px-[0.55rem] py-[0.2rem] font-body text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-emerald-400 rounded-[3px] whitespace-nowrap">
+                    <IconRecommended />
+                    Recommended
                   </span>
                 )}
               </div>
