@@ -300,17 +300,27 @@ const Index = () => {
 
               <div className="grid gap-x-3" style={{ gridTemplateColumns: 'auto minmax(0, 1fr)' }}>
                 <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0 row-span-2 self-center" />
-                {p.accent === 'purple' ? (
-                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap overflow-hidden ${accentText[p.accent]}`}>
-                    {p.name.replace('.UI', '')}
-                    <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
-                  </h2>
-                ) : (
-                  <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap overflow-hidden ${accentText[p.accent]}`}>
-                    {p.name.replace('.CLI', '')}
-                    <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
-                  </h2>
-                )}
+                <div className="relative overflow-hidden min-w-0">
+                  {p.accent === 'purple' ? (
+                    <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
+                      {p.name.replace('.UI', '')}
+                      <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
+                    </h2>
+                  ) : (
+                    <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
+                      {p.name.replace('.CLI', '')}
+                      <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
+                    </h2>
+                  )}
+                  <div
+                    className="absolute inset-y-0 right-0 w-14 pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(to right, transparent, hsl(220 20% 6%))',
+                      opacity: active !== null && active !== i ? 1 : 0,
+                      transition: 'opacity 0.5s ease',
+                    }}
+                  />
+                </div>
                 <a
                   href="https://github.com/massimopaganigh"
                   target="_blank"
