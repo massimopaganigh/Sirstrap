@@ -57,6 +57,7 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -307,8 +308,30 @@
                         </Style>
                     </ComboBox.Styles>
                 </ComboBox>
-                <Grid
+                <Button
                     Grid.Row="11"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="2"
+                    Height="32"
+                    Margin="0,5,0,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Background="#C0392B"
+                    BorderThickness="0"
+                    Classes="hover-lift"
+                    Command="{Binding UninstallCommand}"
+                    CornerRadius="999"
+                    Foreground="White"
+                    ToolTip.Tip="Uninstall Sirstrap (removes registry entries, data folder and executable)">
+                    <TextBlock
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Text="Uninstall" />
+                </Button>
+                <Grid
+                    Grid.Row="12"
                     Grid.Column="1"
                     Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
