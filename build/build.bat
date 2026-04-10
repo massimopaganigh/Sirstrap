@@ -193,12 +193,13 @@ if %ERRORLEVEL% neq 0 (
 
 echo Compressing Sirstrap.UI...
 
-ren "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll" "_libHarfBuzzSharp.dll"
-ren "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll" "_libSkiaSharp.dll"
+rem libHarfBuzzSharp.dll and libSkiaSharp.dll have GUARD_CF enabled — UPX cannot compress them
+rem ren "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll" "_libHarfBuzzSharp.dll"
+rem ren "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll" "_libSkiaSharp.dll"
 ren "%sirstrap_ui_publish_dir%\Sirstrap.exe" "_Sirstrap.exe"
 
-"%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\bin\_libHarfBuzzSharp.dll" -o "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll"
-"%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\bin\_libSkiaSharp.dll" -o "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll"
+rem "%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\bin\_libHarfBuzzSharp.dll" -o "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll"
+rem "%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\bin\_libSkiaSharp.dll" -o "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll"
 "%upx_path%" --best --ultra-brute "%sirstrap_ui_publish_dir%\_Sirstrap.exe" -o "%sirstrap_ui_publish_dir%\Sirstrap.exe"
 
 if %ERRORLEVEL% neq 0 (
@@ -206,8 +207,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
-"%upx_path%" -t "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll"
-"%upx_path%" -t "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll"
+rem "%upx_path%" -t "%sirstrap_ui_publish_dir%\bin\libHarfBuzzSharp.dll"
+rem "%upx_path%" -t "%sirstrap_ui_publish_dir%\bin\libSkiaSharp.dll"
 "%upx_path%" -t "%sirstrap_ui_publish_dir%\Sirstrap.exe"
 
 if %ERRORLEVEL% neq 0 (
@@ -215,8 +216,8 @@ if %ERRORLEVEL% neq 0 (
     exit /b %ERRORLEVEL%
 )
 
-del /f /q "%sirstrap_ui_publish_dir%\bin\_libHarfBuzzSharp.dll"
-del /f /q "%sirstrap_ui_publish_dir%\bin\_libSkiaSharp.dll"
+rem del /f /q "%sirstrap_ui_publish_dir%\bin\_libHarfBuzzSharp.dll"
+rem del /f /q "%sirstrap_ui_publish_dir%\bin\_libSkiaSharp.dll"
 del /f /q "%sirstrap_ui_publish_dir%\_Sirstrap.exe"
 
 if "%should_test%" == "true" (

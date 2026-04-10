@@ -2,9 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
 
 @layer base {
   * {
@@ -67,3 +64,35 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+
+@keyframes title-shimmer {
+  from { background-position: 0% center; }
+  to   { background-position: 100% center; }
+}
+
+.title-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(270 60% 58%)  0%,
+    hsl(270 60% 58%) 40%,
+    hsl(270 60% 92%) 50%,
+    hsl(270 60% 58%) 60%,
+    hsl(270 60% 58%) 100%
+  );
+  background-size: 400% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: title-shimmer 2.5s linear infinite;
+}
+
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+.title-caret {
+  animation: caret-blink 1s step-end infinite;
+}
+
