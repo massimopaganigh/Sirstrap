@@ -127,6 +127,38 @@
         }
 
 
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        private static extern int MessageBoxW(IntPtr hWnd, string text, string caption, uint type);
+
+        [RelayCommand]
+        private async Task UninstallAsync()
+        {
+            try
+            {
+                const uint MB_YESNO = 0x00000004;
+                const uint MB_ICONWARNING = 0x00000030;
+                const int IDYES = 6;
+
+                var result = await Task.Run(() =>
+                    MessageBoxW(
+                        IntPtr.Zero,
+                        "This will:\n  • Remove Sirstrap protocol handler from the registry\n  • Delete the Sirstrap data folder (%LocalAppData%\\Sirstrap)\n  • Delete the Sirstrap executable\n\nThis action cannot be undone. Are you sure?",
+                        "Uninstall Sirstrap",
+                        MB_YESNO | MB_ICONWARNING));
+
+                if (result != IDYES)
+                    return;
+
+                await Task.Run(UninstallManager.Uninstall);
+
+                Dispatcher.UIThread.Invoke(() => Environment.Exit(0));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(UninstallAsync));
+            }
+        }
+
         [RelayCommand]
         private async Task SaveAsync()
         {
