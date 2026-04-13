@@ -46,7 +46,7 @@
         {
             try
             {
-                var processNames = new[] { "Roblox", "RobloxPlayerBeta" };
+                var processNames = new[] { "RobloxPlayerBeta", "RobloxPlayerBeta.exe" };
                 var isRobloxRunning = false;
 
                 foreach (var processName in processNames)
