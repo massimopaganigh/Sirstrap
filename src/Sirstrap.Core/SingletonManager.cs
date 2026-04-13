@@ -14,7 +14,7 @@
         {
             try
             {
-                var processNames = new[] { "Roblox", "RobloxCrashHandler", "RobloxPlayerBeta" };
+                var processNames = new[] { "RobloxCrashHandler", "RobloxPlayerBeta", "RobloxCrashHandler.exe", "RobloxPlayerBeta.exe" };
 
                 foreach (var processName in processNames)
                 {
@@ -26,7 +26,6 @@
                         }
                         catch (Exception ex)
                         {
-                            // Process may have already exited or access may be denied
                             Log.Debug(ex, "[!] Failed to kill process {0}: {1}", processName, ex.Message);
                         }
                         finally
@@ -140,7 +139,7 @@
         {
             try
             {
-                var processNames = new[] { "Roblox", "RobloxCrashHandler", "RobloxPlayerBeta" };
+                var processNames = new[] { "RobloxCrashHandler", "RobloxPlayerBeta", "RobloxCrashHandler.exe", "RobloxPlayerBeta.exe" };
                 var startTime = DateTime.UtcNow;
 
                 while ((DateTime.UtcNow - startTime).TotalMilliseconds < timeoutMs)

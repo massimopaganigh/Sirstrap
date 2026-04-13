@@ -71,12 +71,14 @@
                 {
                     Log.Information("[*] Waiting for exit (MultiInstance enabled)...");
 
+                    var processNames = new[] { "RobloxPlayerBeta", "RobloxPlayerBeta.exe" };
+
                     while (SingletonManager.HasCapturedSingleton
                         && !robloxPlayerBetaExeProcess.HasExited
-                        && Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ROBLOX_PLAYER_BETA_EXE)).Length > 0)
+                        && processNames.Any(name => Process.GetProcessesByName(name).Length > 0))
                         Thread.Sleep(100);
 
-                    Log.Information("[*] Wait loop ended. HasCapturedSingleton: {0}, ProcessExited: {1}, RobloxProcessCount: {2}.", SingletonManager.HasCapturedSingleton, robloxPlayerBetaExeProcess.HasExited, Process.GetProcessesByName(Path.GetFileNameWithoutExtension(ROBLOX_PLAYER_BETA_EXE)).Length);
+                    Log.Information("[*] Wait loop ended. HasCapturedSingleton: {0}, ProcessExited: {1}, RobloxProcessCount: {2}.", SingletonManager.HasCapturedSingleton, robloxPlayerBetaExeProcess.HasExited, processNames.Sum(name => Process.GetProcessesByName(name).Length));
                 }
 
                 span?.Finish(SpanStatus.Ok);
