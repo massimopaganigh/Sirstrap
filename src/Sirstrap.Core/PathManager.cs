@@ -51,7 +51,16 @@
                 var toDelete = files.Count - maxFiles;
 
                 for (var i = 0; i < toDelete; i++)
-                    files[i].Delete();
+                {
+                    try
+                    {
+                        files[i].Delete();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning(ex, "Failed to delete log file: {0}", files[i].Name);
+                    }
+                }
             }
             catch (Exception ex)
             {

@@ -129,6 +129,25 @@
             }
         }
 
+        public static void EmitSettingsMetrics()
+        {
+            try
+            {
+                SentrySdk.Metrics.EmitCounter("settings.AutoUpdate", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.AutoUpdate });
+                SentrySdk.Metrics.EmitCounter("settings.MultiInstance", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.MultiInstance });
+                SentrySdk.Metrics.EmitCounter("settings.Incognito", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.Incognito });
+                SentrySdk.Metrics.EmitCounter("settings.RobloxApi", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.RobloxApi });
+                SentrySdk.Metrics.EmitCounter("settings.TrayMode", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.TrayMode.ToString() });
+                SentrySdk.Metrics.EmitCounter("settings.ChannelName", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.ChannelName });
+                SentrySdk.Metrics.EmitCounter("settings.FontFamily", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.FontFamily });
+                SentrySdk.Metrics.EmitCounter("settings.RobloxVersionOverride", 1, new Dictionary<string, object> { ["value"] = string.IsNullOrEmpty(SirstrapConfiguration.RobloxVersionOverride) ? "None" : "Custom" });
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, nameof(EmitSettingsMetrics));
+            }
+        }
+
         public static void SaveSettings(string? settingsFilePath = null)
         {
             try
