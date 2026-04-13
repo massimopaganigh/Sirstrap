@@ -79,6 +79,15 @@
                         Thread.Sleep(100);
 
                     Log.Information("[*] Wait loop ended. HasCapturedSingleton: {0}, ProcessExited: {1}, RobloxProcessCount: {2}.", SingletonManager.HasCapturedSingleton, robloxPlayerBetaExeProcess.HasExited, processNames.Sum(name => Process.GetProcessesByName(name).Length));
+
+                    foreach (var processName in processNames)
+                        foreach (var process in Process.GetProcessesByName(processName))
+                            Log.Information("[*] Process: {0} | PID: {1} | Started: {2} | Memory: {3} MB | Title: {4}",
+                                processName,
+                                process.Id,
+                                process.StartTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                                process.WorkingSet64 / 1024 / 1024,
+                                process.MainWindowTitle);
                 }
 
                 span?.Finish(SpanStatus.Ok);
