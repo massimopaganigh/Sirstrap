@@ -24,5 +24,27 @@
                 return string.Empty;
             }
         }
+
+        public static string GetSirHurtUsername()
+        {
+            try
+            {
+                var sirhurtaDat = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sirhurt", "sirhui", "sirhurta.dat");
+
+                if (File.Exists(sirhurtaDat))
+                {
+                    var username = File.ReadAllText(sirhurtaDat).Trim();
+
+                    if (!string.IsNullOrWhiteSpace(username))
+                        return username;
+                }
+
+                return string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
     }
 }
