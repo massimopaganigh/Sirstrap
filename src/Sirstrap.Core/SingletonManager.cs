@@ -22,6 +22,13 @@
                     {
                         try
                         {
+                            Log.Information("[*] Killing process: {0} | PID: {1} | Started: {2} | Memory: {3} MB | Title: {4}",
+                                processName,
+                                process.Id,
+                                process.StartTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                                process.WorkingSet64 / 1024 / 1024,
+                                process.MainWindowTitle);
+
                             process.Kill();
                         }
                         catch (Exception ex)
