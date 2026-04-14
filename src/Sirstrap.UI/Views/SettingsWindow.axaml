@@ -57,7 +57,6 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -308,30 +307,30 @@
                         </Style>
                     </ComboBox.Styles>
                 </ComboBox>
-                <Button
+                <Grid
                     Grid.Row="11"
                     Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Height="32"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
-                    Background="#C0392B"
-                    BorderThickness="0"
-                    Classes="hover-lift"
-                    Command="{Binding UninstallCommand}"
-                    CornerRadius="999"
-                    Foreground="White"
-                    ToolTip.Tip="Uninstall Sirstrap (removes registry entries, data folder and executable)">
-                    <TextBlock
-                        FontSize="12"
-                        FontWeight="SemiBold"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Text="Uninstall" />
-                </Button>
+                    Margin="0,5,5,0">
+                    <Button
+                        Grid.Column="0"
+                        Height="32"
+                        Margin="0,0,2.5,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="Coral"
+                        BorderThickness="0"
+                        Classes="hover-lift"
+                        Command="{Binding UninstallCommand}"
+                        CornerRadius="999"
+                        ToolTip.Tip="Uninstall Sirstrap (removes registry entries, data folder and executable)">
+                        <Image
+                            Margin="2.5"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="avares://Sirstrap/Assets/uninstall.png" />
+                    </Button>
+                </Grid>
                 <Grid
-                    Grid.Row="12"
+                    Grid.Row="11"
                     Grid.Column="1"
                     Margin="0,5,0,0">
                     <Grid.ColumnDefinitions>
