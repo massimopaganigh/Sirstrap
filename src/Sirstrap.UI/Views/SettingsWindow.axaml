@@ -334,7 +334,7 @@
                         Margin="0,0,2.5,0"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Background="Coral"
+                        Background="#4dbf6a6a"
                         BorderThickness="0"
                         Classes="hover-lift"
                         Command="{Binding UninstallCommand}"

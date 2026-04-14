@@ -65,13 +65,8 @@
                     </Image.Styles>
                 </Image>
                 <Grid Width="600" VerticalAlignment="Top">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
                     <Border
-                        Grid.Column="0"
+                        Height="32"
                         Background="#33ffffff"
                         Classes="hover-lift"
                         CornerRadius="999"
@@ -85,42 +80,12 @@
                             TextTrimming="CharacterEllipsis"
                             ToolTip.Tip="{Binding Announcement}" />
                     </Border>
-                    <Border
-                        Grid.Column="1"
-                        Margin="5,0,0,0"
-                        Background="#33ffffff"
-                        Classes="hover-lift"
-                        CornerRadius="999"
-                        IsVisible="{Binding IsLoggedIn}"
-                        Padding="10,0">
-                        <TextBlock
-                            HorizontalAlignment="Left"
-                            VerticalAlignment="Center"
-                            FontSize="10"
-                            Text="{Binding AccountName}"
-                            TextTrimming="CharacterEllipsis" />
-                    </Border>
-                    <Button
-                        Grid.Column="2"
-                        Height="32"
-                        Margin="5,0,0,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        BorderThickness="0"
-                        Classes="hover-lift"
-                        Command="{Binding LogoutCommand}"
-                        CornerRadius="999"
-                        IsVisible="{Binding IsLoggedIn}"
-                        ToolTip.Tip="Logout">
-                        <Image
-                            Margin="2.5"
-                            RenderOptions.BitmapInterpolationMode="HighQuality"
-                            Source="avares://Sirstrap/Assets/logout.png" />
-                    </Button>
                 </Grid>
                 <Grid Width="600" VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -145,7 +110,7 @@
                         Height="32"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        Background="LightGreen"
+                        Background="#4d6abf6a"
                         BorderThickness="0"
                         Classes="hover-lift"
                         Command="{Binding RunCommand}"
@@ -219,6 +184,38 @@
                             Margin="2.5"
                             RenderOptions.BitmapInterpolationMode="HighQuality"
                             Source="avares://Sirstrap/Assets/settings.png" />
+                    </Button>
+                    <Border
+                        Grid.Column="5"
+                        Margin="5,0,0,0"
+                        Background="#33ffffff"
+                        Classes="hover-lift"
+                        CornerRadius="999"
+                        IsVisible="{Binding IsLoggedIn}"
+                        Padding="10,0">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="10"
+                            Text="{Binding AccountName}"
+                            TextTrimming="CharacterEllipsis" />
+                    </Border>
+                    <Button
+                        Grid.Column="6"
+                        Height="32"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        Classes="hover-lift"
+                        Command="{Binding LogoutCommand}"
+                        CornerRadius="999"
+                        IsVisible="{Binding IsLoggedIn}"
+                        ToolTip.Tip="Logout">
+                        <Image
+                            Margin="2.5"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="avares://Sirstrap/Assets/logout.png" />
                     </Button>
                 </Grid>
             </Grid>
