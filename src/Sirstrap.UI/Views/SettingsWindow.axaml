@@ -11,7 +11,7 @@
     ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/favicon.ico"
     SizeToContent="WidthAndHeight"
-    Title="Sirstrap"
+    Title=""
     TransparencyLevelHint="AcrylicBlur"
     WindowStartupLocation="CenterOwner"
     x:DataType="vm:SettingsWindowViewModel">
@@ -27,8 +27,7 @@
             Margin="0,4,0,9"
             HorizontalAlignment="Center"
             FontSize="10"
-            Text="Sirstrap"
-            Opacity="0" />
+            Text="Sirstrap" />
         <TextBlock
             Grid.Row="1"
             FontSize="28"
