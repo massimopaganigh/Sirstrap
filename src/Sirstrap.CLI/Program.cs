@@ -21,16 +21,20 @@
 
                 var appGuid = Guid.NewGuid().ToString("N");
 
-                Log.Logger = new LoggerConfiguration()
+                SirstrapConfigurationService.LoadSettings();
+
+                var loggerConfig = new LoggerConfiguration()
                     .Enrich.WithThreadId()
                     .Enrich.WithThreadName()
                     .Enrich.WithProperty("SirHurtUser", SirHurtService.GetSirHurtUser())
                     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}")
                     .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
                     .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
-                    .WriteTo.LastLog()
+                    .WriteTo.LastLog();
+
 #if !DEBUG
-                    .WriteTo.Sentry(x =>
+                if (SirstrapConfiguration.Telemetry)
+                    loggerConfig = loggerConfig.WriteTo.Sentry(x =>
                     {
                         x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
                         //x.Debug = true;
@@ -40,9 +44,10 @@
                         x.TracesSampleRate = 0.5;
                         x.ProfilesSampleRate = 0.5;
                         x.AddIntegration(new Sentry.Profiling.ProfilingIntegration(/*TimeSpan.FromMilliseconds(500)*/));
-                    })
+                    });
 #endif
-                    .CreateLogger();
+
+                Log.Logger = loggerConfig.CreateLogger();
 
                 Log.Information(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄

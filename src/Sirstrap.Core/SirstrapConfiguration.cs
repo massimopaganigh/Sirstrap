@@ -26,6 +26,8 @@
 
         public static string SirHurtPath => SirHurtService.GetSirHurtPath();
 
+        public static bool Telemetry { get; set; } = true;
+
         public static TrayMode TrayMode { get; set; } = TrayMode.None;
     }
 }
