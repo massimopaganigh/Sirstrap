@@ -202,6 +202,35 @@
             }
         }
 
+        [RelayCommand]
+        private async Task RunAsync()
+        {
+            try
+            {
+                ShowLaunchButton = false;
+
+#if !DEBUG
+                await _robloxDownloader.ExecuteAsync(Program.Args ?? [], SirstrapType.UI);
+#endif
+
+                Environment.ExitCode = 0;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(RunAsync));
+                Environment.ExitCode = 1;
+            }
+            finally
+            {
+#if !DEBUG
+                await _ipcService.StopAsync();
+                await Log.CloseAndFlushAsync();
+
+                Environment.Exit(Environment.ExitCode);
+#endif
+            }
+        }
+
         private async Task SomethingAsync()
         {
 #if DEBUG
@@ -263,35 +292,6 @@
             await _ipcService.StartAsync("SirstrapIpc");
 
             RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
-        }
-
-        [RelayCommand]
-        private async Task RunAsync()
-        {
-            try
-            {
-                ShowLaunchButton = false;
-
-#if !DEBUG
-                await _robloxDownloader.ExecuteAsync(Program.Args ?? [], SirstrapType.UI);
-#endif
-
-                Environment.ExitCode = 0;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, nameof(RunAsync));
-                Environment.ExitCode = 1;
-            }
-            finally
-            {
-#if !DEBUG
-                await _ipcService.StopAsync();
-                await Log.CloseAndFlushAsync();
-
-                Environment.Exit(Environment.ExitCode);
-#endif
-            }
         }
     }
 }
