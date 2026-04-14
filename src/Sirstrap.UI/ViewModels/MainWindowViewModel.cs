@@ -2,11 +2,23 @@
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
+        private static readonly HttpClient _httpClient = new();
+
+        [ObservableProperty]
+        private string _accountName = string.Empty;
+
+        [ObservableProperty]
+        private string _announcement = string.Empty;
+
         [ObservableProperty]
         private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
 
         private int _currentPollingInterval = 100;
         private readonly IpcService _ipcService = new();
+
+        [ObservableProperty]
+        private bool _isLoggedIn = false;
+
         private bool _isMinimized;
 
         [ObservableProperty]
@@ -19,6 +31,9 @@
 
         [ObservableProperty]
         private string _serverLocation = string.Empty;
+
+        [ObservableProperty]
+        private bool _showAnnouncement = false;
 
         [ObservableProperty]
         private bool _showLaunchButton = Program.Args == null || Program.Args.Length == 0;
@@ -143,6 +158,41 @@
             catch (Exception ex)
             {
                 Log.Error(ex, nameof(GetPollingInterval));
+            }
+        }
+
+        private async Task LoadAnnouncementAsync()
+        {
+            try
+            {
+                var announcement = await HttpClientExtension.GetStringAsync(_httpClient, "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt");
+
+                if (!string.IsNullOrWhiteSpace(announcement))
+                {
+                    Announcement = announcement.Trim();
+                    ShowAnnouncement = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, nameof(LoadAnnouncementAsync));
+            }
+        }
+
+        [RelayCommand]
+        private void Logout()
+        {
+            try
+            {
+                if (SirHurtService.Logout())
+                {
+                    AccountName = string.Empty;
+                    IsLoggedIn = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(Logout));
             }
         }
 
@@ -286,12 +336,18 @@
                     ███    ███                            ███    ███ by SirHurt CSR Team", CurrentFullVersion, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
             SirstrapConfigurationService.LoadSettings();
             SirstrapConfigurationService.EmitSettingsMetrics();
-
             PathManager.PurgePreviousInstallationPath();
 
             await _ipcService.StartAsync("SirstrapIpc");
 
             RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
+
+            var user = SirHurtService.GetSirHurtUser();
+
+            AccountName = user;
+            IsLoggedIn = !string.IsNullOrWhiteSpace(user);
+
+            await LoadAnnouncementAsync();
         }
     }
 }
