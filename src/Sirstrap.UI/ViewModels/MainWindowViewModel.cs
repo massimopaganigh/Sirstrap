@@ -21,6 +21,9 @@
         private string _serverLocation = string.Empty;
 
         [ObservableProperty]
+        private bool _showLaunchButton = Program.Args == null || Program.Args.Length == 0;
+
+        [ObservableProperty]
         private bool _showServerLocation = false;
 
         private bool _wasRobloxRunning;
@@ -35,7 +38,10 @@
 
             _robloxActivityWatcher.ServerLocationChanged += OnServerLocationChanged;
 
-            Task.Run(RunAsync);
+            Task.Run(SomethingAsync);
+
+            if (!ShowLaunchButton)
+                Task.Run(RunAsync);
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -196,34 +202,31 @@
             }
         }
 
-        [RelayCommand]
-        private async Task RunAsync()
+        private async Task SomethingAsync()
         {
-            try
-            {
 #if DEBUG
-                AllocConsole();
+            AllocConsole();
 #endif
 
-                var logsDirectory = PathManager.GetLogsPath();
+            var logsDirectory = PathManager.GetLogsPath();
 
-                if (!Directory.Exists(logsDirectory))
-                    Directory.CreateDirectory(logsDirectory);
+            if (!Directory.Exists(logsDirectory))
+                Directory.CreateDirectory(logsDirectory);
 
-                PathManager.PurgeOldLogs();
+            PathManager.PurgeOldLogs();
 
-                var appGuid = Guid.NewGuid().ToString("N");
+            var appGuid = Guid.NewGuid().ToString("N");
 
-                SirstrapConfigurationService.LoadSettings();
+            SirstrapConfigurationService.LoadSettings();
 
-                var loggerConfig = new LoggerConfiguration()
-                    .Enrich.WithThreadId()
-                    .Enrich.WithThreadName()
-                    .Enrich.WithProperty("SirHurtUser", SirHurtService.GetSirHurtUser())
-                    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}")
-                    .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
-                    .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
-                    .WriteTo.LastLog();
+            var loggerConfig = new LoggerConfiguration()
+                .Enrich.WithThreadId()
+                .Enrich.WithThreadName()
+                .Enrich.WithProperty("SirHurtUser", SirHurtService.GetSirHurtUser())
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
+                .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
+                .WriteTo.LastLog();
 
 #if !DEBUG
                 if (SirstrapConfiguration.Telemetry)
@@ -240,9 +243,9 @@
                     });
 #endif
 
-                Log.Logger = loggerConfig.CreateLogger();
+            Log.Logger = loggerConfig.CreateLogger();
 
-                Log.Information(@"
+            Log.Information(@"
    ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
   ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
   ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
@@ -252,14 +255,22 @@
    ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {1}
  ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {2}
                     ███    ███                            ███    ███ by SirHurt CSR Team", CurrentFullVersion, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
-                SirstrapConfigurationService.LoadSettings();
-                SirstrapConfigurationService.EmitSettingsMetrics();
+            SirstrapConfigurationService.LoadSettings();
+            SirstrapConfigurationService.EmitSettingsMetrics();
 
-                PathManager.PurgePreviousInstallationPath();
+            PathManager.PurgePreviousInstallationPath();
 
-                await _ipcService.StartAsync("SirstrapIpc");
+            await _ipcService.StartAsync("SirstrapIpc");
 
-                RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
+            RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
+        }
+
+        [RelayCommand]
+        private async Task RunAsync()
+        {
+            try
+            {
+                ShowLaunchButton = false;
 
 #if !DEBUG
                 await _robloxDownloader.ExecuteAsync(Program.Args ?? [], SirstrapType.UI);

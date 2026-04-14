@@ -77,6 +77,7 @@
                         Background="#33ffffff"
                         Classes="hover-lift"
                         CornerRadius="999"
+                        IsVisible="{Binding !ShowLaunchButton}"
                         Padding="10,0">
                         <TextBlock
                             HorizontalAlignment="Left"
@@ -85,6 +86,23 @@
                             Text="{Binding LastLogMessage}"
                             TextTrimming="CharacterEllipsis" />
                     </Border>
+                    <Button
+                        Grid.Column="0"
+                        Height="32"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="LightGreen"
+                        BorderThickness="0"
+                        Classes="hover-lift"
+                        Command="{Binding RunCommand}"
+                        CornerRadius="999"
+                        IsVisible="{Binding ShowLaunchButton}"
+                        ToolTip.Tip="Launch Roblox">
+                        <Image
+                            Margin="2.5"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="avares://Sirstrap/Assets/run.png" />
+                    </Button>
                     <Border
                         Grid.Column="1"
                         Margin="5,0,0,0"
