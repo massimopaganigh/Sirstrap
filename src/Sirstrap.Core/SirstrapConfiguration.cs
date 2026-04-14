@@ -2,6 +2,8 @@
 {
     public static class SirstrapConfiguration
     {
+        public static string GetDefaultInstallationPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Versions");
+
         public static bool AutoUpdate { get; set; } = true;
 
         public static string ChannelName { get; set; } = "-beta";
@@ -25,7 +27,5 @@
         public static string SirHurtPath => SirHurtService.GetSirHurtPath();
 
         public static TrayMode TrayMode { get; set; } = TrayMode.None;
-
-        public static string GetDefaultInstallationPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Versions");
     }
 }
