@@ -310,7 +310,7 @@ const Index = () => {
           aria-label="Announcement"
           aria-live="polite"
           role="status"
-          className="pointer-events-none absolute left-4 right-4 top-3 z-30 flex justify-center md:left-1/2 md:right-auto md:top-4 md:w-[42rem] md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2"
+          className="pointer-events-none absolute bottom-3 left-4 right-4 z-30 flex justify-center md:bottom-4 md:left-1/2 md:right-auto md:w-[42rem] md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2"
         >
           <div className="flex h-8 min-w-0 items-center gap-2 overflow-hidden rounded-[5px] border border-glow-purple/40 bg-background/75 px-3 font-body text-[0.75rem] leading-none text-muted-foreground shadow-[0_10px_30px_rgba(0,0,0,0.28)] backdrop-blur-md">
             <Megaphone className="h-3.5 w-3.5 shrink-0 text-glow-purple" aria-hidden="true" />
