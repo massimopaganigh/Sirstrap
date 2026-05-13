@@ -1,1 +1,1 @@
-I'm testing announcements ^^
+Fixed: [!] Error getting SirHurt version from API: "Response status code does not indicate success: 404 (Not Found)."

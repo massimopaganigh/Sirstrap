@@ -54,6 +54,10 @@
                 () => SirstrapConfiguration.RobloxVersionOverride,
                 value => SirstrapConfiguration.RobloxVersionOverride = value
             ),
+            ["TELEMETRY"] = (
+                () => SirstrapConfiguration.Telemetry.ToString(),
+                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.Telemetry = v; }
+            ),
             ["TRAY_MODE"] = (
                 () => SirstrapConfiguration.TrayMode.ToString(),
                 value => { if (Enum.TryParse<TrayMode>(value, true, out var v)) SirstrapConfiguration.TrayMode = v; }

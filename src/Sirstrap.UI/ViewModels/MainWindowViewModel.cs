@@ -2,11 +2,23 @@
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
+        private static readonly HttpClient _httpClient = new();
+
+        [ObservableProperty]
+        private string _accountName = string.Empty;
+
+        [ObservableProperty]
+        private string _announcement = string.Empty;
+
         [ObservableProperty]
         private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
 
         private int _currentPollingInterval = 100;
         private readonly IpcService _ipcService = new();
+
+        [ObservableProperty]
+        private bool _isLoggedIn = false;
+
         private bool _isMinimized;
 
         [ObservableProperty]
@@ -19,6 +31,12 @@
 
         [ObservableProperty]
         private string _serverLocation = string.Empty;
+
+        [ObservableProperty]
+        private bool _showAnnouncement = false;
+
+        [ObservableProperty]
+        private bool _showLaunchButton = Program.Args == null || Program.Args.Length == 0;
 
         [ObservableProperty]
         private bool _showServerLocation = false;
@@ -35,7 +53,10 @@
 
             _robloxActivityWatcher.ServerLocationChanged += OnServerLocationChanged;
 
-            Task.Run(RunAsync);
+            Task.Run(SomethingAsync);
+
+            if (!ShowLaunchButton)
+                Task.Run(RunAsync);
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
@@ -140,6 +161,41 @@
             }
         }
 
+        private async Task LoadAnnouncementAsync()
+        {
+            try
+            {
+                var announcement = await HttpClientExtension.GetStringAsync(_httpClient, "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt");
+
+                if (!string.IsNullOrWhiteSpace(announcement))
+                {
+                    Announcement = announcement.Trim();
+                    ShowAnnouncement = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, nameof(LoadAnnouncementAsync));
+            }
+        }
+
+        [RelayCommand]
+        private void Logout()
+        {
+            try
+            {
+                if (SirHurtService.Logout())
+                {
+                    AccountName = string.Empty;
+                    IsLoggedIn = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(Logout));
+            }
+        }
+
         private void OnServerLocationChanged(object? sender, string location) => Dispatcher.UIThread.InvokeAsync(() =>
         {
             ServerLocation = location;
@@ -201,60 +257,7 @@
         {
             try
             {
-#if DEBUG
-                AllocConsole();
-#endif
-
-                var logsDirectory = PathManager.GetLogsPath();
-
-                if (!Directory.Exists(logsDirectory))
-                    Directory.CreateDirectory(logsDirectory);
-
-                PathManager.PurgeOldLogs();
-
-                var appGuid = Guid.NewGuid().ToString("N");
-
-                Log.Logger = new LoggerConfiguration()
-                    .Enrich.WithThreadId()
-                    .Enrich.WithThreadName()
-                    .Enrich.WithProperty("SirHurtUser", SirHurtService.GetSirHurtUsername())
-                    .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}")
-                    .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
-                    .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
-                    .WriteTo.LastLog()
-#if !DEBUG
-                    .WriteTo.Sentry(x =>
-                    {
-                        x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
-                        //x.Debug = true;
-                        x.AutoSessionTracking = true;
-                        x.EnableLogs = true;
-
-                        x.TracesSampleRate = 0.5;
-                        x.ProfilesSampleRate = 0.5;
-                        x.AddIntegration(new Sentry.Profiling.ProfilingIntegration(/*TimeSpan.FromMilliseconds(500)*/));
-                    })
-#endif
-                    .CreateLogger();
-
-                Log.Information(@"
-   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
-  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
-  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
-  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
-▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
-         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {0}
-   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {1}
- ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {2}
-                    ███    ███                            ███    ███ by SirHurt CSR Team", CurrentFullVersion, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
-                SirstrapConfigurationService.LoadSettings();
-                SirstrapConfigurationService.EmitSettingsMetrics();
-
-                PathManager.PurgePreviousInstallationPath();
-
-                await _ipcService.StartAsync("SirstrapIpc");
-
-                RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
+                ShowLaunchButton = false;
 
 #if !DEBUG
                 await _robloxDownloader.ExecuteAsync(Program.Args ?? [], SirstrapType.UI);
@@ -276,6 +279,75 @@
                 Environment.Exit(Environment.ExitCode);
 #endif
             }
+        }
+
+        private async Task SomethingAsync()
+        {
+#if DEBUG
+            AllocConsole();
+#endif
+
+            var logsDirectory = PathManager.GetLogsPath();
+
+            if (!Directory.Exists(logsDirectory))
+                Directory.CreateDirectory(logsDirectory);
+
+            PathManager.PurgeOldLogs();
+
+            var appGuid = Guid.NewGuid().ToString("N");
+
+            SirstrapConfigurationService.LoadSettings();
+
+            var loggerConfig = new LoggerConfiguration()
+                .Enrich.WithThreadId()
+                .Enrich.WithThreadName()
+                .Enrich.WithProperty("SirHurtUser", SirHurtService.GetSirHurtUser())
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}")
+                .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
+                .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
+                .WriteTo.LastLog();
+
+#if !DEBUG
+                if (SirstrapConfiguration.Telemetry)
+                    loggerConfig = loggerConfig.WriteTo.Sentry(x =>
+                    {
+                        x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
+                        //x.Debug = true;
+                        x.AutoSessionTracking = true;
+                        x.EnableLogs = true;
+
+                        x.TracesSampleRate = 0.5;
+                        x.ProfilesSampleRate = 0.5;
+                        x.AddIntegration(new Sentry.Profiling.ProfilingIntegration(/*TimeSpan.FromMilliseconds(500)*/));
+                    });
+#endif
+
+            Log.Logger = loggerConfig.CreateLogger();
+
+            Log.Information(@"
+   ▄████████  ▄█     ▄████████    ▄████████     ███        ▄████████    ▄████████    ▄███████▄
+  ███    ███ ███    ███    ███   ███    ███ ▀█████████▄   ███    ███   ███    ███   ███    ███
+  ███    █▀  ███▌   ███    ███   ███    █▀     ▀███▀▀██   ███    ███   ███    ███   ███    ███
+  ███        ███▌  ▄███▄▄▄▄██▀   ███            ███   ▀  ▄███▄▄▄▄██▀   ███    ███   ███    ███
+▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀███████████     ███     ▀▀███▀▀▀▀▀   ▀███████████ ▀█████████▀
+         ███ ███  ▀███████████          ███     ███     ▀███████████   ███    ███   ███ {0}
+   ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {1}
+ ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {2}
+                    ███    ███                            ███    ███ by SirHurt CSR Team", CurrentFullVersion, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
+            SirstrapConfigurationService.LoadSettings();
+            SirstrapConfigurationService.EmitSettingsMetrics();
+            PathManager.PurgePreviousInstallationPath();
+
+            await _ipcService.StartAsync("SirstrapIpc");
+
+            RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
+
+            var user = SirHurtService.GetSirHurtUser();
+
+            AccountName = user;
+            IsLoggedIn = !string.IsNullOrWhiteSpace(user);
+
+            await LoadAnnouncementAsync();
         }
     }
 }

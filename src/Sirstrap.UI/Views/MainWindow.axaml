@@ -11,7 +11,7 @@
     ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/favicon.ico"
     SizeToContent="WidthAndHeight"
-    Title="Sirstrap"
+    Title=""
     TransparencyLevelHint="AcrylicBlur"
     WindowStartupLocation="CenterOwner"
     x:DataType="vm:MainWindowViewModel">
@@ -26,8 +26,7 @@
             Margin="0,4,0,9"
             HorizontalAlignment="Center"
             FontSize="10"
-            Text="Sirstrap"
-            Opacity="0"/>
+            Text="Sirstrap" />
         <Border
             Grid.Row="1"
             HorizontalAlignment="Stretch"
@@ -65,9 +64,28 @@
                         </Style>
                     </Image.Styles>
                 </Image>
+                <Grid Width="600" VerticalAlignment="Top">
+                    <Border
+                        Height="32"
+                        Background="#33ffffff"
+                        Classes="hover-lift"
+                        CornerRadius="999"
+                        IsVisible="{Binding ShowAnnouncement}"
+                        Padding="10,0">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="10"
+                            Text="{Binding Announcement}"
+                            TextTrimming="CharacterEllipsis"
+                            ToolTip.Tip="{Binding Announcement}" />
+                    </Border>
+                </Grid>
                 <Grid Width="600" VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -78,6 +96,7 @@
                         Background="#33ffffff"
                         Classes="hover-lift"
                         CornerRadius="999"
+                        IsVisible="{Binding !ShowLaunchButton}"
                         Padding="10,0">
                         <TextBlock
                             HorizontalAlignment="Left"
@@ -86,6 +105,23 @@
                             Text="{Binding LastLogMessage}"
                             TextTrimming="CharacterEllipsis" />
                     </Border>
+                    <Button
+                        Grid.Column="0"
+                        Height="32"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="#4d6abf6a"
+                        BorderThickness="0"
+                        Classes="hover-lift"
+                        Command="{Binding RunCommand}"
+                        CornerRadius="999"
+                        IsVisible="{Binding ShowLaunchButton}"
+                        ToolTip.Tip="Launch Roblox">
+                        <Image
+                            Margin="2.5"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="avares://Sirstrap/Assets/run.png" />
+                    </Button>
                     <Border
                         Grid.Column="1"
                         Margin="5,0,0,0"
@@ -148,6 +184,38 @@
                             Margin="2.5"
                             RenderOptions.BitmapInterpolationMode="HighQuality"
                             Source="avares://Sirstrap/Assets/settings.png" />
+                    </Button>
+                    <Border
+                        Grid.Column="5"
+                        Margin="5,0,0,0"
+                        Background="#33ffffff"
+                        Classes="hover-lift"
+                        CornerRadius="999"
+                        IsVisible="{Binding IsLoggedIn}"
+                        Padding="10,0">
+                        <TextBlock
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            FontSize="10"
+                            Text="{Binding AccountName}"
+                            TextTrimming="CharacterEllipsis" />
+                    </Border>
+                    <Button
+                        Grid.Column="6"
+                        Height="32"
+                        Margin="5,0,0,0"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        BorderThickness="0"
+                        Classes="hover-lift"
+                        Command="{Binding LogoutCommand}"
+                        CornerRadius="999"
+                        IsVisible="{Binding IsLoggedIn}"
+                        ToolTip.Tip="Logout">
+                        <Image
+                            Margin="2.5"
+                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                            Source="avares://Sirstrap/Assets/logout.png" />
                     </Button>
                 </Grid>
             </Grid>
