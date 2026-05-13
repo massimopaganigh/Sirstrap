@@ -149,7 +149,7 @@
 
 #pragma warning disable S1075 // URIs should not be hardcoded - These are external API endpoints
         private const string ROBLOX_API_URI = "https://clientsettingscdn.roblox.com/v1/client-version/WindowsPlayer";
-        private const string SIRHURT_API_URI = "https://sirhurt.net/status/fetch.php?exploit=SirHurt%20V5";
+        private const string SIRHURT_API_URI = "https://sirhurt.net/status/fetch_2.php?exploit=SirHurt%20V5";
 #pragma warning restore S1075
     }
 }
