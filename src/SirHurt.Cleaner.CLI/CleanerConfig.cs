@@ -1,4 +1,4 @@
-﻿namespace SirHurt.Cleaner.CLI
+namespace SirHurt.Cleaner.CLI
 {
     public class CleanerConfig
     {
@@ -28,15 +28,35 @@
                 "RobloxPlayerBeta",
                 "RobloxStudioBeta",
                 "SirHurtUI",
-                "Sirstrap"
+                "Sirstrap",
+                "RobloxCrashHandler",
+                "RobloxPlayerInstaller",
+                "RobloxStudioInstaller"
             ];
             RegistryKeys =
             [
-                @"Software\Asshurt"
+                @"Software\Asshurt",
+                @"Software\Roblox",
+                @"Software\Roblox Corporation"
+            ];
+            LocalMachineRegistryKeys =
+            [
+                @"SOFTWARE\Roblox Corporation",
+                @"SOFTWARE\WOW6432Node\Roblox Corporation"
             ];
             SystemFolders =
             [
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "rsTrust")
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "rsTrust"),
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Roblox")
+            ];
+            UserFolders =
+            [
+                Path.Combine("AppData", "Local", "Roblox"),
+                Path.Combine("AppData", "LocalLow", "Roblox"),
+                Path.Combine("AppData", "Roaming", "Roblox"),
+                Path.Combine("AppData", "Local", "Roblox Corporation"),
+                Path.Combine("AppData", "Roaming", "sirhurt"),
+                Path.Combine("AppData", "Local", "Sirstrap")
             ];
         }
 
@@ -54,6 +74,10 @@
 
         public IReadOnlyList<string> RegistryKeys { get; }
 
+        public IReadOnlyList<string> LocalMachineRegistryKeys { get; }
+
         public IReadOnlyList<string> SystemFolders { get; }
+
+        public IReadOnlyList<string> UserFolders { get; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using Serilog;
 using System;
 using System.Linq;
@@ -79,6 +79,17 @@ namespace SirHurt.Cleaner.CLI
             catch (Exception ex)
             {
                 _logger.Error(ex, "Failed to process user registry hives");
+            }
+        }
+
+        /// <summary>
+        /// Cleans registry keys from the local machine hive (requires administrator privileges)
+        /// </summary>
+        public void CleanLocalMachineRegistry()
+        {
+            foreach (var keyPath in _config.LocalMachineRegistryKeys)
+            {
+                DeleteRegistryKey(Registry.LocalMachine, keyPath);
             }
         }
 

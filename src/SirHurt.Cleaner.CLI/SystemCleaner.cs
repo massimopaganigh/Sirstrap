@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 
 namespace SirHurt.Cleaner.CLI
 {
@@ -51,21 +51,21 @@ namespace SirHurt.Cleaner.CLI
 
                     // Clean current user folders
                     logger.Information("Checking folders for current user");
-                    string robloxFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox");
-                    cleanerCore.DeleteFolderContentsWithConfirmation(robloxFolder);
-
-                    string sirhurtFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "sirhurt");
-                    cleanerCore.DeleteFolderContentsWithConfirmation(sirhurtFolder);
-
-                    string sirstrapFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap");
-                    cleanerCore.DeleteFolderContentsWithConfirmation(sirstrapFolder);
+                    string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                    
+                    foreach (var folder in config.UserFolders)
+                    {
+                        string fullPath = Path.Combine(userProfile, folder);
+                        cleanerCore.DeleteFolderContentsWithConfirmation(fullPath);
+                    }
 
                     // Clean all user profiles
-                    CleanupAllUserProfiles(logger, fileSystem, cleanerCore);
+                    CleanupAllUserProfiles(logger, fileSystem, cleanerCore, config);
 
                     // Clean registry
                     registryCleaner.CleanCurrentUserRegistry();
                     registryCleaner.CleanAllUsersRegistry();
+                    registryCleaner.CleanLocalMachineRegistry();
 
                     // Clean temporary folders if enabled
                     if (config.CleanTempFolders)
@@ -93,7 +93,7 @@ namespace SirHurt.Cleaner.CLI
         /// <summary>
         /// Removes application folders from all other user profiles on the system.
         /// </summary>
-        private static void CleanupAllUserProfiles(ILogger logger, IFileSystem fileSystem, CleanerCore cleanerCore)
+        private static void CleanupAllUserProfiles(ILogger logger, IFileSystem fileSystem, CleanerCore cleanerCore, CleanerConfig config)
         {
             try
             {
@@ -128,18 +128,10 @@ namespace SirHurt.Cleaner.CLI
                         string username = fileSystem.GetFileName(userProfile);
                         logger.Information("Checking profile for user: {Username}", username);
 
-                        string localAppData = Path.Combine(userProfile, "AppData", "Local");
-                        if (fileSystem.DirectoryExists(localAppData))
+                        foreach (var folder in config.UserFolders)
                         {
-                            string robloxPath = Path.Combine(localAppData, "Roblox");
-                            cleanerCore.DeleteFolderContentsWithConfirmation(robloxPath);
-                        }
-
-                        string roamingAppData = Path.Combine(userProfile, "AppData", "Roaming");
-                        if (fileSystem.DirectoryExists(roamingAppData))
-                        {
-                            string sirhurtPath = Path.Combine(roamingAppData, "sirhurt");
-                            cleanerCore.DeleteFolderContentsWithConfirmation(sirhurtPath);
+                            string fullPath = Path.Combine(userProfile, folder);
+                            cleanerCore.DeleteFolderContentsWithConfirmation(fullPath);
                         }
                     }
                     catch (UnauthorizedAccessException ex)
