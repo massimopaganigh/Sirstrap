@@ -165,7 +165,9 @@
         {
             try
             {
+#pragma warning disable S1075 // remote announcements endpoint, not a local path
                 var announcement = await HttpClientExtension.GetStringAsync(_httpClient, "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt");
+#pragma warning restore S1075
 
                 if (!string.IsNullOrWhiteSpace(announcement))
                 {

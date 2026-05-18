@@ -36,7 +36,7 @@
             {
                 Log.Error(ex, "[!] Installation error: {0}", ex.Message);
 
-                throw;
+                throw new InvalidOperationException($"Installation error: {ex.Message}", ex);
             }
         }
     }

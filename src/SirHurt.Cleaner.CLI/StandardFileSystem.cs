@@ -16,7 +16,7 @@ namespace SirHurt.Cleaner.CLI
         public void DeleteFile(string file) => File.Delete(file);
         public bool FileExists(string path) => File.Exists(path);
         public string GetRelativePath(string relativeTo, string path) => Path.GetRelativePath(relativeTo, path);
-        public string GetDirectoryName(string path) => Path.GetDirectoryName(path);
+        public string GetDirectoryName(string path) => Path.GetDirectoryName(path) ?? string.Empty;
         public string GetFileName(string path) => Path.GetFileName(path);
     }
 }

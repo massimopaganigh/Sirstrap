@@ -6,7 +6,7 @@ namespace SirHurt.Cleaner.CLI
     /// Entry point for the SirHurt cleanup utility.
     /// Removes Roblox and SirHurt-related folders and registry keys.
     /// </summary>
-    public class Program
+    public static class Program
     {
         /// <summary>
         /// Main application entry point. Initializes logging, displays a banner,
@@ -54,7 +54,7 @@ namespace SirHurt.Cleaner.CLI
             }
             finally
             {
-                Log.CloseAndFlush();
+                await Log.CloseAndFlushAsync();
             }
         }
     }

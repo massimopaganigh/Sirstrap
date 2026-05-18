@@ -22,11 +22,11 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] Error creating directory: {0}.", directoryPath);
+                Log.Error(ex, "[!] Error creating directory: {0}.", directoryPath);
 
-                throw;
+                throw new InvalidOperationException($"Error creating directory: {directoryPath}.", ex);
             }
         }
 
@@ -50,11 +50,11 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] Error deleting directory: {0}.", directoryPath);
+                Log.Error(ex, "[!] Error deleting directory: {0}.", directoryPath);
 
-                throw;
+                throw new InvalidOperationException($"Error deleting directory: {directoryPath}.", ex);
             }
         }
 
@@ -77,11 +77,11 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] Error moving directory: {0} -> {1}.", sourcePath, destinationPath);
+                Log.Error(ex, "[!] Error moving directory: {0} -> {1}.", sourcePath, destinationPath);
 
-                throw;
+                throw new InvalidOperationException($"Error moving directory: {sourcePath} -> {destinationPath}.", ex);
             }
         }
 
@@ -105,11 +105,11 @@
                         Thread.Sleep(100 * attempt);
                     }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Log.Error("[!] Error deleting file: {0}.", filePath);
+                Log.Error(ex, "[!] Error deleting file: {0}.", filePath);
 
-                throw;
+                throw new InvalidOperationException($"Error deleting file: {filePath}.", ex);
             }
         }
     }
