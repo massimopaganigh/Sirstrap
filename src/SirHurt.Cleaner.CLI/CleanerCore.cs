@@ -39,13 +39,10 @@ namespace SirHurt.Cleaner.CLI
             bool anyRunning = false;
 
             // First check which processes are running
-            foreach (var processName in processesToCheck)
+            foreach (var processName in processesToCheck.Where(_processManager.IsProcessRunning))
             {
-                if (_processManager.IsProcessRunning(processName))
-                {
-                    _logger.Information("{ProcessName} is currently running", processName);
-                    anyRunning = true;
-                }
+                _logger.Information("{ProcessName} is currently running", processName);
+                anyRunning = true;
             }
 
             if (!anyRunning)
@@ -65,16 +62,13 @@ namespace SirHurt.Cleaner.CLI
             }
 
             // Try to close each running process
-            foreach (var processName in processesToCheck)
+            foreach (var processName in processesToCheck.Where(_processManager.IsProcessRunning))
             {
-                if (_processManager.IsProcessRunning(processName))
+                bool processClosed = _processManager.TryKillProcess(processName);
+                if (!processClosed)
                 {
-                    bool processClosed = _processManager.TryKillProcess(processName);
-                    if (!processClosed)
-                    {
-                        _logger.Warning("Failed to close all instances of {ProcessName}", processName);
-                        allClosed = false;
-                    }
+                    _logger.Warning("Failed to close all instances of {ProcessName}", processName);
+                    allClosed = false;
                 }
             }
 
@@ -99,9 +93,9 @@ namespace SirHurt.Cleaner.CLI
                 _fileSystem.DeleteDirectory(path, recursive: true);
                 _logger.Information("Folder deleted: {FolderPath}", path);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                _logger.Warning("Access denied to folder: {FolderPath}. Attempting with elevated permissions.", path);
+                _logger.Warning(ex, "Access denied to folder: {FolderPath}. Attempting with elevated permissions.", path);
                 TryDeleteWithElevatedPermissions(path);
             }
             catch (Exception ex)

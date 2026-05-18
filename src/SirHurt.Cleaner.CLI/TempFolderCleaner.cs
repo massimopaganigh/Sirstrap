@@ -105,9 +105,9 @@ namespace SirHurt.Cleaner.CLI
                                 _cleanerCore.DeleteFolder(directory);
                             }
                         }
-                        catch (UnauthorizedAccessException)
+                        catch (UnauthorizedAccessException ex)
                         {
-                            _logger.Warning("Access denied to user's temp folder: {TempPath}", tempPath);
+                            _logger.Warning(ex, "Access denied to user's temp folder: {TempPath}", tempPath);
                         }
                         catch (Exception ex)
                         {
@@ -135,7 +135,7 @@ namespace SirHurt.Cleaner.CLI
 
                 // Windows\Temp - system temp folder
                 string systemTempPath = Path.Combine(
-                    Environment.GetEnvironmentVariable("SystemRoot") ?? @"C:\Windows",
+                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
                     "Temp");
 
                 if (_fileSystem.DirectoryExists(systemTempPath))
@@ -151,9 +151,9 @@ namespace SirHurt.Cleaner.CLI
                             _cleanerCore.DeleteFolder(directory);
                         }
                     }
-                    catch (UnauthorizedAccessException)
+                    catch (UnauthorizedAccessException ex)
                     {
-                        _logger.Warning("Access denied to system temp folder: {TempPath}", systemTempPath);
+                        _logger.Warning(ex, "Access denied to system temp folder: {TempPath}", systemTempPath);
                     }
                     catch (Exception ex)
                     {
@@ -185,14 +185,14 @@ namespace SirHurt.Cleaner.CLI
                 {
                     _fileSystem.DeleteFile(filePath);
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
                     // File is likely in use, log and continue
-                    _logger.Debug("Could not delete file (in use): {FilePath}", filePath);
+                    _logger.Debug(ex, "Could not delete file (in use): {FilePath}", filePath);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
                 {
-                    _logger.Debug("Access denied to file: {FilePath}", filePath);
+                    _logger.Debug(ex, "Access denied to file: {FilePath}", filePath);
                 }
                 catch (Exception ex)
                 {

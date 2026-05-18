@@ -90,7 +90,7 @@ namespace Sirstrap.Core
             {
                 Log.Error(ex, "[!] An error occurred while downloading the package: {0}.", package);
 
-                throw;
+                throw new InvalidOperationException($"An error occurred while downloading the package: {package}.", ex);
             }
         }
 
@@ -193,7 +193,7 @@ namespace Sirstrap.Core
 
                 span?.Finish(SpanStatus.InternalError);
 
-                throw;
+                throw new InvalidOperationException("An error occurred while downloading the package for Mac.", ex);
             }
         }
 
@@ -246,7 +246,7 @@ namespace Sirstrap.Core
 
                 span?.Finish(SpanStatus.InternalError);
 
-                throw;
+                throw new InvalidOperationException("An error occurred while downloading packages for Windows.", ex);
             }
         }
     }

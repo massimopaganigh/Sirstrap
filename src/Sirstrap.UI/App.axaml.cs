@@ -107,6 +107,7 @@ namespace Sirstrap.UI
                 trayNativeMenu.Items.Add(new NativeMenuItemSeparator());
                 trayNativeMenu.Items.Add(exitNativeMenuItem);
 
+#pragma warning disable S1075 // avares:// resource URI, not a local path
                 _trayIcon = new TrayIcon
                 {
                     Icon = new WindowIcon(Avalonia.Platform.AssetLoader.Open(new Uri("avares://Sirstrap/Assets/favicon.ico"))),
@@ -114,6 +115,7 @@ namespace Sirstrap.UI
                     Menu = trayNativeMenu,
                     ToolTipText = "Sirstrap"
                 };
+#pragma warning restore S1075
 
                 desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             }

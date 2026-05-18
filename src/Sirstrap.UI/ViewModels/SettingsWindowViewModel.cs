@@ -151,7 +151,7 @@
 
                 await Task.Run(UninstallManager.Uninstall);
 
-                Dispatcher.UIThread.Invoke(() => Environment.Exit(0));
+                await Dispatcher.UIThread.InvokeAsync(() => Environment.Exit(0));
             }
             catch (Exception ex)
             {
