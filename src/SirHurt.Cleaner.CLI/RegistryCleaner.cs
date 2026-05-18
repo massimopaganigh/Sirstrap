@@ -83,7 +83,7 @@ namespace SirHurt.Cleaner.CLI
         }
 
         /// <summary>
-        /// Cleans registry keys from the local machine hive (requires administrator privileges)
+        /// Cleans registry keys from the local machine hive
         /// </summary>
         public void CleanLocalMachineRegistry()
         {

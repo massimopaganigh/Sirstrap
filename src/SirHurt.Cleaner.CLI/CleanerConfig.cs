@@ -4,7 +4,10 @@ namespace SirHurt.Cleaner.CLI
     {
         public CleanerConfig()
         {
-            ExcludedFiles = ["GlobalBasicSettings_13_Studio.xml"];
+            ExcludedFiles =
+            [
+                "GlobalBasicSettings_13_Studio.xml"
+            ];
             ExcludedSubFolders =
             [
                 "DefaultInstances",
@@ -23,6 +26,11 @@ namespace SirHurt.Cleaner.CLI
             [
                 //"Versions"
             ];
+            LocalMachineRegistryKeys =
+            [
+                @"SOFTWARE\Roblox Corporation",
+                @"SOFTWARE\WOW6432Node\Roblox Corporation"
+            ];
             ProcessesToClose =
             [
                 "RobloxPlayerBeta",
@@ -38,11 +46,6 @@ namespace SirHurt.Cleaner.CLI
                 @"Software\Asshurt",
                 @"Software\Roblox",
                 @"Software\Roblox Corporation"
-            ];
-            LocalMachineRegistryKeys =
-            [
-                @"SOFTWARE\Roblox Corporation",
-                @"SOFTWARE\WOW6432Node\Roblox Corporation"
             ];
             SystemFolders =
             [
@@ -70,11 +73,11 @@ namespace SirHurt.Cleaner.CLI
 
         public IReadOnlyList<string> FoldersRequiringConfirmation { get; }
 
+        public IReadOnlyList<string> LocalMachineRegistryKeys { get; }
+
         public IReadOnlyList<string> ProcessesToClose { get; }
 
         public IReadOnlyList<string> RegistryKeys { get; }
-
-        public IReadOnlyList<string> LocalMachineRegistryKeys { get; }
 
         public IReadOnlyList<string> SystemFolders { get; }
 

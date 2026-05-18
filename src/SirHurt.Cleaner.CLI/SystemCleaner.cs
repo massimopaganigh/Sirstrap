@@ -52,11 +52,17 @@ namespace SirHurt.Cleaner.CLI
                     // Clean current user folders
                     logger.Information("Checking folders for current user");
                     string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-
-                    foreach (var folder in config.UserFolders)
+                    foreach (var userFolder in config.UserFolders)
                     {
-                        string fullPath = Path.Combine(userProfile, folder);
-                        cleanerCore.DeleteFolderContentsWithConfirmation(fullPath);
+                        try
+                        {
+                            string folderPath = Path.GetFullPath(Path.Combine(userProfile, userFolder));
+                            cleanerCore.DeleteFolderContentsWithConfirmation(folderPath);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Error(ex, "Error cleaning: {0}", userFolder);
+                        }
                     }
 
                     // Clean all user profiles
@@ -127,11 +133,17 @@ namespace SirHurt.Cleaner.CLI
                     {
                         string username = fileSystem.GetFileName(userProfile);
                         logger.Information("Checking profile for user: {Username}", username);
-
-                        foreach (var folder in config.UserFolders)
+                        foreach (var userFolder in config.UserFolders)
                         {
-                            string fullPath = Path.Combine(userProfile, folder);
-                            cleanerCore.DeleteFolderContentsWithConfirmation(fullPath);
+                            try
+                            {
+                                string folderPath = Path.GetFullPath(Path.Combine(userProfile, userFolder));
+                                cleanerCore.DeleteFolderContentsWithConfirmation(folderPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.Error(ex, "Error cleaning: {0}", userFolder);
+                            }
                         }
                     }
                     catch (UnauthorizedAccessException ex)
