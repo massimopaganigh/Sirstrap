@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { Megaphone } from "lucide-react";
 import WavyBackground from "@/components/WavyBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 import iconCleaner from "../../../src/SirHurt.Cleaner.CLI/Assets/favicon.ico";
@@ -7,7 +6,6 @@ import iconCli from "../../../src/Sirstrap.CLI/Assets/favicon.ico";
 import iconUi from "../../../src/Sirstrap.UI/Assets/favicon.ico";
 
 const REPO = "https://github.com/massimopaganigh/Sirstrap";
-const ANNOUNCEMENT_URL = "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt";
 
 const products = [
   {
@@ -203,27 +201,8 @@ const badgeClass =
 const Index = () => {
   const isMobile = useIsMobile();
   const [active, setActive] = useState<number | null>(null);
-  const [announcement, setAnnouncement] = useState<string | null>(null);
   const [version, setVersion] = useState<string | null>(null);
   const [downloads, setDownloads] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    let cancelled = false;
-
-    fetch(ANNOUNCEMENT_URL)
-      .then(response => response.ok ? response.text() : "")
-      .then(text => {
-        const trimmed = text.trim();
-        if (!cancelled && trimmed) {
-          setAnnouncement(trimmed);
-        }
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     const fetchAllReleases = async (repo: string) => {
@@ -304,20 +283,7 @@ const Index = () => {
   const handleClick = (i: number) => { if (isMobile) setActive(prev => prev === i ? null : i); };
 
   return (
-    <div className="relative flex flex-col md:flex-row h-screen w-screen overflow-hidden">
-      {announcement && (
-        <div
-          aria-label="Announcement"
-          aria-live="polite"
-          role="status"
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center md:left-1/2 md:right-auto md:w-[42rem] md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2"
-        >
-          <div className="flex h-8 w-full min-w-0 items-center justify-center gap-2 overflow-hidden rounded-t-[5px] rounded-b-none border border-b-0 border-glow-purple/40 bg-background/75 px-3 font-body text-[0.75rem] leading-none text-muted-foreground shadow-[0_10px_30px_rgba(0,0,0,0.28)] backdrop-blur-md">
-            <Megaphone className="h-3.5 w-3.5 shrink-0 text-glow-purple" aria-hidden="true" />
-            <span className="truncate">{announcement}</span>
-          </div>
-        </div>
-      )}
+    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden">
       {products.map((p, i) => (
         <section
           key={p.name}

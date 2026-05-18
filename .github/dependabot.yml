@@ -2,21 +2,31 @@ version: 2
 
 updates:
   - package-ecosystem: "nuget"
-    directory: "/"
+    directory: "/src"
     schedule:
       interval: "daily"
     target-branch: "develop"
-    open-pull-requests-limit: 25
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "nuget"
+
+  - package-ecosystem: "npm"
+    directory: "/website"
+    schedule:
+      interval: "daily"
+    target-branch: "develop"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "npm"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
     target-branch: "develop"
-    open-pull-requests-limit: 25
+    open-pull-requests-limit: 10
     labels:
       - "dependencies"
       - "github-actions"
