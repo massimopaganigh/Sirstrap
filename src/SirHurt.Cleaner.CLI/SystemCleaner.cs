@@ -52,7 +52,7 @@ namespace SirHurt.Cleaner.CLI
                     // Clean current user folders
                     logger.Information("Checking folders for current user");
                     string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                    
+
                     foreach (var folder in config.UserFolders)
                     {
                         string fullPath = Path.Combine(userProfile, folder);
