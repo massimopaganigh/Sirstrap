@@ -1,4 +1,5 @@
 using Serilog;
+using Sirstrap.Core;
 
 namespace SirHurt.Cleaner.CLI
 {
@@ -21,7 +22,6 @@ namespace SirHurt.Cleaner.CLI
                 // Create dependencies
                 var logger = Log.Logger;
                 var fileSystem = new StandardFileSystem();
-                var registry = new StandardRegistry();
                 var userInteraction = new ConsoleUserInteraction();
                 var processManager = new StandardProcessManager(logger);
 
@@ -30,7 +30,6 @@ namespace SirHurt.Cleaner.CLI
 
                 // Create component cleaners
                 var cleanerCore = new CleanerCore(logger, fileSystem, userInteraction, processManager, config);
-                var registryCleaner = new RegistryCleaner(logger, registry, config);
                 var tempCleaner = new TempFolderCleaner(logger, fileSystem, cleanerCore);
 
                 await Task.Run(() =>
@@ -69,9 +68,9 @@ namespace SirHurt.Cleaner.CLI
                     CleanupAllUserProfiles(logger, fileSystem, cleanerCore, config);
 
                     // Clean registry
-                    registryCleaner.CleanCurrentUserRegistry();
-                    registryCleaner.CleanAllUsersRegistry();
-                    registryCleaner.CleanLocalMachineRegistry();
+                    RegistryManager.CleanCurrentUserRegistry(config.RegistryKeys, logger);
+                    RegistryManager.CleanAllUsersRegistry(config.RegistryKeys, logger);
+                    RegistryManager.CleanLocalMachineRegistry(config.LocalMachineRegistryKeys, logger);
 
                     // Clean temporary folders if enabled
                     if (config.CleanTempFolders)

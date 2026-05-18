@@ -25,11 +25,11 @@
 
                 // Check if protocol is already registered correctly
                 // Use CurrentUser\Software\Classes path to match where we write
-                using var commandKey = Registry.CurrentUser.OpenSubKey($@"{RegistryBasePath}\{protocol}\{ShellOpenCommand}");
+                using var commandKey = OpenRegistrySubKey(Registry.CurrentUser, GetProtocolCommandKeyPath(protocol));
 
                 if (commandKey != null)
                 {
-                    var currentCommand = commandKey.GetValue(string.Empty)?.ToString();
+                    var currentCommand = GetRegistryStringValue(commandKey, string.Empty);
 
                     if (string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase))
                     {
@@ -61,6 +61,10 @@
 
         private static string GetExpectedCommand() => $"cmd /c start \"\" \"{AppDomain.CurrentDomain.BaseDirectory}{AppDomain.CurrentDomain.FriendlyName}\" \"%1\"";
 
+        private static string GetProtocolKeyPath(string protocol) => $@"{RegistryBasePath}\{protocol}";
+
+        private static string GetProtocolCommandKeyPath(string protocol) => $@"{GetProtocolKeyPath(protocol)}\{ShellOpenCommand}";
+
         /// <summary>
         /// Registers a protocol handler in the Windows Registry.
         /// Uses CurrentUser\Software\Classes path which doesn't require admin privileges.
@@ -79,52 +83,24 @@
 
                 // Use CurrentUser\Software\Classes instead of ClassesRoot - doesn't require admin privileges
                 // CreateSubKey creates the key if it doesn't exist, or opens it with write access if it does
-                using var protocolKey = Registry.CurrentUser.CreateSubKey($@"{RegistryBasePath}\{protocol}");
-
-                if (protocolKey == null)
-                {
-                    Log.Error("[!] Failed to create or open registry key for protocol {0}. Access may be denied.", protocol);
-
-                    throw new UnauthorizedAccessException($"Could not create registry key for protocol {protocol}");
-                }
-
-                using var defaultIconKey = protocolKey.CreateSubKey(DefaultIconSubKey);
-
-                if (defaultIconKey == null)
-                {
-                    Log.Error("[!] Failed to create or open DefaultIcon registry key for protocol {0}.", protocol);
-
-                    throw new UnauthorizedAccessException($"Could not create DefaultIcon registry key for protocol {protocol}");
-                }
-
-                using var commandKey = protocolKey.CreateSubKey(ShellOpenCommand);
-
-                if (commandKey == null)
-                {
-                    Log.Error("[!] Failed to create or open command registry key for protocol {0}.", protocol);
-
-                    throw new UnauthorizedAccessException($"Could not create command registry key for protocol {protocol}");
-                }
+                using var protocolKey = CreateRegistrySubKey(Registry.CurrentUser, GetProtocolKeyPath(protocol), $"protocol {protocol}");
+                using var defaultIconKey = CreateRegistrySubKey(protocolKey, DefaultIconSubKey, $"DefaultIcon registry key for protocol {protocol}");
+                using var commandKey = CreateRegistrySubKey(protocolKey, ShellOpenCommand, $"command registry key for protocol {protocol}");
 
                 // Set URL Protocol attributes if not already set
-                if (protocolKey.GetValue(string.Empty) is null)
+                if (GetRegistryStringValue(protocolKey, string.Empty) is null)
                 {
-                    SetValueSafe(protocolKey, string.Empty, $"URL: {protocol} Protocol");
-                    SetValueSafe(protocolKey, UrlProtocolValue, string.Empty);
+                    SetRegistryValue(protocolKey, string.Empty, $"URL: {protocol} Protocol");
+                    SetRegistryValue(protocolKey, UrlProtocolValue, string.Empty);
                 }
 
                 // Set the default icon path (always ensure it's set correctly)
                 var iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, AppDomain.CurrentDomain.FriendlyName);
-                var currentIcon = defaultIconKey.GetValue(string.Empty)?.ToString();
 
-                if (!string.Equals(currentIcon, iconPath, StringComparison.OrdinalIgnoreCase))
-                    SetValueSafe(defaultIconKey, string.Empty, iconPath);
+                SetRegistryStringValueIfDifferent(defaultIconKey, string.Empty, iconPath);
 
                 // Only update command if it's different from expected
-                var currentCommand = commandKey.GetValue(string.Empty)?.ToString();
-
-                if (!string.Equals(currentCommand, expectedCommand, StringComparison.OrdinalIgnoreCase))
-                    SetValueSafe(commandKey, string.Empty, expectedCommand);
+                SetRegistryStringValueIfDifferent(commandKey, string.Empty, expectedCommand);
 
                 Log.Information("[*] Protocol {0} registered successfully.", protocol);
 
@@ -140,26 +116,6 @@
                 Log.Error(ex, "[!] Failed to register protocol {0}: {1}", protocol, ex.Message);
 
                 return false;
-            }
-        }
-
-        /// <summary>
-        /// Sets a registry value safely with proper error handling.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Convalida compatibilità della piattaforma", Justification = "<In sospeso>")]
-        private static void SetValueSafe(RegistryKey registryKey, string? name, object value)
-        {
-            try
-            {
-                Log.Debug("[*] Writing '{0}' to {1}\\{2}", value, registryKey.Name, name ?? "(Default)");
-
-                registryKey.SetValue(name, value);
-            }
-            catch (UnauthorizedAccessException)
-            {
-                Log.Error("[!] Unauthorized access when writing to registry: {0}\\{1}", registryKey.Name, name ?? "(Default)");
-
-                throw;
             }
         }
 
@@ -199,13 +155,46 @@
             {
                 return EnsureProtocolRegistration(protocol);
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
                 // Fall back to requesting admin privileges if necessary
-                Log.Warning("[*] Registry access denied, requesting administrator privileges...");
+                Log.Warning(ex, "[*] Registry access denied, requesting administrator privileges...");
 
                 return UacHelper.EnsureAdministratorPrivileges(() => EnsureProtocolRegistration(protocol), arguments, $"Protocol registration for {protocol}");
             }
+        }
+
+        /// <summary>
+        /// Removes a protocol handler registration from HKCU\Software\Classes.
+        /// </summary>
+        /// <param name="protocol">The protocol name to unregister.</param>
+        /// <param name="logger">Optional logger override.</param>
+        /// <exception cref="ArgumentException">Thrown when protocol name is invalid.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Sirstrap registry operations target Windows.")]
+        public static void UnregisterProtocolHandler(string protocol, ILogger? logger = null)
+        {
+            ValidateProtocolName(protocol);
+
+            var log = logger ?? Log.Logger;
+
+            try
+            {
+                DeleteRegistrySubKeyTree(Registry.CurrentUser, GetProtocolKeyPath(protocol), throwOnMissingSubKey: false);
+
+                log.Information("[*] Unregistered protocol: {Protocol}", protocol);
+            }
+            catch (Exception ex)
+            {
+                log.Warning(ex, "[!] Failed to unregister protocol {Protocol}: {Message}", protocol, ex.Message);
+            }
+        }
+
+        public static void UnregisterProtocolHandlers(IEnumerable<string> protocols, ILogger? logger = null)
+        {
+            ArgumentNullException.ThrowIfNull(protocols);
+
+            foreach (var protocol in protocols)
+                UnregisterProtocolHandler(protocol, logger);
         }
     }
 }

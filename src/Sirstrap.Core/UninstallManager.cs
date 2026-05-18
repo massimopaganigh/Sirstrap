@@ -3,28 +3,13 @@ namespace Sirstrap.Core
     public static class UninstallManager
     {
         private static readonly string[] _protocols = ["roblox-player"];
-        private const string RegistryBasePath = @"Software\Classes";
 
         /// <summary>
         /// Removes all Sirstrap protocol handler registrations from HKCU\Software\Classes.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Convalida compatibilità della piattaforma", Justification = "Windows-only application")]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0079:Rimuovere l'eliminazione non necessaria", Justification = "Cross-platform suppression")]
         public static void UnregisterProtocols()
         {
-            foreach (var protocol in _protocols)
-            {
-                try
-                {
-                    Registry.CurrentUser.DeleteSubKeyTree($@"{RegistryBasePath}\{protocol}", throwOnMissingSubKey: false);
-
-                    Log.Information("[*] Unregistered protocol: {0}", protocol);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "[!] Failed to unregister protocol {0}: {1}", protocol, ex.Message);
-                }
-            }
+            RegistryManager.UnregisterProtocolHandlers(_protocols);
         }
 
         /// <summary>
