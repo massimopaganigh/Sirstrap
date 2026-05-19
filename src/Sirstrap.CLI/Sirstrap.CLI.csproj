@@ -32,7 +32,7 @@
 		<AssemblyMetadata Include="BuildDate" Value="$([System.DateTime]::Now.ToString('o'))" />
 	</ItemGroup>
 	<ItemGroup>
-	  <PackageReference Include="SonarAnalyzer.CSharp" Version="10.25.0.139117">
+	  <PackageReference Include="SonarAnalyzer.CSharp" Version="10.26.0.140279">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>

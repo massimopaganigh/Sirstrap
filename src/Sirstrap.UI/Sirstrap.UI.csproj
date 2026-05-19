@@ -54,7 +54,7 @@
 			<IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
 			<PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.25.0.139117">
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.26.0.140279">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
