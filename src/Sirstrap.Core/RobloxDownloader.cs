@@ -3,17 +3,18 @@
     public class RobloxDownloader
     {
         private readonly PackageManager _packageManager;
+        private readonly HttpClient _httpClient;
         private readonly RobloxVersionService _robloxVersionService;
 
         public RobloxDownloader()
         {
-            var httpClient = new HttpClient
+            _httpClient = new HttpClient
             {
                 Timeout = TimeSpan.FromMinutes(5)
             };
 
-            _robloxVersionService = new RobloxVersionService(httpClient);
-            _packageManager = new PackageManager(httpClient);
+            _robloxVersionService = new RobloxVersionService(_httpClient);
+            _packageManager = new PackageManager(_httpClient);
         }
 
         private async Task DownloadAndProcessFilesAsync(Configuration configuration)
@@ -93,6 +94,8 @@
                         return;
                     }
                 }
+
+                await RobloxCdnService.ResolveAsync(_httpClient, configuration).ConfigureAwait(false);
 
                 Configuration.ClearCacheDirectory();
 

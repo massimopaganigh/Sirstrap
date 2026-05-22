@@ -2,6 +2,12 @@
 {
     public static class SirstrapConfigurationService
     {
+        private static readonly HashSet<string> _legacySettingsKeys = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "ROBLOX_CND_URI",
+            "ROBLOX_CDN_URI"
+        };
+
         private static List<string> GetMissingKeys(HashSet<string> foundKeys)
         {
             var settingsDefinitions = GetSettingsDefinitions();
@@ -46,9 +52,9 @@
                 () => SirstrapConfiguration.RobloxApi.ToString(),
                 value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.RobloxApi = v; }
             ),
-            ["ROBLOX_CND_URI"] = (
-                () => SirstrapConfiguration.RobloxCdnUri,
-                value => SirstrapConfiguration.RobloxCdnUri = value
+            ["ROBLOX_CDN_URI_OVERRIDE"] = (
+                () => SirstrapConfiguration.RobloxCdnUriOverride,
+                value => SirstrapConfiguration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(value)
             ),
             ["ROBLOX_VERSION_OVERRIDE"] = (
                 () => SirstrapConfiguration.RobloxVersionOverride,
@@ -95,6 +101,9 @@
                 var rows = File.ReadAllLines(settingsFilePath);
                 var settingsSection = false;
                 var settingsDefinitions = GetSettingsDefinitions();
+                bool hasRobloxCdnUriOverride = rows
+                    .Select(row => row.Trim())
+                    .Any(row => row.StartsWith("ROBLOX_CDN_URI_OVERRIDE", StringComparison.OrdinalIgnoreCase));
 
                 foreach (var row in rows)
                 {
@@ -125,6 +134,18 @@
 
                         definition.Setter(value);
                     }
+                    else if (_legacySettingsKeys.Contains(key)
+                        && !hasRobloxCdnUriOverride)
+                    {
+                        string normalized = RobloxCdnService.NormalizeCdnUriOverride(value);
+
+                        if (normalized.Equals(RobloxCdnService.DefaultBaseUri, StringComparison.OrdinalIgnoreCase))
+                            normalized = string.Empty;
+
+                        Log.Information("[{0}] Migrating {1} to ROBLOX_CDN_URI_OVERRIDE...", nameof(LoadSettings), key);
+
+                        SirstrapConfiguration.RobloxCdnUriOverride = normalized;
+                    }
                 }
             }
             catch (Exception ex)
@@ -144,6 +165,7 @@
                 SentrySdk.Metrics.EmitCounter("settings.TrayMode", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.TrayMode.ToString() });
                 SentrySdk.Metrics.EmitCounter("settings.ChannelName", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.ChannelName });
                 SentrySdk.Metrics.EmitCounter("settings.FontFamily", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.FontFamily });
+                SentrySdk.Metrics.EmitCounter("settings.RobloxCdnUriOverride", 1, new Dictionary<string, object> { ["value"] = string.IsNullOrEmpty(SirstrapConfiguration.RobloxCdnUriOverride) ? "Auto" : "Custom" });
                 SentrySdk.Metrics.EmitCounter("settings.RobloxVersionOverride", 1, new Dictionary<string, object> { ["value"] = string.IsNullOrEmpty(SirstrapConfiguration.RobloxVersionOverride) ? "None" : "Custom" });
             }
             catch (Exception ex)
@@ -231,6 +253,13 @@
                     }
 
                     var key = parts[0].Trim();
+
+                    if (_legacySettingsKeys.Contains(key))
+                    {
+                        rows.RemoveAt(i);
+
+                        continue;
+                    }
 
                     foundKeys.Add(key);
 
