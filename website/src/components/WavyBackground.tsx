@@ -4,6 +4,7 @@ const accentHSL: Record<string, [number, number, number]> = {
   blue: [210, 90, 55],
   green: [145, 80, 42],
   purple: [270, 60, 58],
+  red: [0, 75, 55],
 };
 
 interface WavyBackgroundProps {
