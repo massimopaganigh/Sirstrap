@@ -1,74 +1,23 @@
-﻿namespace Sirstrap.Core
+namespace Sirstrap.Core
 {
     public static class SirstrapConfigurationService
     {
-        private static readonly HashSet<string> _legacySettingsKeys = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "ROBLOX_CND_URI",
-            "ROBLOX_CDN_URI"
-        };
+        private const string SettingsSectionHeader = "[SETTINGS]";
+
+        private static IReadOnlyDictionary<string, ISetting> GetSettingsByKey()
+            => SirstrapSettingsRegistry.Settings.ToDictionary(setting => setting.Key, StringComparer.OrdinalIgnoreCase);
+
+        private static IReadOnlyDictionary<string, ISettingMigration> GetMigrationsByKey()
+            => SirstrapSettingsRegistry.Migrations.ToDictionary(migration => migration.LegacyKey, StringComparer.OrdinalIgnoreCase);
+
+        private static HashSet<string> GetLegacyKeys()
+            => new(SirstrapSettingsRegistry.Migrations.Select(migration => migration.LegacyKey), StringComparer.OrdinalIgnoreCase);
 
         private static List<string> GetMissingKeys(HashSet<string> foundKeys)
-        {
-            var settingsDefinitions = GetSettingsDefinitions();
-
-            return settingsDefinitions
+            => SirstrapSettingsRegistry.Settings
                 .Where(setting => !foundKeys.Contains(setting.Key))
-                .Select(setting => $"{setting.Key}={setting.Value.Getter()}")
+                .Select(setting => $"{setting.Key}={setting.Read()}")
                 .ToList();
-        }
-
-        private static Dictionary<string, (Func<string> Getter, Action<string> Setter)> GetSettingsDefinitions() => new()
-        {
-            ["AUTO_UPDATE"] = (
-                () => SirstrapConfiguration.AutoUpdate.ToString(),
-                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.AutoUpdate = v; }
-            ),
-            ["CHANNEL_NAME"] = (
-                () => SirstrapConfiguration.ChannelName,
-                value => SirstrapConfiguration.ChannelName = value
-            ),
-            ["FONT_FAMILY"] = (
-                () => SirstrapConfiguration.FontFamily,
-                value => SirstrapConfiguration.FontFamily = value.Equals("Minecraft", StringComparison.OrdinalIgnoreCase) ? "JetBrains Mono" : value
-            ),
-            ["INCOGNITO"] = (
-                () => SirstrapConfiguration.Incognito.ToString(),
-                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.Incognito = v; }
-            ),
-            ["INSTALLATION_PATH"] = (
-                () => SirstrapConfiguration.InstallationPath,
-                value => SirstrapConfiguration.InstallationPath = string.IsNullOrWhiteSpace(value) ? SirstrapConfiguration.GetDefaultInstallationPath() : value
-            ),
-            ["MULTI_INSTANCE"] = (
-                () => SirstrapConfiguration.MultiInstance.ToString(),
-                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.MultiInstance = v; }
-            ),
-            ["PREVIOUS_INSTALLATION_PATH"] = (
-                () => SirstrapConfiguration.PreviousInstallationPath,
-                value => SirstrapConfiguration.PreviousInstallationPath = value
-            ),
-            ["ROBLOX_API"] = (
-                () => SirstrapConfiguration.RobloxApi.ToString(),
-                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.RobloxApi = v; }
-            ),
-            ["ROBLOX_CDN_URI_OVERRIDE"] = (
-                () => SirstrapConfiguration.RobloxCdnUriOverride,
-                value => SirstrapConfiguration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(value)
-            ),
-            ["ROBLOX_VERSION_OVERRIDE"] = (
-                () => SirstrapConfiguration.RobloxVersionOverride,
-                value => SirstrapConfiguration.RobloxVersionOverride = value
-            ),
-            ["TELEMETRY"] = (
-                () => SirstrapConfiguration.Telemetry.ToString(),
-                value => { if (bool.TryParse(value, out var v)) SirstrapConfiguration.Telemetry = v; }
-            ),
-            ["TRAY_MODE"] = (
-                () => SirstrapConfiguration.TrayMode.ToString(),
-                value => { if (Enum.TryParse<TrayMode>(value, true, out var v)) SirstrapConfiguration.TrayMode = v; }
-            )
-        };
 
         private static string GetSettingsFilePath()
         {
@@ -87,6 +36,63 @@
             return Path.Combine(settingsPath, "Sirstrap.ini");
         }
 
+        private static bool IsSectionHeader(string trimmedRow, out bool isSettingsSection)
+        {
+            isSettingsSection = false;
+
+            if (!trimmedRow.StartsWith('['))
+                return false;
+
+            isSettingsSection = trimmedRow.Equals(SettingsSectionHeader, StringComparison.InvariantCultureIgnoreCase);
+
+            return true;
+        }
+
+        private static bool TryParseRow(string trimmedRow, out string key, out string value)
+        {
+            key = string.Empty;
+            value = string.Empty;
+
+            if (!trimmedRow.Contains('='))
+                return false;
+
+            var parts = trimmedRow.Split('=', 2);
+
+            if (parts.Length != 2)
+                return false;
+
+            key = parts[0].Trim();
+            value = parts[1].Trim();
+
+            return !string.IsNullOrEmpty(key);
+        }
+
+        private static HashSet<string> ExtractExistingKeys(IEnumerable<string> rows)
+        {
+            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var inSettingsSection = false;
+
+            foreach (var row in rows)
+            {
+                var trimmedRow = row.Trim();
+
+                if (IsSectionHeader(trimmedRow, out var isSettingsSection))
+                {
+                    inSettingsSection = isSettingsSection;
+
+                    continue;
+                }
+
+                if (!inSettingsSection)
+                    continue;
+
+                if (TryParseRow(trimmedRow, out var key, out _))
+                    keys.Add(key);
+            }
+
+            return keys;
+        }
+
         public static void LoadSettings(string? settingsFilePath = null)
         {
             try
@@ -99,52 +105,39 @@
                     SaveSettings();
 
                 var rows = File.ReadAllLines(settingsFilePath);
-                var settingsSection = false;
-                var settingsDefinitions = GetSettingsDefinitions();
-                bool hasRobloxCdnUriOverride = rows
-                    .Select(row => row.Trim())
-                    .Any(row => row.StartsWith("ROBLOX_CDN_URI_OVERRIDE=", StringComparison.OrdinalIgnoreCase));
+                var settingsByKey = GetSettingsByKey();
+                var migrationsByKey = GetMigrationsByKey();
+                var existingKeys = ExtractExistingKeys(rows);
+
+                var inSettingsSection = false;
 
                 foreach (var row in rows)
                 {
                     var trimmedRow = row.Trim();
 
-                    if (trimmedRow.StartsWith('['))
+                    if (IsSectionHeader(trimmedRow, out var isSettingsSection))
                     {
-                        settingsSection = trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase);
+                        inSettingsSection = isSettingsSection;
 
                         continue;
                     }
 
-                    if (!settingsSection
-                        || !trimmedRow.Contains('='))
+                    if (!inSettingsSection
+                        || !TryParseRow(trimmedRow, out var key, out var value))
                         continue;
 
-                    var parts = trimmedRow.Split('=');
-
-                    if (parts.Length != 2)
-                        continue;
-
-                    var key = parts[0].Trim();
-                    var value = parts[1].Trim();
-
-                    if (settingsDefinitions.TryGetValue(key, out var definition))
+                    if (settingsByKey.TryGetValue(key, out var setting))
                     {
                         Log.Information("[{0}] Setting {1} to {2}...", nameof(LoadSettings), key, value);
 
-                        definition.Setter(value);
+                        setting.Write(value);
                     }
-                    else if (_legacySettingsKeys.Contains(key)
-                        && !hasRobloxCdnUriOverride)
+                    else if (migrationsByKey.TryGetValue(key, out var migration)
+                        && migration.ShouldMigrate(existingKeys))
                     {
-                        string normalized = RobloxCdnService.NormalizeCdnUriOverride(value);
+                        Log.Information("[{0}] Migrating {1} to {2}...", nameof(LoadSettings), key, migration.TargetKey);
 
-                        if (normalized.Equals(RobloxCdnService.DefaultBaseUri, StringComparison.OrdinalIgnoreCase))
-                            normalized = string.Empty;
-
-                        Log.Information("[{0}] Migrating {1} to ROBLOX_CDN_URI_OVERRIDE...", nameof(LoadSettings), key);
-
-                        SirstrapConfiguration.RobloxCdnUriOverride = normalized;
+                        migration.Apply(value);
                     }
                 }
             }
@@ -158,15 +151,8 @@
         {
             try
             {
-                SentrySdk.Metrics.EmitCounter("settings.AutoUpdate", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.AutoUpdate });
-                SentrySdk.Metrics.EmitCounter("settings.MultiInstance", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.MultiInstance });
-                SentrySdk.Metrics.EmitCounter("settings.Incognito", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.Incognito });
-                SentrySdk.Metrics.EmitCounter("settings.RobloxApi", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.RobloxApi });
-                SentrySdk.Metrics.EmitCounter("settings.TrayMode", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.TrayMode.ToString() });
-                SentrySdk.Metrics.EmitCounter("settings.ChannelName", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.ChannelName });
-                SentrySdk.Metrics.EmitCounter("settings.FontFamily", 1, new Dictionary<string, object> { ["value"] = SirstrapConfiguration.FontFamily });
-                SentrySdk.Metrics.EmitCounter("settings.RobloxCdnUriOverride", 1, new Dictionary<string, object> { ["value"] = string.IsNullOrEmpty(SirstrapConfiguration.RobloxCdnUriOverride) ? "Auto" : "Custom" });
-                SentrySdk.Metrics.EmitCounter("settings.RobloxVersionOverride", 1, new Dictionary<string, object> { ["value"] = string.IsNullOrEmpty(SirstrapConfiguration.RobloxVersionOverride) ? "None" : "Custom" });
+                foreach (var setting in SirstrapSettingsRegistry.Settings)
+                    setting.EmitMetric();
             }
             catch (Exception ex)
             {
@@ -182,49 +168,38 @@
 
                 Log.Information("[{0}] Saving settings (SettingsFilePath: {1})...", nameof(SaveSettings), settingsFilePath);
 
-                var settingsDefinitions = GetSettingsDefinitions();
+                var legacyKeys = GetLegacyKeys();
+                var settingsByKey = GetSettingsByKey();
 
                 if (!File.Exists(settingsFilePath))
                 {
-                    var directory = Path.GetDirectoryName(settingsFilePath);
-
-                    if (!string.IsNullOrWhiteSpace(directory)
-                        && !Directory.Exists(directory))
-                        Directory.CreateDirectory(directory);
-
-                    var content = new StringBuilder();
-
-                    content.AppendLine("[SETTINGS]");
-
-                    foreach (var setting in settingsDefinitions)
-                        content.AppendLine($"{setting.Key}={setting.Value.Getter()}");
-
-                    File.WriteAllText(settingsFilePath, content.ToString(), Encoding.UTF8);
+                    WriteFreshSettingsFile(settingsFilePath);
 
                     return;
                 }
 
                 var rows = File.ReadAllLines(settingsFilePath).ToList();
-                var settingsSection = false;
+                var inSettingsSection = false;
                 var settingsSectionIndex = -1;
-                var foundKeys = new HashSet<string>();
+                var foundKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 var i = 0;
+
                 while (i < rows.Count)
                 {
                     var trimmedRow = rows[i].Trim();
 
-                    if (trimmedRow.StartsWith('['))
+                    if (IsSectionHeader(trimmedRow, out var isSettingsSection))
                     {
-                        var wasSettingsSection = settingsSection;
+                        var wasSettingsSection = inSettingsSection;
 
-                        settingsSection = trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase);
+                        inSettingsSection = isSettingsSection;
 
-                        if (settingsSection)
+                        if (inSettingsSection)
                             settingsSectionIndex = i;
 
                         if (wasSettingsSection
-                            && !settingsSection)
+                            && !inSettingsSection)
                         {
                             var missingKeys = GetMissingKeys(foundKeys);
 
@@ -234,27 +209,19 @@
                         }
 
                         i++;
+
                         continue;
                     }
 
-                    if (!settingsSection
-                        || !trimmedRow.Contains('='))
+                    if (!inSettingsSection
+                        || !TryParseRow(trimmedRow, out var key, out _))
                     {
                         i++;
+
                         continue;
                     }
 
-                    var parts = trimmedRow.Split('=');
-
-                    if (parts.Length != 2)
-                    {
-                        i++;
-                        continue;
-                    }
-
-                    var key = parts[0].Trim();
-
-                    if (_legacySettingsKeys.Contains(key))
+                    if (legacyKeys.Contains(key))
                     {
                         rows.RemoveAt(i);
 
@@ -263,18 +230,18 @@
 
                     foundKeys.Add(key);
 
-                    if (settingsDefinitions.TryGetValue(key, out var definition))
-                        rows[i] = $"{key}={definition.Getter()}";
+                    if (settingsByKey.TryGetValue(key, out var setting))
+                        rows[i] = $"{key}={setting.Read()}";
 
                     i++;
                 }
 
                 if (settingsSectionIndex == -1)
                 {
-                    rows.Insert(0, "[SETTINGS]");
+                    rows.Insert(0, SettingsSectionHeader);
                     rows.InsertRange(1, GetMissingKeys(foundKeys));
                 }
-                else if (settingsSection)
+                else if (inSettingsSection)
                     rows.AddRange(GetMissingKeys(foundKeys));
 
                 File.WriteAllLines(settingsFilePath, rows);
@@ -283,6 +250,24 @@
             {
                 Log.Error(ex, nameof(SaveSettings));
             }
+        }
+
+        private static void WriteFreshSettingsFile(string settingsFilePath)
+        {
+            var directory = Path.GetDirectoryName(settingsFilePath);
+
+            if (!string.IsNullOrWhiteSpace(directory)
+                && !Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            var content = new StringBuilder();
+
+            content.AppendLine(SettingsSectionHeader);
+
+            foreach (var setting in SirstrapSettingsRegistry.Settings)
+                content.AppendLine($"{setting.Key}={setting.Read()}");
+
+            File.WriteAllText(settingsFilePath, content.ToString(), Encoding.UTF8);
         }
     }
 }
