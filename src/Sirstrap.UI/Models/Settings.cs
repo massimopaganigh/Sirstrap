@@ -80,6 +80,7 @@
             SirstrapConfiguration.MultiInstance = MultiInstance;
             SirstrapConfiguration.RobloxApi = RobloxApi;
             SirstrapConfiguration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(RobloxCdnUriOverride);
+            RobloxCdnUriOverride = SirstrapConfiguration.RobloxCdnUriOverride;
             SirstrapConfiguration.RobloxVersionOverride = RobloxVersionOverride;
             SirstrapConfiguration.Telemetry = Telemetry;
             SirstrapConfiguration.TrayMode = TrayMode;

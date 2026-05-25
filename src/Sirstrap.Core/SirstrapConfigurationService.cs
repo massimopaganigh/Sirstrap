@@ -103,7 +103,7 @@
                 var settingsDefinitions = GetSettingsDefinitions();
                 bool hasRobloxCdnUriOverride = rows
                     .Select(row => row.Trim())
-                    .Any(row => row.StartsWith("ROBLOX_CDN_URI_OVERRIDE", StringComparison.OrdinalIgnoreCase));
+                    .Any(row => row.StartsWith("ROBLOX_CDN_URI_OVERRIDE=", StringComparison.OrdinalIgnoreCase));
 
                 foreach (var row in rows)
                 {
