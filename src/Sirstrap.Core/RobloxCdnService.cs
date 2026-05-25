@@ -17,10 +17,12 @@ namespace Sirstrap.Core
         {
             ArgumentNullException.ThrowIfNull(httpClient);
 
+            ICdnTelemetry cdnTelemetry = Telemetry.Cdn;
             ICdnResolver resolver = new CdnResolver(
                 _normalizer,
                 _candidateProvider,
-                new HttpCdnProber(httpClient, _probeUriFactory, _probeTimeout));
+                new HttpCdnProber(httpClient, _probeUriFactory, cdnTelemetry, _probeTimeout),
+                cdnTelemetry);
 
             return resolver.ResolveAsync(configuration, cancellationToken);
         }

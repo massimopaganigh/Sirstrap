@@ -4,15 +4,18 @@ namespace Sirstrap.Core
     {
         private readonly HttpClient _httpClient;
         private readonly ICdnProbeUriFactory _probeUriFactory;
+        private readonly ICdnTelemetry _telemetry;
         private readonly TimeSpan _probeTimeout;
 
-        public HttpCdnProber(HttpClient httpClient, ICdnProbeUriFactory probeUriFactory, TimeSpan probeTimeout)
+        public HttpCdnProber(HttpClient httpClient, ICdnProbeUriFactory probeUriFactory, ICdnTelemetry telemetry, TimeSpan probeTimeout)
         {
             ArgumentNullException.ThrowIfNull(httpClient);
             ArgumentNullException.ThrowIfNull(probeUriFactory);
+            ArgumentNullException.ThrowIfNull(telemetry);
 
             _httpClient = httpClient;
             _probeUriFactory = probeUriFactory;
+            _telemetry = telemetry;
             _probeTimeout = probeTimeout;
         }
 
@@ -38,20 +41,32 @@ namespace Sirstrap.Core
                 {
                     Log.Warning("[*] Roblox CDN probe failed for {0}: HTTP {1}.", candidate.BaseUri, (int)response.StatusCode);
 
+                    _telemetry.RecordProbe(candidate.BaseUri, success: false, stopwatch.Elapsed);
+
                     return null;
                 }
+
+                _telemetry.RecordProbe(candidate.BaseUri, success: true, stopwatch.Elapsed);
 
                 return new CdnProbeResult(candidate, stopwatch.Elapsed);
             }
             catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
             {
+                stopwatch.Stop();
+
                 Log.Warning(ex, "[*] Roblox CDN probe timed out for {0}.", candidate.BaseUri);
+
+                _telemetry.RecordProbe(candidate.BaseUri, success: false, stopwatch.Elapsed);
 
                 return null;
             }
             catch (Exception ex)
             {
+                stopwatch.Stop();
+
                 Log.Warning(ex, "[*] Roblox CDN probe failed for {0}: {1}", candidate.BaseUri, ex.Message);
+
+                _telemetry.RecordProbe(candidate.BaseUri, success: false, stopwatch.Elapsed);
 
                 return null;
             }

@@ -75,6 +75,6 @@ namespace Sirstrap.Core
         }
 
         private static Action Metric(string name, Func<object> getValue)
-            => () => SentrySdk.Metrics.EmitCounter($"settings.{name}", 1, new Dictionary<string, object> { ["value"] = getValue() });
+            => () => Telemetry.Performance.RecordCounter($"settings.{name}", new Dictionary<string, object> { ["value"] = getValue() });
     }
 }

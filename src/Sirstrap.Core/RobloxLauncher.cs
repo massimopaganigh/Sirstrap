@@ -89,14 +89,21 @@ namespace Sirstrap.Core
 
         public static bool Launch(Configuration configuration)
         {
-            var span = SentrySdk.GetSpan()?.StartChild("roblox.launch", "Launch Roblox");
+            using ITelemetryScope scope = Telemetry.Performance.Measure("roblox.launch", new Dictionary<string, object>
+            {
+                ["multiInstance"] = SirstrapConfiguration.MultiInstance,
+                ["incognito"] = SirstrapConfiguration.Incognito
+            });
+
             var robloxPlayerBetaExePath = Path.Combine(PathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {
                 Log.Error("[!] Roblox executable not found at path: {0}.", robloxPlayerBetaExePath);
 
-                span?.Finish(SpanStatus.NotFound);
+                scope.MarkFailed();
+
+                Telemetry.Performance.RecordCounter("roblox.launch.outcome", new Dictionary<string, object> { ["value"] = "NotFound" });
 
                 return false;
             }
@@ -124,14 +131,16 @@ namespace Sirstrap.Core
                 {
                     Log.Error("[!] Process.Start returned null — Roblox failed to launch.");
 
-                    span?.Finish(SpanStatus.InternalError);
+                    scope.MarkFailed();
+
+                    Telemetry.Performance.RecordCounter("roblox.launch.outcome", new Dictionary<string, object> { ["value"] = "ProcessStartFailed" });
 
                     return false;
                 }
 
                 WaitForInputIdle(launcherProcess);
 
-                span?.Finish(SpanStatus.Ok);
+                Telemetry.Performance.RecordCounter("roblox.launch.outcome", new Dictionary<string, object> { ["value"] = "Success" });
 
                 if (singletonCaptured)
                     WaitForGameExit(existingPids);
@@ -142,7 +151,9 @@ namespace Sirstrap.Core
             {
                 Log.Error(ex, "[!] Unhandled exception during Roblox launch: {0}.", ex.Message);
 
-                span?.Finish(SpanStatus.InternalError);
+                scope.MarkFailed();
+
+                Telemetry.Performance.RecordCounter("roblox.launch.outcome", new Dictionary<string, object> { ["value"] = "Exception" });
 
                 return false;
             }

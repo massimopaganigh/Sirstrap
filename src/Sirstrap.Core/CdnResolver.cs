@@ -5,16 +5,19 @@ namespace Sirstrap.Core
         private readonly ICdnUriNormalizer _normalizer;
         private readonly ICdnCandidateProvider _candidateProvider;
         private readonly ICdnProber _prober;
+        private readonly ICdnTelemetry _telemetry;
 
-        public CdnResolver(ICdnUriNormalizer normalizer, ICdnCandidateProvider candidateProvider, ICdnProber prober)
+        public CdnResolver(ICdnUriNormalizer normalizer, ICdnCandidateProvider candidateProvider, ICdnProber prober, ICdnTelemetry telemetry)
         {
             ArgumentNullException.ThrowIfNull(normalizer);
             ArgumentNullException.ThrowIfNull(candidateProvider);
             ArgumentNullException.ThrowIfNull(prober);
+            ArgumentNullException.ThrowIfNull(telemetry);
 
             _normalizer = normalizer;
             _candidateProvider = candidateProvider;
             _prober = prober;
+            _telemetry = telemetry;
         }
 
         public async Task<string> ResolveAsync(Configuration configuration, CancellationToken cancellationToken = default)
@@ -31,6 +34,8 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] Roblox CDN URI override is set, using {0}.", normalizedOverride);
 
+                _telemetry.RecordResolved(normalizedOverride, CdnResolutionSource.Override);
+
                 return normalizedOverride;
             }
 
@@ -40,17 +45,21 @@ namespace Sirstrap.Core
 
                 SirstrapConfiguration.ResolvedRobloxCdnUri = RobloxCdnService.DefaultBaseUri;
 
+                _telemetry.RecordResolved(RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
+
                 return RobloxCdnService.DefaultBaseUri;
             }
 
-            string fastestBaseUri = await SelectFastestAsync(configuration, cancellationToken).ConfigureAwait(false);
+            (string baseUri, CdnResolutionSource source) = await SelectFastestAsync(configuration, cancellationToken).ConfigureAwait(false);
 
-            SirstrapConfiguration.ResolvedRobloxCdnUri = fastestBaseUri;
+            SirstrapConfiguration.ResolvedRobloxCdnUri = baseUri;
 
-            return fastestBaseUri;
+            _telemetry.RecordResolved(baseUri, source);
+
+            return baseUri;
         }
 
-        private async Task<string> SelectFastestAsync(Configuration configuration, CancellationToken cancellationToken)
+        private async Task<(string BaseUri, CdnResolutionSource Source)> SelectFastestAsync(Configuration configuration, CancellationToken cancellationToken)
         {
             Log.Information("[*] Roblox CDN URI override is empty, selecting the fastest Roblox CDN...");
 
@@ -70,12 +79,12 @@ namespace Sirstrap.Core
             {
                 Log.Warning("[*] Failed to probe Roblox CDNs, falling back to {0}.", RobloxCdnService.DefaultBaseUri);
 
-                return RobloxCdnService.DefaultBaseUri;
+                return (RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
             }
 
             Log.Information("[*] Selected Roblox CDN: {0} ({1} ms).", selected.Candidate.BaseUri, (int)selected.Elapsed.TotalMilliseconds);
 
-            return selected.Candidate.BaseUri;
+            return (selected.Candidate.BaseUri, CdnResolutionSource.Probe);
         }
     }
 }
