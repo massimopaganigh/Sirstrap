@@ -79,7 +79,7 @@ namespace Sirstrap.Core
             if (_locationCache.TryGetValue(ipAddress, out var cachedLocation))
                 return cachedLocation;
 
-            var span = SentrySdk.GetSpan()?.StartChild("server.location", $"Resolve server location for {ipAddress}");
+            using ITelemetryScope scope = Telemetry.Performance.Measure("server.location");
 
             try
             {
@@ -87,7 +87,9 @@ namespace Sirstrap.Core
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    span?.Finish(SpanStatus.NotFound);
+                    scope.MarkFailed();
+
+                    Telemetry.Performance.RecordCounter("server.location.outcome", new Dictionary<string, object> { ["value"] = "NotFound" });
 
                     return string.Empty;
                 }
@@ -98,7 +100,7 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] Server location for IP {0}: {1}", ipAddress, location);
 
-                span?.Finish(SpanStatus.Ok);
+                Telemetry.Performance.RecordCounter("server.location.outcome", new Dictionary<string, object> { ["value"] = "Success" });
 
                 return location;
             }
@@ -106,7 +108,9 @@ namespace Sirstrap.Core
             {
                 Log.Error(ex, "[!] Exception while getting server location for IP {0}: {1}", ipAddress, ex.Message);
 
-                span?.Finish(SpanStatus.InternalError);
+                scope.MarkFailed();
+
+                Telemetry.Performance.RecordCounter("server.location.outcome", new Dictionary<string, object> { ["value"] = "Exception" });
 
                 return string.Empty;
             }

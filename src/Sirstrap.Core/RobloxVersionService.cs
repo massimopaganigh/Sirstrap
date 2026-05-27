@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.Core
+namespace Sirstrap.Core
 {
     public class RobloxVersionService(HttpClient httpClient)
     {
@@ -85,16 +85,19 @@
 
         public async Task<string> GetLatestVersionAsync()
         {
-            var span = SentrySdk.GetSpan()?.StartChild("version.resolve", "Resolve Roblox version");
+            using ITelemetryScope scope = Telemetry.Performance.Measure("version.resolve");
+
             string version;
+            VersionResolutionSource source;
 
             if (!string.IsNullOrWhiteSpace(SirstrapConfiguration.RobloxVersionOverride))
             {
                 Log.Information("[*] Roblox version override is set, using Roblox version override to retrieve version...");
 
                 version = SirstrapConfiguration.RobloxVersionOverride;
+                source = VersionResolutionSource.Override;
 
-                Log.Information("[*] Using version: {0}.", version);
+                FinishVersionResolution(scope, version, source);
 
                 return version;
             }
@@ -104,6 +107,7 @@
                 Log.Information("[*] Roblox API is enabled, using Roblox API to retrieve version...");
 
                 version = await GetRobloxVersionAsync();
+                source = string.IsNullOrWhiteSpace(version) ? VersionResolutionSource.Failed : VersionResolutionSource.RobloxApi;
 
                 if (string.IsNullOrWhiteSpace(version))
                     Log.Error("[!] Failed to retrieve version.");
@@ -119,6 +123,7 @@
                     Log.Error("[!] Failed to retrieve version from SirHurt API, using Roblox API to retrieve version...");
 
                     version = await GetRobloxVersionAsync();
+                    source = string.IsNullOrWhiteSpace(version) ? VersionResolutionSource.Failed : VersionResolutionSource.RobloxApi;
 
                     if (string.IsNullOrEmpty(version))
                         Log.Error("[!] Failed to retrieve version.");
@@ -134,17 +139,37 @@
                         Log.Error("[!] Failed to retrieve version from Roblox API, using outdated SirHurt version...");
 
                         version = sirhurtVersion;
+                        source = VersionResolutionSource.SirHurtFallback;
                     }
+                    else
+                        source = VersionResolutionSource.RobloxApi;
                 }
                 else
+                {
                     version = sirhurtVersion;
+                    source = VersionResolutionSource.SirHurt;
+                }
             }
 
             Log.Information("[*] Using version: {0}.", version);
 
-            span?.Finish(string.IsNullOrEmpty(version) ? SpanStatus.NotFound : SpanStatus.Ok);
+            FinishVersionResolution(scope, version, source);
 
             return version;
+        }
+
+        private static void FinishVersionResolution(ITelemetryScope scope, string version, VersionResolutionSource source)
+        {
+            scope.SetTag("source", source.ToString());
+
+            if (string.IsNullOrEmpty(version))
+                scope.MarkFailed();
+
+            Telemetry.Performance.RecordCounter("version.resolve.outcome", new Dictionary<string, object>
+            {
+                ["source"] = source.ToString(),
+                ["success"] = !string.IsNullOrEmpty(version)
+            });
         }
 
 #pragma warning disable S1075 // URIs should not be hardcoded - These are external API endpoints

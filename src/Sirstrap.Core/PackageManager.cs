@@ -74,7 +74,7 @@ namespace Sirstrap.Core
         private readonly HttpClient _httpClient = httpClient;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        private async Task DownloadPackageAsync(Configuration configuration, string package, ZipArchive archive)
+        private async Task<int> DownloadPackageAsync(Configuration configuration, string package, ZipArchive archive)
         {
             try
             {
@@ -82,9 +82,13 @@ namespace Sirstrap.Core
 
                 byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, package));
 
+                int byteCount = packageBytes?.Length ?? 0;
+
                 await ExtractPackageBytesAsync(packageBytes, package, archive);
 
                 Log.Information("[*] The package has been downloaded successfully: {0}.", package);
+
+                return byteCount;
             }
             catch (Exception ex)
             {
@@ -170,28 +174,37 @@ namespace Sirstrap.Core
 
         public async Task Download4MacAsync(Configuration configuration)
         {
-            var span = SentrySdk.GetSpan()?.StartChild("packages.download", "Download Mac packages");
+            string archiveName = configuration.BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
+
+            using ITelemetryScope scope = Telemetry.Performance.Measure("packages.download.mac", new Dictionary<string, object>
+            {
+                ["archive"] = archiveName
+            });
 
             try
             {
-                string archiveName = configuration.BinaryType.Equals("MacPlayer", StringComparison.OrdinalIgnoreCase) ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
-
                 Log.Information("[*] Downloading package for Mac: {0}...", archiveName);
 
                 byte[]? archiveBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, archiveName));
+
+                int byteCount = archiveBytes?.Length ?? 0;
 
                 if (archiveBytes != null)
                     await File.WriteAllBytesAsync(configuration.GetOutputPath(), archiveBytes);
 
                 Log.Information("[*] The package has been downloaded successfully for Mac: {0}.", archiveName);
 
-                span?.Finish(SpanStatus.Ok);
+                Telemetry.Performance.RecordCounter("packages.download.mac.bytes", new Dictionary<string, object>
+                {
+                    ["bytes"] = byteCount,
+                    ["archive"] = archiveName
+                });
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] An error occurred while downloading the package for Mac.");
 
-                span?.Finish(SpanStatus.InternalError);
+                scope.MarkFailed();
 
                 throw new InvalidOperationException("An error occurred while downloading the package for Mac.", ex);
             }
@@ -199,7 +212,7 @@ namespace Sirstrap.Core
 
         public async Task Download4WindowsAsync(Configuration configuration)
         {
-            var span = SentrySdk.GetSpan()?.StartChild("packages.download", "Download Windows packages");
+            using ITelemetryScope scope = Telemetry.Performance.Measure("packages.download.windows");
 
             try
             {
@@ -208,7 +221,22 @@ namespace Sirstrap.Core
                 Manifest manifest = ManifestParser.Parse(await HttpClientExtension.GetStringAsync(_httpClient, UriBuilder.GetManifestUri(configuration)));
 
                 if (!manifest.IsValid)
+                {
+                    scope.MarkFailed();
+
+                    Telemetry.Performance.RecordCounter("packages.download.windows.manifest_invalid");
+
                     return;
+                }
+
+                int packageCount = manifest.Packages.Count;
+
+                scope.SetTag("packageCount", packageCount.ToString());
+
+                Telemetry.Performance.RecordCounter("packages.download.windows.manifest", new Dictionary<string, object>
+                {
+                    ["packageCount"] = packageCount
+                });
 
                 string outputPath = configuration.GetOutputPath();
 
@@ -219,6 +247,7 @@ namespace Sirstrap.Core
                 await ExtractPackageContentAsync(APP_SETTINGS_XML, "AppSettings.xml", archive);
 
                 SemaphoreSlim semaphore = new(Environment.ProcessorCount, Environment.ProcessorCount);
+                long totalBytes = 0;
 
                 IEnumerable<Task> downloadTasks = manifest.Packages.Select(async package =>
                 {
@@ -226,7 +255,9 @@ namespace Sirstrap.Core
 
                     try
                     {
-                        await DownloadPackageAsync(configuration, package, archive);
+                        int bytes = await DownloadPackageAsync(configuration, package, archive);
+
+                        Interlocked.Add(ref totalBytes, bytes);
                     }
                     finally
                     {
@@ -238,13 +269,17 @@ namespace Sirstrap.Core
 
                 Log.Information("[*] All packages have been downloaded successfully for Windows.");
 
-                span?.Finish(SpanStatus.Ok);
+                Telemetry.Performance.RecordCounter("packages.download.windows.bytes", new Dictionary<string, object>
+                {
+                    ["bytes"] = totalBytes,
+                    ["packageCount"] = packageCount
+                });
             }
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] An error occurred while downloading packages for Windows.");
 
-                span?.Finish(SpanStatus.InternalError);
+                scope.MarkFailed();
 
                 throw new InvalidOperationException("An error occurred while downloading packages for Windows.", ex);
             }
