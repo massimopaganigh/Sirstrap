@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="PeanutButter.INI" Version="3.0.418" />
+		<PackageReference Include="PeanutButter.INI" Version="3.0.427" />
 		<PackageReference Include="Sentry.Profiling" Version="6.6.0" />
 		<PackageReference Include="Sentry.Serilog" Version="6.5.0" />
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
