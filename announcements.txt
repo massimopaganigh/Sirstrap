@@ -1,1 +1,1 @@
-Fixed: [!] Error getting SirHurt version from API: "Response status code does not indicate success: 404 (Not Found)."
+Download speed improvements for Sirstrap v10.12.2.x
