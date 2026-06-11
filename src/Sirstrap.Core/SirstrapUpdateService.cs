@@ -319,7 +319,12 @@ exit
 
         public async Task UpdateAsync(SirstrapType sirstrapType, string[] args)
         {
-            var span = SentrySdk.GetSpan()?.StartChild("update.check", "Check for updates");
+            using ITelemetryScope scope = Telemetry.Performance.Measure("update.check", new Dictionary<string, object>
+            {
+                ["sirstrapType"] = sirstrapType.ToString()
+            });
+
+            UpdateOutcome outcome;
 
             try
             {
@@ -327,22 +332,38 @@ exit
                 {
                     Log.Information("[*] AutoUpdate is disabled. Skipping...");
 
-                    span?.Finish(SpanStatus.Ok);
-
-                    return;
+                    outcome = UpdateOutcome.Disabled;
                 }
+                else if (await IsUpToDateAsync(sirstrapType))
+                {
+                    outcome = UpdateOutcome.UpToDate;
+                }
+                else
+                {
+                    bool applied = await DownloadAndApplyUpdateAsync(sirstrapType, args);
 
-                if (!await IsUpToDateAsync(sirstrapType))
-                    await DownloadAndApplyUpdateAsync(sirstrapType, args);
+                    outcome = applied ? UpdateOutcome.Updated : UpdateOutcome.Failed;
 
-                span?.Finish(SpanStatus.Ok);
+                    if (!applied)
+                        scope.MarkFailed();
+                }
             }
             catch (Exception ex)
             {
                 Log.Error(ex, nameof(UpdateAsync));
 
-                span?.Finish(SpanStatus.InternalError);
+                scope.MarkFailed();
+
+                outcome = UpdateOutcome.Failed;
             }
+
+            scope.SetTag("outcome", outcome.ToString());
+
+            Telemetry.Performance.RecordCounter("update.check.outcome", new Dictionary<string, object>
+            {
+                ["outcome"] = outcome.ToString(),
+                ["sirstrapType"] = sirstrapType.ToString()
+            });
         }
     }
 }
