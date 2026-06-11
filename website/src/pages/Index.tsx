@@ -1,13 +1,33 @@
 import { useState, useEffect, useRef } from "react";
+import { Megaphone } from "lucide-react";
 import WavyBackground from "@/components/WavyBackground";
 import { useIsMobile } from "@/hooks/use-mobile";
 import iconCleaner from "../../../src/SirHurt.Cleaner.CLI/Assets/favicon.ico";
 import iconCli from "../../../src/Sirstrap.CLI/Assets/favicon.ico";
 import iconUi from "../../../src/Sirstrap.UI/Assets/favicon.ico";
+import iconKnee from "@/assets/kneesurgery.ico";
 
 const REPO = "https://github.com/massimopaganigh/Sirstrap";
+const MAIN_REPO = "massimopaganigh/Sirstrap";
+const ANNOUNCEMENT_URL = "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt";
 
-const products = [
+type ExternalDownload = { repo: string; asset?: string; assetPrefix?: string };
+
+type Product = {
+  name: string;
+  description: string;
+  asset: string;
+  variants: string[];
+  externalDownloads: ExternalDownload[];
+  recommended: boolean;
+  icon: string;
+  source: string;
+  accent: "blue" | "green" | "purple" | "red";
+  repo?: string;
+  downloadUrl?: string;
+};
+
+const products: Product[] = [
   {
     name: "SirHurt.Cleaner.CLI",
     description: "A complete cleanup utility that wipes Roblox, SirHurt, and Sirstrap from your filesystem and registry — built by exploiters, for exploiters.",
@@ -17,7 +37,7 @@ const products = [
     recommended: false,
     icon: iconCleaner,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/SirHurt.Cleaner.CLI",
-    accent: "blue" as const,
+    accent: "blue",
   },
   {
     name: "Sirstrap.CLI",
@@ -29,7 +49,7 @@ const products = [
     recommended: false,
     icon: iconCli,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.CLI",
-    accent: "green" as const,
+    accent: "green",
   },
   {
     name: "Sirstrap.UI",
@@ -41,7 +61,21 @@ const products = [
     recommended: true,
     icon: iconUi,
     source: "https://github.com/massimopaganigh/Sirstrap/tree/main/src/Sirstrap.UI",
-    accent: "purple" as const,
+    accent: "purple",
+  },
+  {
+    name: "KneeSurgery",
+    description:
+      "A DLL for building custom UIs for SirHurt — built by exploiters, for exploiters.",
+    asset: "KneeSurgery",
+    variants: [],
+    externalDownloads: [{ repo: "massimopaganigh/KneeSurgery", assetPrefix: "KneeSurgery_" }],
+    recommended: false,
+    icon: iconKnee,
+    source: "https://github.com/massimopaganigh/KneeSurgery",
+    accent: "red",
+    repo: "massimopaganigh/KneeSurgery",
+    downloadUrl: "https://github.com/massimopaganigh/KneeSurgery/releases/latest",
   },
 ];
 
@@ -49,18 +83,21 @@ const accentLine: Record<string, string> = {
   blue: "bg-glow-blue",
   green: "bg-glow-green",
   purple: "bg-glow-purple",
+  red: "bg-glow-red",
 };
 
 const accentText: Record<string, string> = {
   blue: "text-glow-blue",
   green: "text-glow-green",
   purple: "text-glow-purple",
+  red: "text-glow-red",
 };
 
 const accentBorder: Record<string, string> = {
   blue: "border-glow-blue/40 hover:border-glow-blue",
   green: "border-glow-green/40 hover:border-glow-green",
   purple: "border-glow-purple/40 hover:border-glow-purple",
+  red: "border-glow-red/40 hover:border-glow-red",
 };
 
 
@@ -126,6 +163,54 @@ const TypewriterSpan = ({ text, className, enabled }: { text: string; className?
       {displayed}{enabled && <span className="title-caret">▌</span>}
     </span>
   );
+};
+
+const useRapidEee = (count: number, enabled: boolean) => {
+  const [n, setN] = useState(0);
+
+  useEffect(() => {
+    setN(0);
+    if (!enabled) return;
+
+    let cancelled = false;
+    let t: ReturnType<typeof setTimeout>;
+
+    const wait = (ms: number) =>
+      new Promise<void>(resolve => {
+        t = setTimeout(resolve, ms);
+      });
+
+    const cycle = async () => {
+      await wait(5000);
+      while (!cancelled) {
+        for (let i = 1; i <= count; i++) {
+          if (cancelled) return;
+          setN(i);
+          await wait(30 + Math.random() * 25);
+        }
+        await wait(5000);
+        for (let i = count - 1; i >= 0; i--) {
+          if (cancelled) return;
+          setN(i);
+          await wait(25 + Math.random() * 25);
+        }
+        await wait(2500);
+      }
+    };
+    cycle();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [count, enabled]);
+
+  return 'e'.repeat(n);
+};
+
+const RapidEeeSpan = ({ className, enabled }: { className?: string; enabled: boolean }) => {
+  const eee = useRapidEee(15, enabled);
+  return <span className={className}>{eee}</span>;
 };
 
 const FadingTitle = ({ children }: { children: React.ReactNode }) => {
@@ -201,8 +286,27 @@ const badgeClass =
 const Index = () => {
   const isMobile = useIsMobile();
   const [active, setActive] = useState<number | null>(null);
-  const [version, setVersion] = useState<string | null>(null);
+  const [announcement, setAnnouncement] = useState<string | null>(null);
+  const [versions, setVersions] = useState<Record<string, string>>({});
   const [downloads, setDownloads] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(ANNOUNCEMENT_URL)
+      .then(response => response.ok ? response.text() : "")
+      .then(text => {
+        const trimmed = text.trim();
+        if (!cancelled && trimmed) {
+          setAnnouncement(trimmed);
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const fetchAllReleases = async (repo: string) => {
@@ -219,15 +323,28 @@ const Index = () => {
       return all;
     };
 
+    const productRepos = [...new Set(products.map(p => p.repo ?? MAIN_REPO))];
     const externalRepos = [...new Set(products.flatMap(p => p.externalDownloads.map(e => e.repo)))];
 
     Promise.all([
-      fetch("https://api.github.com/repos/massimopaganigh/Sirstrap/releases/latest").then(r => r.json()),
-      fetchAllReleases("massimopaganigh/Sirstrap"),
+      Promise.all(
+        productRepos.map(repo =>
+          fetch(`https://api.github.com/repos/${repo}/releases/latest`)
+            .then(r => r.json())
+            .then(j => [repo, j.tag_name as string | undefined] as const)
+            .catch(() => [repo, undefined] as const)
+        )
+      ),
+      fetchAllReleases(MAIN_REPO),
       ...externalRepos.map(repo => fetchAllReleases(repo).then(releases => ({ repo, releases }))),
     ])
-      .then(([latest, all, ...externalResults]) => {
-        if (latest.tag_name) setVersion(latest.tag_name);
+      .then(([versionEntries, all, ...externalResults]) => {
+        const versionMap: Record<string, string> = {};
+        for (const [repo, tag] of versionEntries) {
+          if (tag) versionMap[repo] = tag;
+        }
+        setVersions(versionMap);
+
         const raw: Record<string, number> = {};
         for (const release of all as { assets?: { name: string; download_count: number }[] }[]) {
           if (!Array.isArray(release.assets)) continue;
@@ -256,9 +373,18 @@ const Index = () => {
             }
           }
           for (const ext of p.externalDownloads) {
-            const count = externalCounts[ext.repo]?.[ext.asset] ?? 0;
-            if (count > 0) {
-              map[p.asset] = (map[p.asset] ?? 0) + count;
+            const repoAssets = externalCounts[ext.repo] ?? {};
+            if (ext.assetPrefix) {
+              for (const [name, count] of Object.entries(repoAssets)) {
+                if (name.startsWith(ext.assetPrefix)) {
+                  map[p.asset] = (map[p.asset] ?? 0) + count;
+                }
+              }
+            } else if (ext.asset) {
+              const count = repoAssets[ext.asset] ?? 0;
+              if (count > 0) {
+                map[p.asset] = (map[p.asset] ?? 0) + count;
+              }
             }
           }
         }
@@ -283,7 +409,20 @@ const Index = () => {
   const handleClick = (i: number) => { if (isMobile) setActive(prev => prev === i ? null : i); };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden">
+    <div className="relative flex flex-col md:flex-row h-screen w-screen overflow-hidden">
+      {announcement && (
+        <div
+          aria-label="Announcement"
+          aria-live="polite"
+          role="status"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center md:left-1/2 md:right-auto md:w-[42rem] md:max-w-[calc(100vw-2rem)] md:-translate-x-1/2"
+        >
+          <div className="flex h-8 w-full min-w-0 items-center justify-center gap-2 overflow-hidden rounded-t-[5px] rounded-b-none border border-b-0 border-glow-purple/40 bg-background/75 px-3 font-body text-[0.75rem] leading-none text-muted-foreground shadow-[0_10px_30px_rgba(0,0,0,0.28)] backdrop-blur-md">
+            <Megaphone className="h-3.5 w-3.5 shrink-0 text-glow-purple" aria-hidden="true" />
+            <span className="truncate">{announcement}</span>
+          </div>
+        </div>
+      )}
       {products.map((p, i) => (
         <section
           key={p.name}
@@ -330,15 +469,23 @@ const Index = () => {
               <div className="grid gap-x-3" style={{ gridTemplateColumns: 'auto minmax(0, 1fr)' }}>
                 <img src={p.icon} alt="" className="h-8 w-8 lg:h-9 lg:w-9 shrink-0 row-span-2 self-center" />
                 <FadingTitle>
-                  {p.accent === 'purple' ? (
+                  {p.accent === 'purple' && p.name.endsWith('.UI') ? (
                     <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
-                      {p.name.replace('.UI', '')}
+                      {p.name.slice(0, -3)}
                       <span className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${active === i ? 'title-shimmer' : accentText[p.accent]}`}>.UI</span>
+                    </h2>
+                  ) : p.name.endsWith('.CLI') ? (
+                    <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
+                      {p.name.slice(0, -4)}
+                      <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
+                    </h2>
+                  ) : p.name === 'KneeSurgery' ? (
+                    <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
+                      Knee<RapidEeeSpan className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />Surgery
                     </h2>
                   ) : (
                     <h2 className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl whitespace-nowrap ${accentText[p.accent]}`}>
-                      {p.name.replace('.CLI', '')}
-                      <TypewriterSpan text=".CLI" className={`font-display text-2xl font-extrabold tracking-[-0.035em] lg:text-3xl ${accentText[p.accent]}`} enabled={active === i} />
+                      {p.name}
                     </h2>
                   )}
                 </FadingTitle>
@@ -367,9 +514,9 @@ const Index = () => {
                     {downloads[p.asset].toLocaleString()}
                   </span>
                 )}
-                {version && (
+                {versions[p.repo ?? MAIN_REPO] && (
                   <span className={badgeClass}>
-                    {version}
+                    {versions[p.repo ?? MAIN_REPO]}
                   </span>
                 )}
                 {mostPopularAsset === p.asset && (
@@ -405,7 +552,7 @@ const Index = () => {
             }}
           >
             <a
-              href={`${REPO}/releases/latest/download/${p.asset}`}
+              href={p.downloadUrl ?? `${REPO}/releases/latest/download/${p.asset}`}
               target="_blank"
               rel="noopener noreferrer"
               className={`inline-flex items-center gap-2 border px-6 py-3 font-body text-[0.82rem] font-semibold tracking-[0.03em] rounded-[5px] transition-all duration-300 whitespace-nowrap ${accentBorder[p.accent]} text-foreground`}

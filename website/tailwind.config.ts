@@ -65,6 +65,7 @@ export default {
           green: "hsl(var(--glow-green))",
           purple: "hsl(var(--glow-purple))",
           blue: "hsl(var(--glow-blue))",
+          red: "hsl(var(--glow-red))",
         },
       },
       borderRadius: {
