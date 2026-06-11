@@ -5,13 +5,13 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="PeanutButter.INI" Version="3.0.418" />
-		<PackageReference Include="Sentry.Profiling" Version="6.5.0" />
-		<PackageReference Include="Sentry.Serilog" Version="6.5.0" />
+		<PackageReference Include="PeanutButter.INI" Version="3.0.427" />
+		<PackageReference Include="Sentry.Profiling" Version="6.6.0" />
+		<PackageReference Include="Sentry.Serilog" Version="6.6.0" />
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.25.0.139117">
+		<PackageReference Include="SonarAnalyzer.CSharp" Version="10.27.0.140913">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

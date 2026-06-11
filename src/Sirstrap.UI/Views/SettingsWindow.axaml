@@ -176,7 +176,7 @@
                     Margin="0,5,5,0"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Text="Roblox CDN URI:" />
+                    Text="Roblox CDN URI override:" />
                 <TextBox
                     Grid.Row="6"
                     Grid.Column="1"
@@ -185,7 +185,7 @@
                     BorderThickness="0"
                     CornerRadius="999"
                     DataContext="{Binding Settings}"
-                    Text="{Binding RobloxCdnUri}" />
+                    Text="{Binding RobloxCdnUriOverride}" />
                 <TextBlock
                     Grid.Row="7"
                     Grid.Column="0"

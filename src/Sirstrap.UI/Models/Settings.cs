@@ -24,8 +24,7 @@
         private bool _robloxApi = false;
 
         [ObservableProperty]
-        [SuppressMessage("SonarAnalyzer.CSharp", "S1075", Justification = "Sybau")]
-        private string _robloxCdnUri = "https://setup.rbxcdn.com";
+        private string _robloxCdnUriOverride = string.Empty;
 
         [ObservableProperty]
         private string _robloxVersionOverride = string.Empty;
@@ -53,7 +52,7 @@
             InstallationPath = SirstrapConfiguration.InstallationPath;
             MultiInstance = SirstrapConfiguration.MultiInstance;
             RobloxApi = SirstrapConfiguration.RobloxApi;
-            RobloxCdnUri = SirstrapConfiguration.RobloxCdnUri;
+            RobloxCdnUriOverride = SirstrapConfiguration.RobloxCdnUriOverride;
             RobloxVersionOverride = SirstrapConfiguration.RobloxVersionOverride;
             RunSirHurtEnabled = File.Exists(Path.Combine(SirstrapConfiguration.SirHurtPath, "bootstrapper.exe"));
             SirHurtPath = SirstrapConfiguration.SirHurtPath;
@@ -80,7 +79,8 @@
             SirstrapConfiguration.InstallationPath = InstallationPath;
             SirstrapConfiguration.MultiInstance = MultiInstance;
             SirstrapConfiguration.RobloxApi = RobloxApi;
-            SirstrapConfiguration.RobloxCdnUri = RobloxCdnUri;
+            SirstrapConfiguration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(RobloxCdnUriOverride);
+            RobloxCdnUriOverride = SirstrapConfiguration.RobloxCdnUriOverride;
             SirstrapConfiguration.RobloxVersionOverride = RobloxVersionOverride;
             SirstrapConfiguration.Telemetry = Telemetry;
             SirstrapConfiguration.TrayMode = TrayMode;
