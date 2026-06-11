@@ -50,7 +50,7 @@ namespace Sirstrap.Core
 
                 SentrySdk.ConfigureScope(scope => scope.Transaction = transaction);
 
-                return new SentryTransactionScope(transaction);
+                return new SentrySpanScope(transaction);
             }
             catch (Exception ex)
             {
@@ -102,34 +102,5 @@ namespace Sirstrap.Core
             }
         }
 
-        private sealed class SentryTransactionScope : ITelemetryScope
-        {
-            private readonly ITransactionTracer _transaction;
-            private bool _failed;
-            private bool _disposed;
-
-            public SentryTransactionScope(ITransactionTracer transaction) => _transaction = transaction;
-
-            public void MarkFailed() => _failed = true;
-
-            public void SetTag(string key, string value) => _transaction.SetTag(key, value);
-
-            public void Dispose()
-            {
-                if (_disposed)
-                    return;
-
-                _disposed = true;
-
-                try
-                {
-                    _transaction.Finish(_failed ? SpanStatus.InternalError : SpanStatus.Ok);
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning(ex, "[*] Failed to finish telemetry transaction.");
-                }
-            }
-        }
     }
 }

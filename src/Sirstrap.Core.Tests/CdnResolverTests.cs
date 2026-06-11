@@ -19,13 +19,17 @@ namespace Sirstrap.Core.Tests
 
             public FakeProber(Dictionary<string, TimeSpan?> results) => _results = results;
 
-            public Task<CdnProbeResult?> ProbeAsync(CdnCandidate candidate, Configuration configuration, CancellationToken cancellationToken)
+            public async Task<CdnProbeResult?> ProbeAsync(CdnCandidate candidate, Configuration configuration, CancellationToken cancellationToken)
             {
                 if (_results.TryGetValue(candidate.BaseUri, out var elapsed)
                     && elapsed.HasValue)
-                    return Task.FromResult<CdnProbeResult?>(new CdnProbeResult(candidate, elapsed.Value));
+                {
+                    await Task.Delay(elapsed.Value, cancellationToken);
 
-                return Task.FromResult<CdnProbeResult?>(null);
+                    return new CdnProbeResult(candidate, elapsed.Value);
+                }
+
+                return null;
             }
         }
 
@@ -124,6 +128,47 @@ namespace Sirstrap.Core.Tests
                 Assert.Equal(RobloxCdnService.DefaultBaseUri, resolved);
                 Assert.Single(telemetry.Records);
                 Assert.Equal((RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback), telemetry.Records[0]);
+            }
+            finally
+            {
+                SirstrapConfiguration.RobloxCdnUriOverride = originalOverride;
+            }
+        }
+
+        [Fact]
+        public async Task ResolveAsync_ReturnsFirstSuccessfulProbe_WithoutWaitingForSlowProbes()
+        {
+            string originalOverride = SirstrapConfiguration.RobloxCdnUriOverride;
+
+            try
+            {
+                SirstrapConfiguration.RobloxCdnUriOverride = string.Empty;
+
+                IReadOnlyList<CdnCandidate> candidates =
+                [
+                    new CdnCandidate("https://hanging.example.com", 0),
+                    new CdnCandidate("https://fast.example.com", 2)
+                ];
+                Dictionary<string, TimeSpan?> probeResults = new()
+                {
+                    ["https://hanging.example.com"] = TimeSpan.FromSeconds(30),
+                    ["https://fast.example.com"] = TimeSpan.FromMilliseconds(50)
+                };
+
+                CdnResolver resolver = new(
+                    new CdnUriNormalizer(),
+                    new StaticCandidateProvider(candidates),
+                    new FakeProber(probeResults),
+                    new RecordingTelemetry());
+
+                var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+                string resolved = await resolver.ResolveAsync(NewConfiguration(), TestContext.Current.CancellationToken);
+
+                stopwatch.Stop();
+
+                Assert.Equal("https://fast.example.com", resolved);
+                Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(10), $"Resolution took {stopwatch.Elapsed} instead of returning at the first successful probe.");
             }
             finally
             {

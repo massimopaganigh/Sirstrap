@@ -76,6 +76,29 @@ namespace Sirstrap.Core.Tests
         }
 
         [Fact]
+        public void LoadSettings_CreatesSettingsFile_WhenCustomPathDoesNotExist()
+        {
+            string settingsFilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.ini");
+
+            try
+            {
+                SirstrapConfigurationService.LoadSettings(settingsFilePath);
+
+                Assert.True(File.Exists(settingsFilePath));
+
+                string savedSettings = File.ReadAllText(settingsFilePath);
+
+                Assert.Contains("[SETTINGS]", savedSettings);
+                Assert.Contains("ROBLOX_CDN_URI_OVERRIDE=", savedSettings);
+            }
+            finally
+            {
+                if (File.Exists(settingsFilePath))
+                    File.Delete(settingsFilePath);
+            }
+        }
+
+        [Fact]
         public void SaveSettings_RemovesLegacyCdnUriKeys_AndWritesOverrideKey()
         {
             string settingsFilePath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.ini");

@@ -80,11 +80,12 @@ namespace Sirstrap.Core
             {
                 Log.Information("[*] Downloading package: {0}...", package);
 
-                byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, package));
+                byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, package))
+                    ?? throw new InvalidOperationException($"No bytes were downloaded for the package: {package}.");
 
-                int byteCount = packageBytes?.Length ?? 0;
+                int byteCount = packageBytes.Length;
 
-                await ExtractPackageBytesAsync(packageBytes, package, archive);
+                await ExtractPackageBytesAsync(packageBytes, package, archive, GetEntryCompressionLevel(configuration));
 
                 Log.Information("[*] The package has been downloaded successfully: {0}.", package);
 
@@ -98,11 +99,8 @@ namespace Sirstrap.Core
             }
         }
 
-        private async Task ExtractPackageBytesAsync(byte[]? packageBytes, string package, ZipArchive archive)
+        private async Task ExtractPackageBytesAsync(byte[] packageBytes, string package, ZipArchive archive, CompressionLevel compressionLevel)
         {
-            if (packageBytes == null)
-                return;
-
             Dictionary<string, string> roots = GetRoots(package.AsSpan());
 
             if (roots.TryGetValue(package, out string? value))
@@ -114,19 +112,21 @@ namespace Sirstrap.Core
 
                 foreach (ZipArchiveEntry entry in entries)
                 {
+                    string entryPath = $"{value}{entry.FullName.Replace('\\', '/')}";
+
+                    // Inflate outside the semaphore so packages decompress in parallel;
+                    // the lock only guards writes to the shared output archive.
+                    byte[] entryBytes = await ReadEntryBytesAsync(entry);
+
                     await _semaphore.WaitAsync();
 
                     try
                     {
-                        string entryPath = $"{value}{entry.FullName.Replace('\\', '/')}";
-
-                        await using Stream sourceStream = await entry.OpenAsync();
-
-                        ZipArchiveEntry targetEntry = archive.CreateEntry(entryPath, CompressionLevel.Fastest);
+                        ZipArchiveEntry targetEntry = archive.CreateEntry(entryPath, compressionLevel);
 
                         await using Stream targetStream = await targetEntry.OpenAsync();
 
-                        await sourceStream.CopyToAsync(targetStream);
+                        await targetStream.WriteAsync(entryBytes);
                     }
                     finally
                     {
@@ -140,7 +140,7 @@ namespace Sirstrap.Core
 
                 try
                 {
-                    ZipArchiveEntry entry = archive.CreateEntry(package, CompressionLevel.Fastest);
+                    ZipArchiveEntry entry = archive.CreateEntry(package, compressionLevel);
 
                     await using Stream entryStream = await entry.OpenAsync();
 
@@ -152,6 +152,25 @@ namespace Sirstrap.Core
                 }
             }
         }
+
+        private static async Task<byte[]> ReadEntryBytesAsync(ZipArchiveEntry entry)
+        {
+            byte[] entryBytes = new byte[checked((int)entry.Length)];
+
+            await using Stream sourceStream = await entry.OpenAsync();
+
+            await sourceStream.ReadExactlyAsync(entryBytes);
+
+            return entryBytes;
+        }
+
+        // The Windows Player archive is extracted and deleted right away by Installer.Install,
+        // so compressing it only burns CPU under the archive lock; other binaries keep the
+        // archive as the final artifact and stay compressed.
+        private static CompressionLevel GetEntryCompressionLevel(Configuration configuration)
+            => configuration.BinaryType.Equals("WindowsPlayer", StringComparison.OrdinalIgnoreCase)
+                ? CompressionLevel.NoCompression
+                : CompressionLevel.Fastest;
 
         private static async Task ExtractPackageContentAsync(string content, string package, ZipArchive archive)
         {
@@ -185,12 +204,12 @@ namespace Sirstrap.Core
             {
                 Log.Information("[*] Downloading package for Mac: {0}...", archiveName);
 
-                byte[]? archiveBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, archiveName));
+                byte[]? archiveBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, archiveName))
+                    ?? throw new InvalidOperationException($"No bytes were downloaded for the package for Mac: {archiveName}.");
 
-                int byteCount = archiveBytes?.Length ?? 0;
+                int byteCount = archiveBytes.Length;
 
-                if (archiveBytes != null)
-                    await File.WriteAllBytesAsync(configuration.GetOutputPath(), archiveBytes);
+                await File.WriteAllBytesAsync(configuration.GetOutputPath(), archiveBytes);
 
                 Log.Information("[*] The package has been downloaded successfully for Mac: {0}.", archiveName);
 
@@ -246,7 +265,10 @@ namespace Sirstrap.Core
 
                 await ExtractPackageContentAsync(APP_SETTINGS_XML, "AppSettings.xml", archive);
 
-                SemaphoreSlim semaphore = new(Environment.ProcessorCount, Environment.ProcessorCount);
+                // Downloads are network-bound, so don't let low core counts cap the parallelism.
+                int downloadConcurrency = Math.Max(Environment.ProcessorCount, 8);
+
+                using SemaphoreSlim semaphore = new(downloadConcurrency, downloadConcurrency);
                 long totalBytes = 0;
 
                 IEnumerable<Task> downloadTasks = manifest.Packages.Select(async package =>

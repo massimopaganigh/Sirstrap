@@ -65,26 +65,31 @@ namespace Sirstrap.Core
 
             IReadOnlyList<CdnCandidate> candidates = _candidateProvider.GetCandidates();
 
-            Task<CdnProbeResult?>[] probeTasks = candidates
+            // Probes start simultaneously, so the first successful one is the fastest:
+            // returning immediately avoids waiting up to the probe timeout for slow or dead CDNs.
+            List<Task<CdnProbeResult?>> pendingProbes = candidates
                 .Select(candidate => _prober.ProbeAsync(candidate, configuration, cancellationToken))
-                .ToArray();
+                .ToList();
 
-            CdnProbeResult? selected = (await Task.WhenAll(probeTasks).ConfigureAwait(false))
-                .OfType<CdnProbeResult>()
-                .OrderBy(result => result.Elapsed)
-                .ThenBy(result => result.Candidate.FallbackPriority)
-                .FirstOrDefault();
-
-            if (selected == null)
+            while (pendingProbes.Count > 0)
             {
-                Log.Warning("[*] Failed to probe Roblox CDNs, falling back to {0}.", RobloxCdnService.DefaultBaseUri);
+                Task<CdnProbeResult?> completedProbe = await Task.WhenAny(pendingProbes).ConfigureAwait(false);
 
-                return (RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
+                pendingProbes.Remove(completedProbe);
+
+                CdnProbeResult? selected = await completedProbe.ConfigureAwait(false);
+
+                if (selected != null)
+                {
+                    Log.Information("[*] Selected Roblox CDN: {0} ({1} ms).", selected.Candidate.BaseUri, (int)selected.Elapsed.TotalMilliseconds);
+
+                    return (selected.Candidate.BaseUri, CdnResolutionSource.Probe);
+                }
             }
 
-            Log.Information("[*] Selected Roblox CDN: {0} ({1} ms).", selected.Candidate.BaseUri, (int)selected.Elapsed.TotalMilliseconds);
+            Log.Warning("[*] Failed to probe Roblox CDNs, falling back to {0}.", RobloxCdnService.DefaultBaseUri);
 
-            return (selected.Candidate.BaseUri, CdnResolutionSource.Probe);
+            return (RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
         }
     }
 }

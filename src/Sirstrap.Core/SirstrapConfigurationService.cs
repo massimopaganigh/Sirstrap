@@ -102,7 +102,7 @@ namespace Sirstrap.Core
                 Log.Information("[{0}] Loading settings (SettingsFilePath: {1})...", nameof(LoadSettings), settingsFilePath);
 
                 if (!File.Exists(settingsFilePath))
-                    SaveSettings();
+                    SaveSettings(settingsFilePath);
 
                 var rows = File.ReadAllLines(settingsFilePath);
                 var settingsByKey = GetSettingsByKey();
