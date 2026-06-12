@@ -1,1 +1,1 @@
-Download speed improvements for Sirstrap v10.12.2.x
+Fixed: [!] An error occurred while downloading the package - when a file is missing from the fastest CDN, Sirstrap now falls back to the next fastest one

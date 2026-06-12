@@ -9,6 +9,13 @@
                 {
                     return await httpClient.GetByteArrayAsync(uri);
                 }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    // A 404 is deterministic: the file is missing from this host, so retrying is pointless.
+                    Log.Warning(ex, "[*] Byte array request from {0} failed: HTTP 404.", uri);
+
+                    return null;
+                }
                 catch (Exception ex)
                 {
                     if (attempt < attempts)
@@ -34,6 +41,12 @@
                 try
                 {
                     return await httpClient.GetStringAsync(uri);
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Log.Warning(ex, "[*] String request from {0} failed: HTTP 404.", uri);
+
+                    return null;
                 }
                 catch (Exception ex)
                 {
