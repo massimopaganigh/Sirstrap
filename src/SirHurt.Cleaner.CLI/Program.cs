@@ -1,61 +1,114 @@
-﻿using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using System.Text;
 
 namespace SirHurt.Cleaner.CLI
 {
     /// <summary>
-    /// Entry point for the SirHurt cleanup utility.
+    /// Entry point and composition root for the SirHurt cleanup utility.
     /// Removes Roblox and SirHurt-related folders and registry keys.
     /// </summary>
-    public static class Program
+    internal static class Program
     {
-        /// <summary>
-        /// Main application entry point. Initializes logging, displays a banner,
-        /// and executes the system cleanup process.
-        /// </summary>
-        /// <returns>Asynchronous task</returns>
-        static async Task Main()
+        private static async Task Main()
         {
-            Log.Logger = new LoggerConfiguration().MinimumLevel.Information().WriteTo.Console().CreateLogger();
+            TryEnableUtf8Output();
+
+            var statusLine = new ConsoleStatusLine();
+
+            Log.Logger = CreateLogger(statusLine);
 
             try
             {
                 Log.Information(@"
-   ▄████████  ▄█     ▄████████    ▄█    █▄    ███    █▄     ▄████████     ███      ▄████████  ▄█          ▄████████    ▄████████ ███▄▄▄▄      ▄████████    ▄████████ 
-  ███    ███ ███    ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄ ███    ███ ███         ███    ███   ███    ███ ███▀▀▀██▄   ███    ███   ███    ███ 
-  ███    █▀  ███▌   ███    ███   ███    ███   ███    ███   ███    ███    ▀███▀▀██ ███    █▀  ███         ███    █▀    ███    ███ ███   ███   ███    █▀    ███    ███ 
-  ███        ███▌  ▄███▄▄▄▄██▀  ▄███▄▄▄▄███▄▄ ███    ███  ▄███▄▄▄▄██▀     ███   ▀ ███        ███        ▄███▄▄▄       ███    ███ ███   ███  ▄███▄▄▄      ▄███▄▄▄▄██▀ 
-▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀▀███▀▀▀▀███▀  ███    ███ ▀▀███▀▀▀▀▀       ███     ███        ███       ▀▀███▀▀▀     ▀███████████ ███   ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   
-         ███ ███  ▀███████████   ███    ███   ███    ███ ▀███████████     ███     ███    █▄  ███         ███    █▄    ███    ███ ███   ███   ███    █▄  ▀███████████ 
-   ▄█    ███ ███    ███    ███   ███    ███   ███    ███   ███    ███     ███     ███    ███ ███▌    ▄   ███    ███   ███    ███ ███   ███   ███    ███   ███    ███ 
- ▄████████▀  █▀     ███    ███   ███    █▀    ████████▀    ███    ███    ▄████▀   ████████▀  █████▄▄██   ██████████   ███    █▀   ▀█   █▀    ██████████   ███    ███ 
-                    ███    ███                             ███    ███                        ▀                                                            ███    ███ 
+   ▄████████  ▄█     ▄████████    ▄█    █▄    ███    █▄     ▄████████     ███      ▄████████  ▄█          ▄████████    ▄████████ ███▄▄▄▄      ▄████████    ▄████████
+  ███    ███ ███    ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄ ███    ███ ███         ███    ███   ███    ███ ███▀▀▀██▄   ███    ███   ███    ███
+  ███    █▀  ███▌   ███    ███   ███    ███   ███    ███   ███    ███    ▀███▀▀██ ███    █▀  ███         ███    █▀    ███    ███ ███   ███   ███    █▀    ███    ███
+  ███        ███▌  ▄███▄▄▄▄██▀  ▄███▄▄▄▄███▄▄ ███    ███  ▄███▄▄▄▄██▀     ███   ▀ ███        ███        ▄███▄▄▄       ███    ███ ███   ███  ▄███▄▄▄      ▄███▄▄▄▄██▀
+▀███████████ ███▌ ▀▀███▀▀▀▀▀   ▀▀███▀▀▀▀███▀  ███    ███ ▀▀███▀▀▀▀▀       ███     ███        ███       ▀▀███▀▀▀     ▀███████████ ███   ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀
+         ███ ███  ▀███████████   ███    ███   ███    ███ ▀███████████     ███     ███    █▄  ███         ███    █▄    ███    ███ ███   ███   ███    █▄  ▀███████████
+   ▄█    ███ ███    ███    ███   ███    ███   ███    ███   ███    ███     ███     ███    ███ ███▌    ▄   ███    ███   ███    ███ ███   ███   ███    ███   ███    ███
+ ▄████████▀  █▀     ███    ███   ███    █▀    ████████▀    ███    ███    ▄████▀   ████████▀  █████▄▄██   ██████████   ███    █▀   ▀█   █▀    ██████████   ███    ███
+                    ███    ███                             ███    ███                        ▀                                                            ███    ███
 ");
 
-                Log.Information("Starting cleanup program...");
+                Log.Information("[*] SirHurt Cleaner starting up");
 
-                // Ask the user if they want to clean temp folders
-                var config = new CleanerConfig();
-                Console.Write("Would you like to clean temporary folders? (Y/N, default: Y): ");
-                var response = Console.ReadLine();
+                IUserInteraction userInteraction = new ConsoleUserInteraction(statusLine);
 
-                config.CleanTempFolders = response == null ||
-                                         response.Trim().Equals("", StringComparison.OrdinalIgnoreCase) ||
-                                         response.Trim().Equals("y", StringComparison.OrdinalIgnoreCase) ||
-                                         response.Trim().Equals("yes", StringComparison.OrdinalIgnoreCase);
+                var config = new CleanerConfig
+                {
+                    CleanTempFolders = userInteraction.Confirm("Would you like to clean temporary folders?", defaultAnswer: true)
+                };
 
-                await SystemCleaner.RunCleanupAsync(config).ConfigureAwait(false);
+                BuildOrchestrator(config, userInteraction, statusLine).Run();
 
-                Log.Information("Press any key to exit...");
-                Console.ReadKey();
+                if (!Console.IsInputRedirected)
+                {
+                    Log.Information("[*] Press any key to exit...");
+                    Console.ReadKey(intercept: true);
+                }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "An error occurred in the main program");
+                Log.Error(ex, "[!] Unhandled error — cleanup aborted");
+                Environment.ExitCode = 1;
             }
             finally
             {
+                statusLine.Clear();
                 await Log.CloseAndFlushAsync();
             }
+        }
+
+        private static void TryEnableUtf8Output()
+        {
+            try
+            {
+                Console.OutputEncoding = Encoding.UTF8;
+            }
+            catch (Exception)
+            {
+                // Emoji rendering degrades gracefully when the encoding cannot be changed.
+            }
+        }
+
+        private static ILogger CreateLogger(IStatusLine statusLine)
+        {
+            var consoleLogger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}", theme: AnsiConsoleTheme.Code)
+                .CreateLogger();
+
+            return new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Sink(new StatusLinePreservingSink(consoleLogger, statusLine))
+                .CreateLogger();
+        }
+
+        private static CleanupOrchestrator BuildOrchestrator(CleanerConfig config, IUserInteraction userInteraction, IStatusLine statusLine)
+        {
+            var logger = Log.Logger;
+            IFileSystem fileSystem = new StandardFileSystem();
+            IProcessManager processManager = new StandardProcessManager(logger);
+            IUserProfileProvider userProfileProvider = new WindowsUserProfileProvider(fileSystem);
+            IRegistryCleaner registryCleaner = new SirstrapRegistryCleaner(logger);
+            IFolderDeleter folderDeleter = new FolderDeleter(logger, fileSystem);
+            ISelectiveFolderCleaner selectiveFolderCleaner = new SelectiveFolderCleaner(logger, fileSystem, userInteraction, folderDeleter, config);
+
+            var steps = new List<ICleanupStep>
+            {
+                new ProcessCloser(logger, processManager, userInteraction, config),
+                new SystemFoldersCleanupStep(logger, folderDeleter, config),
+                new UserFoldersCleanupStep(logger, selectiveFolderCleaner, userProfileProvider, config),
+                new RegistryCleanupStep(logger, registryCleaner, config)
+            };
+
+            if (config.CleanTempFolders)
+                steps.Add(new TempFolderCleaner(logger, fileSystem, folderDeleter, userProfileProvider, config));
+            else
+                logger.Information("[*] Temporary folder cleanup skipped (disabled by user)");
+
+            return new CleanupOrchestrator(logger, steps, statusLine);
         }
     }
 }

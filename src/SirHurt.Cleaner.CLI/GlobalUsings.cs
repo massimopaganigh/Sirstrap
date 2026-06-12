@@ -1,1 +1,9 @@
-﻿global using System.Reflection;
+global using Serilog;
+global using SirHurt.Cleaner.CLI.Abstractions;
+global using SirHurt.Cleaner.CLI.Infrastructure;
+global using SirHurt.Cleaner.CLI.Services;
+global using System.Reflection;
+global using Sirstrap.Core;
+global using System.Diagnostics;
+global using Serilog.Core;
+global using Serilog.Events;
