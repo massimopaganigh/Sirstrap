@@ -72,7 +72,7 @@
         {
             e.Cancel = true;
 
-            if (SirstrapConfiguration.TrayMode != TrayMode.None
+            if (Program.Services.GetRequiredService<SirstrapConfiguration>().TrayMode != TrayMode.None
                 && Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop
                 && ReferenceEquals(desktop.MainWindow, this))
             {

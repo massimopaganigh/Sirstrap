@@ -11,9 +11,9 @@ namespace Sirstrap.UI
                 if (Current is not App app)
                     return;
 
-                SirstrapConfigurationService.LoadSettings();
+                Program.Services.GetRequiredService<ISettingsService>().LoadSettings();
 
-                var fontFamilyName = SirstrapConfiguration.FontFamily;
+                var fontFamilyName = Program.Services.GetRequiredService<SirstrapConfiguration>().FontFamily;
 
                 FontFamily fontFamily;
 
@@ -26,7 +26,7 @@ namespace Sirstrap.UI
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(ApplyFontFamily));
+                Log.Error(ex, "[!] Failed to apply the font family.");
             }
         }
 
@@ -43,14 +43,16 @@ namespace Sirstrap.UI
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
+                desktop.MainWindow = new MainWindow { DataContext = Program.Services.GetRequiredService<MainWindowViewModel>() };
 
                 ApplyFontFamily();
 
-                if (SirstrapConfiguration.TrayMode != TrayMode.None)
+                var trayMode = Program.Services.GetRequiredService<SirstrapConfiguration>().TrayMode;
+
+                if (trayMode != TrayMode.None)
                     SetTray(true);
 
-                if (SirstrapConfiguration.TrayMode == TrayMode.OnLaunch)
+                if (trayMode == TrayMode.OnLaunch)
                 {
                     void OnFirstOpen(object? sender, EventArgs e)
                     {

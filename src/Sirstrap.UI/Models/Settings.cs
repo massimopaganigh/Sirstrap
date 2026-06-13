@@ -1,7 +1,11 @@
-﻿namespace Sirstrap.UI.Models
+namespace Sirstrap.UI.Models
 {
     public partial class Settings : ModelBase
     {
+        private readonly SirstrapConfiguration _configuration;
+        private readonly ISettingsService _settingsService;
+        private readonly IPathManager _pathManager;
+
         [ObservableProperty]
         private bool _autoUpdate = true;
 
@@ -41,23 +45,53 @@
         [ObservableProperty]
         private TrayMode _trayMode = TrayMode.None;
 
-        public Settings()
+        public Settings(SirstrapConfiguration configuration, ISettingsService settingsService, IPathManager pathManager, ISirHurtService sirHurtService)
         {
-            SirstrapConfigurationService.LoadSettings();
+            _configuration = configuration;
+            _settingsService = settingsService;
+            _pathManager = pathManager;
 
-            AutoUpdate = SirstrapConfiguration.AutoUpdate;
-            ChannelName = SirstrapConfiguration.ChannelName;
-            FontFamily = SirstrapConfiguration.FontFamily;
-            Incognito = SirstrapConfiguration.Incognito;
-            InstallationPath = SirstrapConfiguration.InstallationPath;
-            MultiInstance = SirstrapConfiguration.MultiInstance;
-            RobloxApi = SirstrapConfiguration.RobloxApi;
-            RobloxCdnUriOverride = SirstrapConfiguration.RobloxCdnUriOverride;
-            RobloxVersionOverride = SirstrapConfiguration.RobloxVersionOverride;
-            RunSirHurtEnabled = File.Exists(Path.Combine(SirstrapConfiguration.SirHurtPath, "bootstrapper.exe"));
-            SirHurtPath = SirstrapConfiguration.SirHurtPath;
-            Telemetry = SirstrapConfiguration.Telemetry;
-            TrayMode = SirstrapConfiguration.TrayMode;
+            _settingsService.LoadSettings();
+
+            var sirHurtPath = sirHurtService.GetSirHurtPath();
+
+            AutoUpdate = configuration.AutoUpdate;
+            ChannelName = configuration.ChannelName;
+            FontFamily = configuration.FontFamily;
+            Incognito = configuration.Incognito;
+            InstallationPath = configuration.InstallationPath;
+            MultiInstance = configuration.MultiInstance;
+            RobloxApi = configuration.RobloxApi;
+            RobloxCdnUriOverride = configuration.RobloxCdnUriOverride;
+            RobloxVersionOverride = configuration.RobloxVersionOverride;
+            RunSirHurtEnabled = File.Exists(Path.Combine(sirHurtPath, "bootstrapper.exe"));
+            SirHurtPath = sirHurtPath;
+            Telemetry = configuration.Telemetry;
+            TrayMode = configuration.TrayMode;
+        }
+
+        public void Set()
+        {
+            if (!string.Equals(_configuration.InstallationPath, InstallationPath, StringComparison.OrdinalIgnoreCase))
+                _configuration.PreviousInstallationPath = _configuration.InstallationPath;
+
+            _configuration.AutoUpdate = AutoUpdate;
+            _configuration.ChannelName = ChannelName;
+            _configuration.FontFamily = FontFamily;
+            _configuration.Incognito = Incognito;
+            _configuration.InstallationPath = InstallationPath;
+            _configuration.MultiInstance = MultiInstance;
+            _configuration.RobloxApi = RobloxApi;
+            _configuration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(RobloxCdnUriOverride);
+            RobloxCdnUriOverride = _configuration.RobloxCdnUriOverride;
+            _configuration.RobloxVersionOverride = RobloxVersionOverride;
+            _configuration.Telemetry = Telemetry;
+            _configuration.TrayMode = TrayMode;
+
+            _settingsService.SaveSettings();
+            _settingsService.LoadSettings();
+
+            _pathManager.PurgePreviousInstallationPath();
         }
 
         partial void OnMultiInstanceChanged(bool value)
@@ -65,30 +99,6 @@
             if (!value
                 && Incognito)
                 Incognito = false;
-        }
-
-        public void Set()
-        {
-            if (!string.Equals(SirstrapConfiguration.InstallationPath, InstallationPath, StringComparison.OrdinalIgnoreCase))
-                SirstrapConfiguration.PreviousInstallationPath = SirstrapConfiguration.InstallationPath;
-
-            SirstrapConfiguration.AutoUpdate = AutoUpdate;
-            SirstrapConfiguration.ChannelName = ChannelName;
-            SirstrapConfiguration.FontFamily = FontFamily;
-            SirstrapConfiguration.Incognito = Incognito;
-            SirstrapConfiguration.InstallationPath = InstallationPath;
-            SirstrapConfiguration.MultiInstance = MultiInstance;
-            SirstrapConfiguration.RobloxApi = RobloxApi;
-            SirstrapConfiguration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(RobloxCdnUriOverride);
-            RobloxCdnUriOverride = SirstrapConfiguration.RobloxCdnUriOverride;
-            SirstrapConfiguration.RobloxVersionOverride = RobloxVersionOverride;
-            SirstrapConfiguration.Telemetry = Telemetry;
-            SirstrapConfiguration.TrayMode = TrayMode;
-
-            SirstrapConfigurationService.SaveSettings();
-            SirstrapConfigurationService.LoadSettings();
-
-            PathManager.PurgePreviousInstallationPath();
         }
     }
 }

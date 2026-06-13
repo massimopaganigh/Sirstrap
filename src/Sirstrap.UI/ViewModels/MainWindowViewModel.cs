@@ -1,8 +1,16 @@
-﻿namespace Sirstrap.UI.ViewModels
+namespace Sirstrap.UI.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
-        private static readonly HttpClient _httpClient = new();
+        private readonly SirstrapConfiguration _configuration;
+        private readonly HttpClient _httpClient;
+        private readonly IIpcService _ipcService;
+        private readonly ILastLogSink _lastLogSink;
+        private readonly IPathManager _pathManager;
+        private readonly IProtocolHandlerRegistrar _protocolHandlerRegistrar;
+        private readonly RobloxActivityWatcher _robloxActivityWatcher;
+        private readonly ISettingsService _settingsService;
+        private readonly ISirHurtService _sirHurtService;
 
         [ObservableProperty]
         private string _accountName = string.Empty;
@@ -11,10 +19,9 @@
         private string _announcement = string.Empty;
 
         [ObservableProperty]
-        private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
+        private string _currentFullVersion = string.Empty;
 
         private int _currentPollingInterval = 100;
-        private readonly IpcService _ipcService = new();
 
         [ObservableProperty]
         private bool _isLoggedIn = false;
@@ -25,9 +32,7 @@
         private string _lastLogMessage = "...";
 
         private DateTimeOffset? _lastLogReceived;
-        private Timer _logPollingTimer;
-        private readonly RobloxActivityWatcher _robloxActivityWatcher = new();
-        private readonly RobloxDownloader _robloxDownloader = new();
+        private readonly Timer _logPollingTimer;
 
         [ObservableProperty]
         private string _serverLocation = string.Empty;
@@ -43,8 +48,30 @@
 
         private bool _wasRobloxRunning;
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(
+            SirstrapConfiguration configuration,
+            HttpClient httpClient,
+            IIpcService ipcService,
+            ILastLogSink lastLogSink,
+            IPathManager pathManager,
+            IProtocolHandlerRegistrar protocolHandlerRegistrar,
+            RobloxActivityWatcher robloxActivityWatcher,
+            ISettingsService settingsService,
+            ISirHurtService sirHurtService,
+            ISirstrapVersion sirstrapVersion)
         {
+            _configuration = configuration;
+            _httpClient = httpClient;
+            _ipcService = ipcService;
+            _lastLogSink = lastLogSink;
+            _pathManager = pathManager;
+            _protocolHandlerRegistrar = protocolHandlerRegistrar;
+            _robloxActivityWatcher = robloxActivityWatcher;
+            _settingsService = settingsService;
+            _sirHurtService = sirHurtService;
+
+            CurrentFullVersion = sirstrapVersion.GetFullVersion();
+
             _logPollingTimer = new(_currentPollingInterval);
 
             _logPollingTimer.Elapsed += (s, e) => GetLastLogMessageFromLastLogSink();
@@ -101,7 +128,7 @@
                     && isRobloxRunning
                     && !_isMinimized)
                 {
-                    if (SirstrapConfiguration.TrayMode == TrayMode.OnRoblox)
+                    if (_configuration.TrayMode == TrayMode.OnRoblox)
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
                             mainWindow.Hide();
@@ -119,7 +146,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(FindRoblox));
+                Log.Error(ex, "[!] Failed to track the Roblox process.");
             }
         }
 
@@ -127,11 +154,11 @@
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(LastLogSink.LastLog)
-                    && !string.Equals(LastLogMessage, LastLogSink.LastLog))
+                if (!string.IsNullOrWhiteSpace(_lastLogSink.LastLog)
+                    && !string.Equals(LastLogMessage, _lastLogSink.LastLog))
                 {
-                    LastLogMessage = LastLogSink.LastLog;
-                    _lastLogReceived = LastLogSink.LastLogTimestamp;
+                    LastLogMessage = _lastLogSink.LastLog;
+                    _lastLogReceived = _lastLogSink.LastLogTimestamp;
                 }
 
                 FindRoblox();
@@ -139,7 +166,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(GetLastLogMessageFromLastLogSink));
+                Log.Error(ex, "[!] Failed to read the last log message.");
             }
         }
 
@@ -157,7 +184,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(GetPollingInterval));
+                Log.Error(ex, "[!] Failed to adjust the log polling interval.");
             }
         }
 
@@ -177,7 +204,7 @@
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, nameof(LoadAnnouncementAsync));
+                Log.Warning(ex, "[!] Failed to load the announcement.");
             }
         }
 
@@ -186,7 +213,7 @@
         {
             try
             {
-                if (SirHurtService.Logout())
+                if (_sirHurtService.Logout())
                 {
                     AccountName = string.Empty;
                     IsLoggedIn = false;
@@ -194,7 +221,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(Logout));
+                Log.Error(ex, "[!] Failed to log out from SirHurt.");
             }
         }
 
@@ -218,7 +245,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(OpenGitHub));
+                Log.Error(ex, "[!] Failed to open the GitHub repository.");
             }
         }
 
@@ -236,7 +263,7 @@
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(OpenIssue));
+                Log.Error(ex, "[!] Failed to open the GitHub issue page.");
             }
         }
 
@@ -245,12 +272,12 @@
         {
             try
             {
-                new SettingsWindow { DataContext = new SettingsWindowViewModel() }.ShowDialog(GetMainWindow()!);
+                new SettingsWindow { DataContext = Program.Services.GetRequiredService<SettingsWindowViewModel>() }.ShowDialog(GetMainWindow()!);
                 Sentry.SentrySdk.Metrics.EmitCounter(nameof(OpenSettings), 1);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(OpenSettings));
+                Log.Error(ex, "[!] Failed to open the settings window.");
             }
         }
 
@@ -262,14 +289,14 @@
                 ShowLaunchButton = false;
 
 #if !DEBUG
-                await _robloxDownloader.ExecuteAsync(Program.Args ?? [], SirstrapType.UI);
+                await Program.Services.GetRequiredService<IRobloxDownloader>().ExecuteAsync(Program.Args ?? [], SirstrapType.UI);
 #endif
 
                 Environment.ExitCode = 0;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, nameof(RunAsync));
+                Log.Error(ex, "[!] Failed to run Sirstrap.");
                 Environment.ExitCode = 1;
             }
             finally
@@ -289,39 +316,38 @@
             AllocConsole();
 #endif
 
-            var logsDirectory = PathManager.GetLogsPath();
+            var logsDirectory = _pathManager.GetLogsPath();
 
             if (!Directory.Exists(logsDirectory))
                 Directory.CreateDirectory(logsDirectory);
 
-            PathManager.PurgeOldLogs();
+            _pathManager.PurgeOldLogs();
 
             var appGuid = Guid.NewGuid().ToString("N");
 
-            SirstrapConfigurationService.LoadSettings();
+            _settingsService.LoadSettings();
 
             var loggerConfig = new LoggerConfiguration()
                 .Enrich.WithThreadId()
                 .Enrich.WithThreadName()
-                .Enrich.WithProperty("SirHurtUser", SirHurtService.GetSirHurtUser())
+                .Enrich.WithProperty("SirHurtUser", _sirHurtService.GetSirHurtUser())
                 .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}")
                 .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapLog{appGuid}.txt"), outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
                 .WriteTo.File(Path.Combine(logsDirectory, $"SirstrapErrorsLog{appGuid}.txt"), restrictedToMinimumLevel: LogEventLevel.Error, outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [Thread: {ThreadId}, {ThreadName}] [User: {SirHurtUser}] {Message:lj}{NewLine}{Exception}", fileSizeLimitBytes: 1_048_576, rollOnFileSizeLimit: true, retainedFileCountLimit: 5)
-                .WriteTo.LastLog();
+                .WriteTo.LastLog(_lastLogSink);
 
 #if !DEBUG
-                if (SirstrapConfiguration.Telemetry)
-                    loggerConfig = loggerConfig.WriteTo.Sentry(x =>
-                    {
-                        x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
-                        //x.Debug = true;
-                        x.AutoSessionTracking = true;
-                        x.EnableLogs = true;
+            if (_configuration.Telemetry)
+                loggerConfig = loggerConfig.WriteTo.Sentry(x =>
+                {
+                    x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
+                    x.AutoSessionTracking = true;
+                    x.EnableLogs = true;
 
-                        x.TracesSampleRate = 0.5;
-                        x.ProfilesSampleRate = 0.5;
-                        x.AddIntegration(new Sentry.Profiling.ProfilingIntegration(/*TimeSpan.FromMilliseconds(500)*/));
-                    });
+                    x.TracesSampleRate = 0.5;
+                    x.ProfilesSampleRate = 0.5;
+                    x.AddIntegration(new Sentry.Profiling.ProfilingIntegration());
+                });
 #endif
 
             Log.Logger = loggerConfig.CreateLogger();
@@ -336,15 +362,15 @@
    ▄█    ███ ███    ███    ███    ▄█    ███     ███       ███    ███   ███    ███   ███ {1}
  ▄████████▀  █▀     ███    ███  ▄████████▀     ▄████▀     ███    ███   ███    █▀   ▄████▀ {2}
                     ███    ███                            ███    ███ by SirHurt CSR Team", CurrentFullVersion, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName, Environment.OSVersion);
-            SirstrapConfigurationService.LoadSettings();
-            SirstrapConfigurationService.EmitSettingsMetrics();
-            PathManager.PurgePreviousInstallationPath();
+            _settingsService.LoadSettings();
+            _settingsService.EmitSettingsMetrics();
+            _pathManager.PurgePreviousInstallationPath();
 
             await _ipcService.StartAsync("SirstrapIpc");
 
-            RegistryManager.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
+            _protocolHandlerRegistrar.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
 
-            var user = SirHurtService.GetSirHurtUser();
+            var user = _sirHurtService.GetSirHurtUser();
 
             AccountName = user;
             IsLoggedIn = !string.IsNullOrWhiteSpace(user);
