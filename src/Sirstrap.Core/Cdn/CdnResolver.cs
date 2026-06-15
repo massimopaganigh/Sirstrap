@@ -23,12 +23,41 @@ namespace Sirstrap.Core.Cdn
             _sirstrapConfiguration = sirstrapConfiguration;
         }
 
+        #region PRIVATE METHODS
+        private async Task<(string BaseUri, CdnResolutionSource Source)> SelectFastestAsync(Configuration configuration, CancellationToken cancellationToken)
+        {
+            Log.Information("[*] Selecting the fastest Roblox CDN...");
+
+            var candidates = _candidateProvider.GetCandidates();
+            List<Task<CdnProbeResult?>> pendingProbes = [.. candidates.Select(candidate => _prober.ProbeAsync(candidate, configuration, cancellationToken))];
+
+            while (pendingProbes.Count > 0)
+            {
+                var completedProbe = await Task.WhenAny(pendingProbes).ConfigureAwait(false);
+
+                pendingProbes.Remove(completedProbe);
+
+                var selected = await completedProbe.ConfigureAwait(false);
+
+                if (selected != null)
+                {
+                    Log.Information("[*] Selected the Roblox CDN {BaseUri} in {ElapsedMs} ms.", selected.Candidate.BaseUri, (int)selected.Elapsed.TotalMilliseconds);
+
+                    return (selected.Candidate.BaseUri, CdnResolutionSource.Probe);
+                }
+            }
+
+            Log.Warning("[!] Failed to probe the Roblox CDNs, falling back to {BaseUri}.", RobloxCdnService.DefaultBaseUri);
+
+            return (RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
+        }
+        #endregion
+
         public async Task<string> ResolveAsync(Configuration configuration, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(configuration);
 
-            string normalizedOverride = _normalizer.Normalize(_sirstrapConfiguration.RobloxCdnUriOverride);
-
+            var normalizedOverride = _normalizer.Normalize(_sirstrapConfiguration.RobloxCdnUriOverride);
             _sirstrapConfiguration.RobloxCdnUriOverride = normalizedOverride;
 
             if (!string.IsNullOrEmpty(normalizedOverride))
@@ -36,7 +65,6 @@ namespace Sirstrap.Core.Cdn
                 _sirstrapConfiguration.ResolvedRobloxCdnUri = normalizedOverride;
 
                 Log.Information("[*] Using the Roblox CDN URI override {BaseUri}.", normalizedOverride);
-
                 _telemetry.RecordResolved(normalizedOverride, CdnResolutionSource.Override);
 
                 return normalizedOverride;
@@ -53,44 +81,12 @@ namespace Sirstrap.Core.Cdn
                 return RobloxCdnService.DefaultBaseUri;
             }
 
-            (string baseUri, CdnResolutionSource source) = await SelectFastestAsync(configuration, cancellationToken).ConfigureAwait(false);
-
+            (var baseUri, var source) = await SelectFastestAsync(configuration, cancellationToken).ConfigureAwait(false);
             _sirstrapConfiguration.ResolvedRobloxCdnUri = baseUri;
 
             _telemetry.RecordResolved(baseUri, source);
 
             return baseUri;
-        }
-
-        private async Task<(string BaseUri, CdnResolutionSource Source)> SelectFastestAsync(Configuration configuration, CancellationToken cancellationToken)
-        {
-            Log.Information("[*] Selecting the fastest Roblox CDN...");
-
-            IReadOnlyList<CdnCandidate> candidates = _candidateProvider.GetCandidates();
-
-            List<Task<CdnProbeResult?>> pendingProbes = candidates
-                .Select(candidate => _prober.ProbeAsync(candidate, configuration, cancellationToken))
-                .ToList();
-
-            while (pendingProbes.Count > 0)
-            {
-                Task<CdnProbeResult?> completedProbe = await Task.WhenAny(pendingProbes).ConfigureAwait(false);
-
-                pendingProbes.Remove(completedProbe);
-
-                CdnProbeResult? selected = await completedProbe.ConfigureAwait(false);
-
-                if (selected != null)
-                {
-                    Log.Information("[*] Selected the Roblox CDN {BaseUri} in {ElapsedMs} ms.", selected.Candidate.BaseUri, (int)selected.Elapsed.TotalMilliseconds);
-
-                    return (selected.Candidate.BaseUri, CdnResolutionSource.Probe);
-                }
-            }
-
-            Log.Warning("[!] Failed to probe the Roblox CDNs, falling back to {BaseUri}.", RobloxCdnService.DefaultBaseUri);
-
-            return (RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
         }
     }
 }

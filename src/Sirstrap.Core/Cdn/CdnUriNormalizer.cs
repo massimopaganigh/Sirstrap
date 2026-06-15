@@ -7,7 +7,7 @@ namespace Sirstrap.Core.Cdn
             if (string.IsNullOrWhiteSpace(cdnUriOverride))
                 return string.Empty;
 
-            string trimmed = cdnUriOverride.Trim().TrimEnd('/');
+            var trimmed = cdnUriOverride.Trim().TrimEnd('/');
 
             if (string.IsNullOrEmpty(trimmed))
                 return string.Empty;

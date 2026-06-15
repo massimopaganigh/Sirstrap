@@ -56,8 +56,6 @@ namespace Sirstrap.Core.Cleaner
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), "Roblox")
         ];
 
-        public string UserTempPath { get; } = Path.Combine("AppData", "Local", "Temp");
-
         public IReadOnlyList<string> UserFolders { get; } =
         [
             Path.Combine("AppData", "Local", "Roblox"),
@@ -67,5 +65,7 @@ namespace Sirstrap.Core.Cleaner
             Path.Combine("AppData", "Roaming", "sirhurt"),
             Path.Combine("AppData", "Local", "Sirstrap")
         ];
+
+        public string UserTempPath { get; } = Path.Combine("AppData", "Local", "Temp");
     }
 }

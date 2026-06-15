@@ -8,9 +8,7 @@ namespace Sirstrap.Core.Cdn
 
             if (configuration.IsMacBinary())
             {
-                string package = configuration.IsMacPlayer()
-                    ? "RobloxPlayer.zip"
-                    : "RobloxStudioApp.zip";
+                var package = configuration.IsMacPlayer() ? "RobloxPlayer.zip" : "RobloxStudioApp.zip";
 
                 return robloxUriFactory.GetPackageUri(configuration, package, baseUri);
             }

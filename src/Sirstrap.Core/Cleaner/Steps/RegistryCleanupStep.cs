@@ -2,8 +2,6 @@ namespace Sirstrap.Core.Cleaner.Steps
 {
     public sealed class RegistryCleanupStep(IRegistryManager registryManager, CleanerConfig config) : ICleanupStep
     {
-        public string Name => "Clean registry";
-
         public void Execute()
         {
             Log.Information("[*] Removing the registry keys for the current user...");
@@ -18,5 +16,7 @@ namespace Sirstrap.Core.Cleaner.Steps
 
             registryManager.CleanLocalMachineRegistry(config.LocalMachineRegistryKeys);
         }
+
+        public string Name => "Clean registry";
     }
 }

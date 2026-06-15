@@ -24,32 +24,24 @@ namespace Sirstrap.Core.Cleaner
             lock (_sync)
             {
                 Erase();
+
                 _status = status;
+
                 Draw();
             }
         }
 
-        private static int GetMaxWidth()
-        {
-            try
-            {
-                return Math.Max(Console.WindowWidth - 1, 20);
-            }
-            catch (IOException)
-            {
-                return 79;
-            }
-        }
-
+        #region PRIVATE METHODS
         private void Draw()
         {
-            if (!_enabled || _status.Length == 0)
+            if (!_enabled
+                || _status.Length == 0)
                 return;
 
-            int maxTextWidth = GetMaxWidth() - 2;
-            string text = _status.Length > maxTextWidth ? _status[..maxTextWidth] : _status;
-
+            var maxTextWidth = GetMaxWidth() - 2;
+            var text = _status.Length > maxTextWidth ? _status[..maxTextWidth] : _status;
             Console.ForegroundColor = ConsoleColor.Cyan;
+
             Console.Write($"» {text}");
             Console.ResetColor();
 
@@ -67,5 +59,18 @@ namespace Sirstrap.Core.Cleaner
 
             _drawnLength = 0;
         }
+
+        private static int GetMaxWidth()
+        {
+            try
+            {
+                return Math.Max(Console.WindowWidth - 1, 20);
+            }
+            catch (IOException)
+            {
+                return 79;
+            }
+        }
+        #endregion
     }
 }

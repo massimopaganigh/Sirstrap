@@ -9,8 +9,6 @@ namespace Sirstrap.Core.Activity
 
         public event EventHandler<string>? ServerLocationChanged;
 
-        public string CurrentServerLocation => _currentServerLocation ?? "UNKNOWN";
-
         public void StartWatching()
         {
             try
@@ -47,13 +45,9 @@ namespace Sirstrap.Core.Activity
             try
             {
                 _cancellationTokenSource?.Cancel();
+                _logReadingTask?.Wait(TimeSpan.FromSeconds(5));
 
-                if (_logReadingTask != null)
-                {
-                    _logReadingTask.Wait(TimeSpan.FromSeconds(5));
-
-                    _logReadingTask = null;
-                }
+                _logReadingTask = null;
 
                 _cancellationTokenSource?.Dispose();
 
@@ -76,13 +70,15 @@ namespace Sirstrap.Core.Activity
             }
         }
 
+        public string CurrentServerLocation => _currentServerLocation ?? "UNKNOWN";
+
+        #region PRIVATE METHODS
         private void OnLogFileCreated(object sender, FileSystemEventArgs e)
         {
             try
             {
                 _cancellationTokenSource?.Cancel();
                 _logReadingTask?.Wait(TimeSpan.FromSeconds(2));
-
                 StartReading(e.FullPath);
             }
             catch (Exception ex)
@@ -102,7 +98,7 @@ namespace Sirstrap.Core.Activity
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    string? line = await reader.ReadLineAsync(cancellationToken);
+                    var line = await reader.ReadLineAsync(cancellationToken);
 
                     if (line is null)
                         await Task.Delay(1000, cancellationToken);
@@ -149,5 +145,6 @@ namespace Sirstrap.Core.Activity
                 Log.Error(ex, "[!] Failed to update the server location for IP {IpAddress}.", ipAddress);
             }
         }
+        #endregion
     }
 }

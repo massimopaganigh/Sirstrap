@@ -4,9 +4,9 @@ namespace Sirstrap.Core.Cleaner
     {
         public bool IsProcessRunning(string processName)
         {
-            Process[] processes = Process.GetProcessesByName(processName);
+            var processes = Process.GetProcessesByName(processName);
 
-            foreach (Process process in processes)
+            foreach (var process in processes)
                 process.Dispose();
 
             return processes.Length > 0;
@@ -16,21 +16,20 @@ namespace Sirstrap.Core.Cleaner
         {
             try
             {
-                Process[] processes = Process.GetProcessesByName(processName);
+                var processes = Process.GetProcessesByName(processName);
 
                 if (processes.Length == 0)
                     return true;
 
                 Log.Information("[*] Closing {InstanceCount} instance(s) of {ProcessName}...", processes.Length, processName);
 
-                bool allClosed = true;
+                var allClosed = true;
 
-                foreach (Process process in processes)
+                foreach (var process in processes)
                     try
                     {
                         process.Kill(entireProcessTree: true);
                         process.WaitForExit(5000);
-
                         Log.Information("[*] Closed the process {ProcessName} (PID {ProcessId}).", processName, process.Id);
                     }
                     catch (Exception ex)

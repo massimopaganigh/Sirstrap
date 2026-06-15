@@ -15,13 +15,11 @@ namespace Sirstrap.Core.Cleaner
             services.TryAddSingleton<IStatusLine, ConsoleStatusLine>();
             services.TryAddSingleton<IUserInteraction, ConsoleUserInteraction>();
             services.TryAddSingleton<IRegistryManager, RegistryManager>();
-
             services.AddSingleton<ICleanupStep, ProcessCloser>();
             services.AddSingleton<ICleanupStep, SystemFoldersCleanupStep>();
             services.AddSingleton<ICleanupStep, UserFoldersCleanupStep>();
             services.AddSingleton<ICleanupStep, RegistryCleanupStep>();
             services.AddSingleton<ICleanupStep, TempFolderCleaner>();
-
             services.TryAddSingleton<ICleanupOrchestrator, CleanupOrchestrator>();
 
             return services;

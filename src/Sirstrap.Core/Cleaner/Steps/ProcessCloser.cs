@@ -2,14 +2,7 @@ namespace Sirstrap.Core.Cleaner.Steps
 {
     public sealed class ProcessCloser(IProcessManager processManager, IUserInteraction userInteraction, CleanerConfig config) : ICleanupStep
     {
-        public string Name => "Close running applications";
-
-        public void Execute()
-        {
-            if (!EnsureApplicationsClosed())
-                Log.Warning("[!] Some applications are still running, locked files may not be removed.");
-        }
-
+        #region PRIVATE METHODS
         private bool EnsureApplicationsClosed()
         {
             var runningProcesses = config.ProcessesToClose.Where(processManager.IsProcessRunning).ToList();
@@ -38,5 +31,14 @@ namespace Sirstrap.Core.Cleaner.Steps
 
             return notClosed.Count == 0;
         }
+        #endregion
+
+        public void Execute()
+        {
+            if (!EnsureApplicationsClosed())
+                Log.Warning("[!] Some applications are still running, locked files may not be removed.");
+        }
+
+        public string Name => "Close running applications";
     }
 }

@@ -1,13 +1,7 @@
 namespace Sirstrap.Core.Cleaner.Steps
 {
-    public sealed class TempFolderCleaner(
-        IFileSystem fileSystem,
-        IFolderDeleter folderDeleter,
-        IUserProfileProvider userProfileProvider,
-        CleanerConfig config) : ICleanupStep
+    public sealed class TempFolderCleaner(IFileSystem fileSystem, IFolderDeleter folderDeleter, IUserProfileProvider userProfileProvider, CleanerConfig config) : ICleanupStep
     {
-        public string Name => "Clean temporary folders";
-
         public void Execute()
         {
             if (!config.CleanTempFolders)
@@ -22,12 +16,14 @@ namespace Sirstrap.Core.Cleaner.Steps
             CleanSystemTempFolder();
         }
 
+        public string Name => "Clean temporary folders";
+
+        #region PRIVATE METHODS
         private void CleanCurrentUserTempFolder()
         {
-            string tempPath = Path.GetTempPath();
+            var tempPath = Path.GetTempPath();
 
             Log.Information("[*] Cleaning the temporary files for the current user: {TempPath}...", tempPath);
-
             CleanTempFolder(tempPath);
         }
 
@@ -37,23 +33,21 @@ namespace Sirstrap.Core.Cleaner.Steps
 
             foreach (var userProfile in userProfileProvider.GetOtherUserProfileDirectories())
             {
-                string tempPath = Path.Combine(userProfile, config.UserTempPath);
+                var tempPath = Path.Combine(userProfile, config.UserTempPath);
 
                 if (!fileSystem.DirectoryExists(tempPath))
                     continue;
 
                 Log.Information("[*] Cleaning the temporary files for the user {Username}: {TempPath}...", Path.GetFileName(userProfile), tempPath);
-
                 CleanTempFolder(tempPath);
             }
         }
 
         private void CleanSystemTempFolder()
         {
-            string systemTempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp");
+            var systemTempPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Temp");
 
             Log.Information("[*] Cleaning the system temporary folder: {TempPath}...", systemTempPath);
-
             CleanTempFolder(systemTempPath);
         }
 
@@ -74,7 +68,7 @@ namespace Sirstrap.Core.Cleaner.Steps
                 foreach (var directory in fileSystem.GetDirectories(tempPath))
                     folderDeleter.DeleteFolder(directory);
 
-                int remainingEntries = fileSystem.GetFileSystemEntries(tempPath).Count();
+                var remainingEntries = fileSystem.GetFileSystemEntries(tempPath).Count();
 
                 if (remainingEntries == 0)
                     Log.Information("[*] Fully cleaned the temporary folder {TempPath}.", tempPath);
@@ -102,5 +96,6 @@ namespace Sirstrap.Core.Cleaner.Steps
                 Log.Debug(ex, "[*] Skipping the temporary file {FilePath} (probably in use).", filePath);
             }
         }
+        #endregion
     }
 }

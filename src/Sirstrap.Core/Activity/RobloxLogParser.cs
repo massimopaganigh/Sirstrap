@@ -2,9 +2,6 @@ namespace Sirstrap.Core.Activity
 {
     public static partial class RobloxLogParser
     {
-        [GeneratedRegex(@"\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b")]
-        private static partial Regex ServerIpRegex();
-
         public static string? ExtractServerIp(string logLine)
         {
             try
@@ -23,7 +20,8 @@ namespace Sirstrap.Core.Activity
                 {
                     var match = ServerIpRegex().Match(logLine);
 
-                    if (match.Success && !IsPrivateIp(match.Groups[1].Value))
+                    if (match.Success
+                        && !IsPrivateIp(match.Groups[1].Value))
                         return match.Groups[1].Value;
                 }
             }
@@ -35,11 +33,8 @@ namespace Sirstrap.Core.Activity
             return null;
         }
 
-        private static bool IsPrivateIp(string ip)
-            => ip.StartsWith("127.")
-                || ip.StartsWith("192.168.")
-                || ip.StartsWith("10.")
-                || IsPrivateIpRange172(ip);
+        #region PRIVATE METHODS
+        private static bool IsPrivateIp(string ip) => ip.StartsWith("127.") || ip.StartsWith("192.168.") || ip.StartsWith("10.") || IsPrivateIpRange172(ip);
 
         private static bool IsPrivateIpRange172(string ip)
         {
@@ -48,10 +43,11 @@ namespace Sirstrap.Core.Activity
 
             var parts = ip.Split('.');
 
-            return parts.Length >= 2
-                && int.TryParse(parts[1], out var secondOctet)
-                && secondOctet >= 16
-                && secondOctet <= 31;
+            return parts.Length >= 2 && int.TryParse(parts[1], out var secondOctet) && secondOctet >= 16 && secondOctet <= 31;
         }
+
+        [GeneratedRegex(@"\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b")]
+        private static partial Regex ServerIpRegex();
+        #endregion
     }
 }

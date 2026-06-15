@@ -1,15 +1,8 @@
 namespace Sirstrap.Core.Cleaner
 {
-    public sealed class SelectiveFolderCleaner(
-        IFileSystem fileSystem,
-        IUserInteraction userInteraction,
-        IFolderDeleter folderDeleter,
-        CleanerConfig config) : ISelectiveFolderCleaner
+    public sealed class SelectiveFolderCleaner(IFileSystem fileSystem, IUserInteraction userInteraction, IFolderDeleter folderDeleter, CleanerConfig config) : ISelectiveFolderCleaner
     {
-        private readonly HashSet<string> _protectedFileDirectories = config.FilesRequiringConfirmation
-            .Select(f => Path.GetDirectoryName(f) ?? string.Empty)
-            .Where(d => d.Length > 0)
-            .ToHashSet(StringComparer.Ordinal);
+        private readonly HashSet<string> _protectedFileDirectories = config.FilesRequiringConfirmation.Select(f => Path.GetDirectoryName(f) ?? string.Empty).Where(d => d.Length > 0).ToHashSet(StringComparer.Ordinal);
 
         public void CleanFolderContents(string folderPath)
         {
@@ -51,13 +44,13 @@ namespace Sirstrap.Core.Cleaner
             }
         }
 
-        private static bool IsRobloxStudioBuildFolder(string name) => !string.IsNullOrEmpty(name) && name.All(char.IsDigit);
-
+        #region PRIVATE METHODS
         private void CleanSubDirectory(string subDir, string baseFolderPath)
         {
-            string subDirName = Path.GetFileName(subDir);
+            var subDirName = Path.GetFileName(subDir);
 
-            if (config.ExcludedSubFolders.Contains(subDirName) || IsRobloxStudioBuildFolder(subDirName))
+            if (config.ExcludedSubFolders.Contains(subDirName)
+                || IsRobloxStudioBuildFolder(subDirName))
             {
                 Log.Debug("[*] Keeping the excluded folder {FolderPath}.", subDir);
 
@@ -86,13 +79,13 @@ namespace Sirstrap.Core.Cleaner
 
         private void DeleteDirectoryIfEmpty(string path)
         {
-            if (!fileSystem.DirectoryExists(path) || fileSystem.GetFileSystemEntries(path).Any())
+            if (!fileSystem.DirectoryExists(path)
+                || fileSystem.GetFileSystemEntries(path).Any())
                 return;
 
             try
             {
                 fileSystem.DeleteDirectory(path, recursive: false);
-
                 Log.Information("[*] Deleted the empty folder {FolderPath}.", path);
             }
             catch (Exception ex)
@@ -117,7 +110,6 @@ namespace Sirstrap.Core.Cleaner
                     }
 
                     fileSystem.DeleteFile(filePath);
-
                     Log.Information("[*] Deleted the protected file {FilePath} after user confirmation.", filePath);
 
                     return;
@@ -146,5 +138,9 @@ namespace Sirstrap.Core.Cleaner
             else
                 Log.Information("[*] Kept the protected folder {FolderPath} at the user's request.", folderPath);
         }
+
+        private static bool IsRobloxStudioBuildFolder(string name) => !string.IsNullOrEmpty(name) && name.All(char.IsDigit);
+        #endregion
+
     }
 }

@@ -4,7 +4,7 @@ namespace Sirstrap.Core.Cleaner
     {
         public void ClearReadOnlyAttribute(string path)
         {
-            FileAttributes attributes = File.GetAttributes(path);
+            var attributes = File.GetAttributes(path);
 
             if (attributes.HasFlag(FileAttributes.ReadOnly))
                 File.SetAttributes(path, attributes & ~FileAttributes.ReadOnly);

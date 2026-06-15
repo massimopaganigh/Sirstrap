@@ -5,20 +5,18 @@ namespace Sirstrap.Core.Cleaner
         public void Run()
         {
             var stepList = steps.ToList();
-            int failedSteps = 0;
+            var failedSteps = 0;
 
-            for (int i = 0; i < stepList.Count; i++)
+            for (var i = 0; i < stepList.Count; i++)
             {
-                ICleanupStep step = stepList[i];
+                var step = stepList[i];
 
                 statusLine.SetStatus($"[{i + 1}/{stepList.Count}] {step.Name}…");
-
                 Log.Information("[*] Step {StepNumber}/{StepCount} — {StepName}...", i + 1, stepList.Count, step.Name);
 
                 try
                 {
                     step.Execute();
-
                     Log.Information("[*] Step {StepNumber}/{StepCount} — {StepName}: completed.", i + 1, stepList.Count, step.Name);
                 }
                 catch (Exception ex)

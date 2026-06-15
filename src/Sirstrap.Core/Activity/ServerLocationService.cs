@@ -3,7 +3,6 @@ namespace Sirstrap.Core.Activity
     public sealed class ServerLocationService(HttpClient httpClient, IPerformanceTelemetry performanceTelemetry) : IServerLocationService
     {
         private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(5);
-
         private readonly ConcurrentDictionary<string, string> _locationCache = new();
 
         public void ClearCache() => _locationCache.Clear();
@@ -26,7 +25,6 @@ namespace Sirstrap.Core.Activity
                 if (!response.IsSuccessStatusCode)
                 {
                     scope.MarkFailed();
-
                     performanceTelemetry.RecordCounter("server.location.outcome", new Dictionary<string, object> { ["value"] = "NotFound" });
 
                     return string.Empty;
@@ -37,7 +35,6 @@ namespace Sirstrap.Core.Activity
                 _locationCache[ipAddress] = location;
 
                 Log.Information("[*] Resolved the server location for IP {IpAddress}: {Location}.", ipAddress, location);
-
                 performanceTelemetry.RecordCounter("server.location.outcome", new Dictionary<string, object> { ["value"] = "Success" });
 
                 return location;
@@ -47,24 +44,20 @@ namespace Sirstrap.Core.Activity
                 Log.Error(ex, "[!] Failed to resolve the server location for IP {IpAddress}.", ipAddress);
 
                 scope.MarkFailed();
-
                 performanceTelemetry.RecordCounter("server.location.outcome", new Dictionary<string, object> { ["value"] = "Exception" });
 
                 return string.Empty;
             }
         }
 
-        private static string GetString(JsonElement root, string propertyName)
-            => root.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String
-                ? property.GetString() ?? string.Empty
-                : string.Empty;
+        #region PRIVATE METHODS
+        private static string GetString(JsonElement root, string propertyName) => root.TryGetProperty(propertyName, out var property) && property.ValueKind == JsonValueKind.String ? property.GetString() ?? string.Empty : string.Empty;
 
         private static string ParseLocation(string json)
         {
             try
             {
                 using var jsonDocument = JsonDocument.Parse(json);
-
                 var root = jsonDocument.RootElement;
                 var city = GetString(root, "city");
                 var region = GetString(root, "region");
@@ -87,5 +80,6 @@ namespace Sirstrap.Core.Activity
                 return string.Empty;
             }
         }
+        #endregion
     }
 }

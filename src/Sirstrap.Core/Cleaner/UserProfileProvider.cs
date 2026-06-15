@@ -6,17 +6,15 @@ namespace Sirstrap.Core.Cleaner
 
         public IEnumerable<string> GetOtherUserProfileDirectories()
         {
-            string systemDrive = Environment.GetEnvironmentVariable("SystemDrive") ?? "C:";
-            string usersFolder = Path.Combine(systemDrive + Path.DirectorySeparatorChar, "Users");
+            var systemDrive = Environment.GetEnvironmentVariable("SystemDrive") ?? "C:";
+            var usersFolder = Path.Combine(systemDrive + Path.DirectorySeparatorChar, "Users");
 
             if (!fileSystem.DirectoryExists(usersFolder))
                 return [];
 
-            string currentUserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var currentUserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            return fileSystem.GetDirectories(usersFolder)
-                .Where(dir => !dir.Equals(currentUserProfile, StringComparison.OrdinalIgnoreCase)
-                    && !_specialProfileNames.Contains(Path.GetFileName(dir), StringComparer.OrdinalIgnoreCase));
+            return fileSystem.GetDirectories(usersFolder).Where(dir => !dir.Equals(currentUserProfile, StringComparison.OrdinalIgnoreCase) && !_specialProfileNames.Contains(Path.GetFileName(dir), StringComparer.OrdinalIgnoreCase));
         }
     }
 }
