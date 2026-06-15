@@ -6,9 +6,9 @@ namespace Sirstrap.Core.Common
         {
             try
             {
-                string cacheDirectory = GetCacheDirectory();
+                var cacheDirectory = GetCacheDirectory();
 
-                foreach (string file in Directory.GetFiles(cacheDirectory))
+                foreach (var file in Directory.GetFiles(cacheDirectory))
                     try
                     {
                         File.Delete(file);
@@ -48,11 +48,7 @@ namespace Sirstrap.Core.Common
                 if (!Directory.Exists(logsDirectory))
                     return;
 
-                var files = new DirectoryInfo(logsDirectory)
-                    .GetFiles()
-                    .OrderBy(f => f.LastWriteTimeUtc)
-                    .ToList();
-
+                var files = new DirectoryInfo(logsDirectory).GetFiles().OrderBy(f => f.LastWriteTimeUtc).ToList();
                 var toDelete = files.Count - maxFiles;
 
                 for (var i = 0; i < toDelete; i++)
@@ -87,12 +83,11 @@ namespace Sirstrap.Core.Common
                     return;
 
                 Log.Information("[*] Purging the previous installation path {InstallationPath}...", previousPath);
-
                 FileSystemOperations.DeleteDirectory(previousPath);
 
                 sirstrapConfiguration.PreviousInstallationPath = string.Empty;
-                settingsService.SaveSettings();
 
+                settingsService.SaveSettings();
                 Log.Information("[*] Purged the previous installation path.");
             }
             catch (Exception ex)

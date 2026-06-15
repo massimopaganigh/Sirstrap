@@ -4,25 +4,25 @@ namespace Sirstrap.Core.Deployment
     {
         public void Install(Configuration configuration)
         {
-            using ITelemetryScope scope = performanceTelemetry.Measure("install");
+            using var scope = performanceTelemetry.Measure("install");
 
             try
             {
-                string targetDirectory = pathManager.GetExtractionPath(configuration.VersionHash);
-                string archivePath = pathManager.GetOutputPath(configuration);
+                var targetDirectory = pathManager.GetExtractionPath(configuration.VersionHash);
+                var archivePath = pathManager.GetOutputPath(configuration);
 
                 FileSystemOperations.DeleteDirectory(targetDirectory);
 
-                int entryCount = 0;
+                var entryCount = 0;
 
                 try
                 {
-                    using ZipArchive archive = ZipFile.OpenRead(archivePath);
+                    using var archive = ZipFile.OpenRead(archivePath);
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        string entryPath = Path.GetFullPath(Path.Combine(targetDirectory, entry.FullName));
-                        string? entryDirectory = Path.GetDirectoryName(entryPath);
+                        var entryPath = Path.GetFullPath(Path.Combine(targetDirectory, entry.FullName));
+                        var entryDirectory = Path.GetDirectoryName(entryPath);
 
                         if (entryDirectory != null)
                             FileSystemOperations.CreateDirectory(entryDirectory);
@@ -53,9 +53,7 @@ namespace Sirstrap.Core.Deployment
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Failed to install the archive.");
-
                 scope.MarkFailed();
-
                 throw new InvalidOperationException($"Installation error: {ex.Message}", ex);
             }
         }

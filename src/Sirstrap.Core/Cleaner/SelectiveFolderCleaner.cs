@@ -141,6 +141,5 @@ namespace Sirstrap.Core.Cleaner
 
         private static bool IsRobloxStudioBuildFolder(string name) => !string.IsNullOrEmpty(name) && name.All(char.IsDigit);
         #endregion
-
     }
 }

@@ -79,15 +79,12 @@ namespace Sirstrap.Core.Common
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
-
                         deletedFiles.Add(fileName);
-
                         Log.Information("[*] Deleted the file {FilePath}.", filePath);
                     }
                     else
                     {
                         notFoundFiles.Add(fileName);
-
                         Log.Warning("[!] The file {FilePath} was not found.", filePath);
                     }
                 }
