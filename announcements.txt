@@ -1,1 +1,1 @@
-Download speed improvements for Sirstrap v10.12.2.x
+Sirstrap.Core has been rewritten from scratch to be more scalable and testable; if you encounter any issues, please report them ^^
