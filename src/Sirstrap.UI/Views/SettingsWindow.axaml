@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
     mc:Ignorable="d"
-    Background="#75151b23"
     CanResize="False"
     ExtendClientAreaToDecorationsHint="True"
     Icon="/Assets/favicon.ico"
@@ -40,7 +39,7 @@
             VerticalAlignment="Stretch"
             Background="#212830"
             BoxShadow="0 0 10 0 #212830"
-            CornerRadius="5"
+            CornerRadius="16"
             Padding="5">
             <Grid>
                 <Grid.RowDefinitions>
