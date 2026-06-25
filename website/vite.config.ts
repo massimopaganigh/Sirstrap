@@ -19,11 +19,7 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
-  optimizeDeps: {
-    esbuildOptions: {
-      define: {
-        "process.env.NODE_ENV": JSON.stringify(mode),
-      },
-    },
+  define: {
+    "process.env.NODE_ENV": JSON.stringify(mode),
   },
 }));
