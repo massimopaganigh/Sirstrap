@@ -2,28 +2,63 @@ name: Format Check
 
 on:
   push:
-    branches: [ develop ]
+    branches:
+      - develop
   pull_request:
-    branches: [ develop ]
+    branches:
+      - develop
   workflow_dispatch:
   workflow_call:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   format:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout
+      - name: Check out the repository
         uses: actions/checkout@v6
-
-      - name: Setup dotnet
-        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
+          ref: ${{ (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && github.head_ref || '' }}
+          token: ${{ secrets.GHP || github.token }}
 
-      - name: Verify formatting
-        shell: bash
-        run: dotnet format src/Sirstrap.slnx --verify-no-changes
+      - name: Set up the build environment
+        uses: ./.github/actions/setup-build-env
+        with:
+          cache: 'false'
+
+      - name: Apply code formatting
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          Write-Host 'Applying dotnet format to src/Sirstrap.slnx...'
+          dotnet format src/Sirstrap.slnx
+
+      - name: Commit formatting fixes
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if (-not (git status --porcelain)) {
+              Write-Host 'No formatting changes to commit; the solution is already well formatted.'
+              exit 0
+          }
+          Write-Host 'Committing and pushing formatting fixes to ${{ github.head_ref }}...'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'style: apply dotnet format'
+          git push
+
+      - name: Verify code formatting
+        if: ${{ !(github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          Write-Host 'Verifying the formatting of src/Sirstrap.slnx...'
+          dotnet format src/Sirstrap.slnx --verify-no-changes

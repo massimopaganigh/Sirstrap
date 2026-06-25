@@ -1,0 +1,142 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      run-security-scan:
+        description: Run Microsoft Security DevOps and upload the SARIF results.
+        type: boolean
+        default: false
+      create-release:
+        description: Publish a GitHub release from the packaged archives, on tag pushes only.
+        type: boolean
+        default: false
+      prerelease:
+        description: Mark the GitHub release as a prerelease.
+        type: boolean
+        default: false
+      run-winget-release:
+        description: Submit winget manifest updates, on tag pushes only.
+        type: boolean
+        default: false
+    secrets:
+      winget-token:
+        description: GitHub token used by wingetcreate.
+        required: false
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v6
+
+      - name: Set up the build environment
+        uses: ./.github/actions/setup-build-env
+
+      - name: Read the version
+        id: version
+        uses: ./.github/actions/read-version
+
+      - name: Restore dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          Write-Host 'Restoring NuGet packages for src/Sirstrap.slnx...'
+          dotnet restore src/Sirstrap.slnx
+
+      - name: Audit dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Write-Host 'Checking for outdated NuGet packages...'
+          dotnet list src/Sirstrap.slnx package --outdated
+          $report = dotnet list src/Sirstrap.slnx package --outdated --format json 2>$null | ConvertFrom-Json -ErrorAction SilentlyContinue
+          if ($report.projects.frameworks.topLevelPackages.Count -gt 0) {
+              Write-Host 'Outdated NuGet packages detected; failing the build.' -ForegroundColor Red
+              exit 1
+          }
+          Write-Host 'All NuGet packages are up to date.' -ForegroundColor Green
+
+      - name: Run unit tests
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $PSNativeCommandUseErrorActionPreference = $true
+          Write-Host 'Running Sirstrap.Core unit tests...'
+          dotnet test src/Sirstrap.Core.Tests/Sirstrap.Core.Tests.csproj
+
+      - name: Publish SirHurt.Cleaner.CLI
+        uses: ./.github/actions/publish-app
+        with:
+          project: src/SirHurt.Cleaner.CLI/SirHurt.Cleaner.CLI.csproj
+          output-dir: out/SirHurt.Cleaner.CLI
+          fat-output-dir: out/SirHurt.Cleaner.CLI_fat
+          executable: SirHurtCleaner.exe
+          version: ${{ steps.version.outputs.version }}
+
+      - name: Publish Sirstrap.CLI
+        uses: ./.github/actions/publish-app
+        with:
+          project: src/Sirstrap.CLI/Sirstrap.CLI.csproj
+          output-dir: out/Sirstrap.CLI
+          fat-output-dir: out/Sirstrap.CLI_fat
+          executable: Sirstrap.exe
+          version: ${{ steps.version.outputs.version }}
+
+      - name: Publish Sirstrap.UI
+        uses: ./.github/actions/publish-app
+        with:
+          project: src/Sirstrap.UI/Sirstrap.UI.csproj
+          output-dir: out/Sirstrap.UI
+          fat-output-dir: out/Sirstrap.UI_fat
+          executable: Sirstrap.exe
+          version: ${{ steps.version.outputs.version }}
+
+      - name: Smoke test Sirstrap.CLI
+        uses: ./.github/actions/smoke-test
+
+      - name: Package SirHurt.Cleaner.CLI
+        uses: ./.github/actions/package-app
+        with:
+          name: SirHurt.Cleaner.CLI
+          output-dir: out/SirHurt.Cleaner.CLI
+          fat-output-dir: out/SirHurt.Cleaner.CLI_fat
+
+      - name: Package Sirstrap.CLI
+        uses: ./.github/actions/package-app
+        with:
+          name: Sirstrap.CLI
+          output-dir: out/Sirstrap.CLI
+          fat-output-dir: out/Sirstrap.CLI_fat
+
+      - name: Package Sirstrap.UI
+        uses: ./.github/actions/package-app
+        with:
+          name: Sirstrap.UI
+          output-dir: out/Sirstrap.UI
+          fat-output-dir: out/Sirstrap.UI_fat
+
+      - name: Upload build artifacts
+        uses: ./.github/actions/upload-build-artifacts
+
+      - name: Run security scan
+        if: inputs.run-security-scan
+        uses: ./.github/actions/security-scan
+
+      - name: Create the GitHub release
+        if: inputs.create-release && startsWith(github.ref, 'refs/tags/')
+        uses: ./.github/actions/create-release
+        with:
+          prerelease: ${{ inputs.prerelease }}
+
+      - name: Submit the winget manifests
+        if: inputs.run-winget-release && startsWith(github.ref, 'refs/tags/')
+        uses: ./.github/actions/winget-release
+        with:
+          token: ${{ secrets.winget-token }}
+          version: ${{ steps.version.outputs.version }}
+          version-tag: ${{ steps.version.outputs.version-tag }}
+          repository: ${{ github.repository }}

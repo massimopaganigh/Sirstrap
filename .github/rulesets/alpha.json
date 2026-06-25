@@ -1,5 +1,5 @@
 {
-  "name": "alpha-branches-protection",
+  "name": "alpha-protection",
   "target": "branch",
   "enforcement": "active",
   "conditions": {

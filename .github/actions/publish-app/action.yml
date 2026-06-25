@@ -1,0 +1,62 @@
+name: Publish app
+description: Publishes a self-contained AOT executable, keeps an uncompressed copy and compresses the shipped one with UPX.
+
+inputs:
+  project:
+    description: Path to the project file to publish, relative to the repository root.
+    required: true
+  output-dir:
+    description: Output directory for the shipped, compressed build, relative to the repository root.
+    required: true
+  fat-output-dir:
+    description: Output directory for the uncompressed copy, relative to the repository root.
+    required: true
+  executable:
+    description: Name of the produced executable, for example Sirstrap.exe.
+    required: true
+  version:
+    description: Numeric version to stamp into the assembly.
+    required: true
+  upx:
+    description: Path to the UPX executable, relative to the repository root.
+    required: false
+    default: src/ext/upx-5.0.2-win64/upx.exe
+
+runs:
+  using: composite
+  steps:
+    - name: Publish and compress ${{ inputs.executable }}
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $PSNativeCommandUseErrorActionPreference = $true
+
+        $outputDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.output-dir }}'
+        $fatDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.fat-output-dir }}'
+        $upx = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.upx }}'
+        $executable = '${{ inputs.executable }}'
+
+        Write-Host "Publishing ${{ inputs.project }} as a self-contained AOT executable (version ${{ inputs.version }})..."
+        dotnet publish '${{ inputs.project }}' `
+          -p:PublishProfile=FolderProfile `
+          -p:PublishDir="$outputDir\" `
+          -p:PublishAot=true `
+          -p:Version=${{ inputs.version }} `
+          -c Release -r win-x64 -f net10.0
+
+        Write-Host "Removing debug symbols from $outputDir..."
+        Remove-Item -Path (Join-Path $outputDir '*.pdb') -Force -ErrorAction SilentlyContinue
+
+        Write-Host "Copying the uncompressed build to $fatDir..."
+        New-Item -ItemType Directory -Force -Path $fatDir | Out-Null
+        Copy-Item -Path (Join-Path $outputDir '*') -Destination $fatDir -Recurse -Force
+
+        Write-Host "Compressing $executable with UPX..."
+        $exePath = Join-Path $outputDir $executable
+        $tmpPath = Join-Path $outputDir "_$executable"
+        Rename-Item -Path $exePath -NewName "_$executable"
+        & $upx --best --ultra-brute $tmpPath -o $exePath
+
+        Write-Host "Verifying the UPX-compressed $executable..."
+        & $upx -t $exePath
+        Remove-Item -Path $tmpPath -Force

@@ -1,0 +1,24 @@
+name: Read version
+description: Reads the VERSION file and exposes both the raw release tag and the numeric version.
+
+outputs:
+  version:
+    description: Numeric version, with the leading 'v' and the '-beta' suffix removed.
+    value: ${{ steps.read.outputs.version }}
+  version-tag:
+    description: Raw VERSION file contents used as the release tag (for example v10.12.3.0-beta).
+    value: ${{ steps.read.outputs.version-tag }}
+
+runs:
+  using: composite
+  steps:
+    - name: Read the VERSION file
+      id: read
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $tag = (Get-Content (Join-Path $env:GITHUB_WORKSPACE 'VERSION') -Raw).Trim()
+        $version = $tag -replace 'v', '' -replace '-beta', ''
+        Write-Host "Resolved version $version from release tag $tag."
+        "version=$version" >> $env:GITHUB_OUTPUT
+        "version-tag=$tag" >> $env:GITHUB_OUTPUT

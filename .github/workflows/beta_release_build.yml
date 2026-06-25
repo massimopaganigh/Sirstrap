@@ -1,9 +1,9 @@
-name: Alpha Release Build
+name: Beta Release Build
 
 on:
   push:
     tags:
-      - 'v*-alpha'
+      - 'v*-beta'
   workflow_dispatch:
 
 jobs:
@@ -16,4 +16,6 @@ jobs:
     uses: ./.github/workflows/_build.yml
     with:
       create-release: true
-      prerelease: true
+      run-winget-release: true
+    secrets:
+      winget-token: ${{ secrets.GHP }}

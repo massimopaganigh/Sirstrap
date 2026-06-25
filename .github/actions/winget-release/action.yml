@@ -1,0 +1,42 @@
+name: Winget release
+description: Submits Sirstrap.CLI and Sirstrap.UI manifest updates to winget-pkgs.
+
+inputs:
+  token:
+    description: GitHub token used by wingetcreate to open the manifest pull request.
+    required: true
+  version:
+    description: Numeric package version.
+    required: true
+  version-tag:
+    description: Release tag the archives are downloaded from, for example v10.12.3.0-beta.
+    required: true
+  repository:
+    description: The owner/repo hosting the release artifacts.
+    required: true
+  wingetcreate:
+    description: Path to the wingetcreate executable, relative to the repository root.
+    required: false
+    default: src/ext/Microsoft.WindowsPackageManagerManifestCreator_1.10.3.0/wingetcreate.exe
+
+runs:
+  using: composite
+  steps:
+    - name: Submit the winget manifests
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $PSNativeCommandUseErrorActionPreference = $true
+
+        $wingetcreate = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.wingetcreate }}'
+        $baseUrl = 'https://github.com/${{ inputs.repository }}/releases/download/${{ inputs.version-tag }}'
+
+        Write-Host 'Submitting the winget manifest for Sirstrap.CLI (version ${{ inputs.version }})...'
+        & $wingetcreate update --submit --token '${{ inputs.token }}' `
+          --urls "$baseUrl/Sirstrap.CLI_fat.zip" `
+          --version ${{ inputs.version }} Sirstrap.CLI
+
+        Write-Host 'Submitting the winget manifest for Sirstrap.UI (version ${{ inputs.version }})...'
+        & $wingetcreate update --submit --token '${{ inputs.token }}' `
+          --urls "$baseUrl/Sirstrap.UI_fat.zip" `
+          --version ${{ inputs.version }} Sirstrap.UI
