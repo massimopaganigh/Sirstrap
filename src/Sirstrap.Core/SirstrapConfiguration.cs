@@ -22,9 +22,6 @@
 
         public static string ResolvedRobloxCdnUri { get; set; } = RobloxCdnService.DefaultBaseUri;
 
-        // Ordered fastest-first; downloads walk this list when a file is missing from the selected CDN.
-        public static IReadOnlyList<string> ResolvedRobloxCdnUris { get; set; } = [RobloxCdnService.DefaultBaseUri];
-
         public static string RobloxCdnUriOverride { get; set; } = string.Empty;
 
         public static string RobloxVersionOverride { get; set; } = string.Empty;

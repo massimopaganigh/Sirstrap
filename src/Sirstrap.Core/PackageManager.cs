@@ -74,64 +74,13 @@ namespace Sirstrap.Core
         private readonly HttpClient _httpClient = httpClient;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        private async Task<byte[]?> GetPackageBytesAsync(Configuration configuration, string package)
-        {
-            byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, package));
-
-            if (packageBytes != null)
-                return packageBytes;
-
-            // Not every CDN mirrors every file: walk the remaining CDNs from fastest to slowest.
-            string primaryCdnUri = SirstrapConfiguration.ResolvedRobloxCdnUri;
-
-            foreach (string fallbackCdnUri in SirstrapConfiguration.ResolvedRobloxCdnUris)
-            {
-                if (fallbackCdnUri.Equals(primaryCdnUri, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                Log.Warning("[*] {0} is unavailable on {1}, trying {2}...", package, primaryCdnUri, fallbackCdnUri);
-
-                packageBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, package, fallbackCdnUri));
-
-                if (packageBytes != null)
-                    return packageBytes;
-            }
-
-            return null;
-        }
-
-        private async Task<string?> GetManifestContentAsync(Configuration configuration)
-        {
-            string? manifestContent = await HttpClientExtension.GetStringAsync(_httpClient, UriBuilder.GetManifestUri(configuration));
-
-            if (manifestContent != null)
-                return manifestContent;
-
-            string primaryCdnUri = SirstrapConfiguration.ResolvedRobloxCdnUri;
-
-            foreach (string fallbackCdnUri in SirstrapConfiguration.ResolvedRobloxCdnUris)
-            {
-                if (fallbackCdnUri.Equals(primaryCdnUri, StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                Log.Warning("[*] The manifest is unavailable on {0}, trying {1}...", primaryCdnUri, fallbackCdnUri);
-
-                manifestContent = await HttpClientExtension.GetStringAsync(_httpClient, UriBuilder.GetManifestUri(configuration, fallbackCdnUri));
-
-                if (manifestContent != null)
-                    return manifestContent;
-            }
-
-            return null;
-        }
-
         private async Task<int> DownloadPackageAsync(Configuration configuration, string package, ZipArchive archive)
         {
             try
             {
                 Log.Information("[*] Downloading package: {0}...", package);
 
-                byte[]? packageBytes = await GetPackageBytesAsync(configuration, package)
+                byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, package))
                     ?? throw new InvalidOperationException($"No bytes were downloaded for the package: {package}.");
 
                 int byteCount = packageBytes.Length;
@@ -255,7 +204,7 @@ namespace Sirstrap.Core
             {
                 Log.Information("[*] Downloading package for Mac: {0}...", archiveName);
 
-                byte[]? archiveBytes = await GetPackageBytesAsync(configuration, archiveName)
+                byte[]? archiveBytes = await HttpClientExtension.GetByteArrayAsync(_httpClient, UriBuilder.GetPackageUri(configuration, archiveName))
                     ?? throw new InvalidOperationException($"No bytes were downloaded for the package for Mac: {archiveName}.");
 
                 int byteCount = archiveBytes.Length;
@@ -288,7 +237,7 @@ namespace Sirstrap.Core
             {
                 Log.Information("[*] Downloading packages for Windows...");
 
-                Manifest manifest = ManifestParser.Parse(await GetManifestContentAsync(configuration));
+                Manifest manifest = ManifestParser.Parse(await HttpClientExtension.GetStringAsync(_httpClient, UriBuilder.GetManifestUri(configuration)));
 
                 if (!manifest.IsValid)
                 {
