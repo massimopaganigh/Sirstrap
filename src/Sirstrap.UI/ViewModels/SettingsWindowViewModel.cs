@@ -2,16 +2,25 @@
 {
     public partial class SettingsWindowViewModel : ViewModelBase
     {
+        private readonly IUninstallService _uninstallService;
+
         [ObservableProperty]
-        private string _currentFullVersion = SirstrapUpdateService.GetCurrentFullVersion();
+        private string _currentFullVersion;
 
         [ObservableProperty]
         private ObservableCollection<string> _fontFamilies = [];
 
         [ObservableProperty]
-        private Settings _settings = new();
+        private Settings _settings;
 
-        public SettingsWindowViewModel() => GetFontFamilies();
+        public SettingsWindowViewModel(Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService)
+        {
+            _settings = settings;
+            _currentFullVersion = sirstrapVersion.GetFullVersion();
+            _uninstallService = uninstallService;
+
+            GetFontFamilies();
+        }
 
         [RelayCommand]
         private async Task BrowseInstallationPathAsync()
@@ -149,7 +158,7 @@
                 if (result != IDYES)
                     return;
 
-                await Task.Run(UninstallManager.Uninstall);
+                await Task.Run(_uninstallService.Uninstall);
 
                 await Dispatcher.UIThread.InvokeAsync(() => Environment.Exit(0));
             }

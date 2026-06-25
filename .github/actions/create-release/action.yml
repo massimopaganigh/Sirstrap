@@ -1,0 +1,22 @@
+name: Create GitHub release
+description: Publishes a GitHub release from the packaged archives.
+
+inputs:
+  files:
+    description: Glob of files to attach to the release.
+    required: false
+    default: out/release/*
+  prerelease:
+    description: Whether the release is a prerelease.
+    required: false
+    default: 'false'
+
+runs:
+  using: composite
+  steps:
+    - name: Publish the GitHub release
+      uses: softprops/action-gh-release@v3
+      with:
+        generate_release_notes: true
+        prerelease: ${{ inputs.prerelease }}
+        files: ${{ inputs.files }}

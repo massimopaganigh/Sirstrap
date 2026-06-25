@@ -1,5 +1,5 @@
 {
-  "name": "release-tags-protection",
+  "name": "tags-protection",
   "target": "tag",
   "enforcement": "active",
   "conditions": {

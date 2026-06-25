@@ -1,4 +1,12 @@
-﻿global using Serilog;
+global using Microsoft.Extensions.DependencyInjection;
+global using Serilog;
 global using Serilog.Events;
 global using Sirstrap.Core;
+global using Sirstrap.Core.Common;
+global using Sirstrap.Core.Deployment;
+global using Sirstrap.Core.Ipc;
+global using Sirstrap.Core.Logging;
+global using Sirstrap.Core.Settings;
+global using Sirstrap.Core.Update;
+global using Sirstrap.Core.Windows;
 global using System.Reflection;

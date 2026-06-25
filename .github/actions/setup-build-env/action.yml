@@ -1,0 +1,29 @@
+name: Set up build environment
+description: Installs the .NET SDK and optionally restores the NuGet package cache.
+
+inputs:
+  dotnet-version:
+    description: .NET SDK version to install.
+    required: false
+    default: '10.0.x'
+  cache:
+    description: Whether to restore and save the NuGet package cache.
+    required: false
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    - name: Install the .NET SDK
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: ${{ inputs.dotnet-version }}
+
+    - name: Restore the NuGet package cache
+      if: inputs.cache == 'true'
+      uses: actions/cache@v5
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-

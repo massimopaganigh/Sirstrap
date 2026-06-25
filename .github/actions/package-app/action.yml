@@ -1,0 +1,49 @@
+name: Package app
+description: Produces zip and SirCab archives for both the shipped and the uncompressed build of an app.
+
+inputs:
+  name:
+    description: Base archive name, for example Sirstrap.CLI. The uncompressed variant is suffixed with _fat.
+    required: true
+  output-dir:
+    description: Shipped build directory to archive, relative to the repository root.
+    required: true
+  fat-output-dir:
+    description: Uncompressed build directory to archive, relative to the repository root.
+    required: true
+  release-dir:
+    description: Destination directory for the archives, relative to the repository root.
+    required: false
+    default: out/release
+  sircab:
+    description: Path to the SirCab executable, relative to the repository root.
+    required: false
+    default: src/ext/SirCab/SirCab.exe
+
+runs:
+  using: composite
+  steps:
+    - name: Package ${{ inputs.name }}
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+        $PSNativeCommandUseErrorActionPreference = $true
+
+        $outputDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.output-dir }}'
+        $fatDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.fat-output-dir }}'
+        $releaseDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.release-dir }}'
+        $sircab = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.sircab }}'
+        $name = '${{ inputs.name }}'
+
+        New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
+
+        Write-Host "Archiving $name as zip and cab into $releaseDir..."
+        Compress-Archive -Path (Join-Path $outputDir '*') -DestinationPath (Join-Path $releaseDir "$name.zip") -Force
+        & $sircab $outputDir $releaseDir $name 'Cab' 'LZX' 'False'
+
+        Write-Host "Archiving ${name}_fat as zip and cab into $releaseDir..."
+        Compress-Archive -Path (Join-Path $fatDir '*') -DestinationPath (Join-Path $releaseDir "${name}_fat.zip") -Force
+        & $sircab $fatDir $releaseDir "${name}_fat" 'Cab' 'LZX' 'False'
+
+        Write-Host "Removing SirCab directive files from $releaseDir..."
+        Remove-Item -Path (Join-Path $releaseDir '*.ddf') -Force -ErrorAction SilentlyContinue

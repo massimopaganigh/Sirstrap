@@ -1,0 +1,52 @@
+name: Smoke test
+description: Runs the published executable with a timeout, capturing its output to a log. A timeout counts as success.
+
+inputs:
+  executable:
+    description: Path to the executable to run, relative to the repository root.
+    required: false
+    default: out/Sirstrap.CLI/Sirstrap.exe
+  log:
+    description: Path to the captured output log, relative to the repository root.
+    required: false
+    default: out/Sirstrap.CLI_test.log
+  timeout-seconds:
+    description: Maximum run time before the process is killed and the test is considered passed.
+    required: false
+    default: '60'
+
+runs:
+  using: composite
+  steps:
+    - name: Run the smoke test
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = 'Stop'
+
+        $executable = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.executable }}'
+        $log = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.log }}'
+        $timeout = ${{ inputs.timeout-seconds }}
+
+        $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+        $startInfo.FileName = $executable
+        $startInfo.RedirectStandardOutput = $true
+        $startInfo.RedirectStandardError = $true
+        $startInfo.UseShellExecute = $false
+        $startInfo.CreateNoWindow = $true
+
+        Write-Host "Starting $executable with a $timeout second timeout..."
+        $process = [System.Diagnostics.Process]::Start($startInfo)
+        $outputReader = $process.StandardOutput
+        $errorReader = $process.StandardError
+
+        if ($process.WaitForExit($timeout * 1000)) {
+            $exitCode = $process.ExitCode
+            ($outputReader.ReadToEnd() + $errorReader.ReadToEnd()) | Out-File $log -Encoding UTF8
+            Write-Host "$executable exited with code $exitCode."
+            exit $exitCode
+        }
+
+        Write-Host "$executable did not exit within $timeout seconds; killing it and treating the smoke test as passed."
+        $process.Kill()
+        $process.WaitForExit()
+        exit 0

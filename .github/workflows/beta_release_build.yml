@@ -1,0 +1,21 @@
+name: Beta Release Build
+
+on:
+  push:
+    tags:
+      - 'v*-beta'
+  workflow_dispatch:
+
+jobs:
+  build:
+    permissions:
+      contents: write
+      discussions: write
+      id-token: write
+      security-events: write
+    uses: ./.github/workflows/_build.yml
+    with:
+      create-release: true
+      run-winget-release: true
+    secrets:
+      winget-token: ${{ secrets.GHP }}

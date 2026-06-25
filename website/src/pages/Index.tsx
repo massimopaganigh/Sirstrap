@@ -103,16 +103,21 @@ const accentBorder: Record<string, string> = {
 
 const useTypewriter = (text: string, enabled: boolean) => {
   const [displayed, setDisplayed] = useState(text);
+  const [resetKey, setResetKey] = useState(`${text}|${enabled}`);
   const phase = useRef<'typing' | 'wait' | 'deleting' | 'wait2'>('wait');
+
+  // Reset state during render when text/enabled change, instead of in the effect.
+  const key = `${text}|${enabled}`;
+  if (key !== resetKey) {
+    setResetKey(key);
+    setDisplayed(text);
+  }
 
   useEffect(() => {
     if (!enabled) {
-      setDisplayed(text);
-      phase.current = 'wait';
       return;
     }
 
-    setDisplayed(text);
     phase.current = 'wait';
 
     let t: ReturnType<typeof setTimeout>;
@@ -167,9 +172,16 @@ const TypewriterSpan = ({ text, className, enabled }: { text: string; className?
 
 const useRapidEee = (count: number, enabled: boolean) => {
   const [n, setN] = useState(0);
+  const [resetKey, setResetKey] = useState(`${count}|${enabled}`);
+
+  // Reset state during render when count/enabled change, instead of in the effect.
+  const key = `${count}|${enabled}`;
+  if (key !== resetKey) {
+    setResetKey(key);
+    setN(0);
+  }
 
   useEffect(() => {
-    setN(0);
     if (!enabled) return;
 
     let cancelled = false;
