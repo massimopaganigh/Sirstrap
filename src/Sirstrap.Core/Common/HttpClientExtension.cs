@@ -10,17 +10,22 @@ namespace Sirstrap.Core.Common
                 {
                     return await request();
                 }
+                catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    Log.Warning(ex, "[!] The {RequestDescription} request to {Uri} failed: HTTP 404.", requestDescription, uri);
+
+                    return null;
+                }
                 catch (Exception ex)
                 {
                     if (attempt < attempts)
                     {
                         Log.Warning("[!] The {RequestDescription} request to {Uri} failed, retrying...", requestDescription, uri);
+
                         await Task.Delay(TimeSpan.FromSeconds(Math.Pow(2, attempt)));
                     }
                     else
-                    {
                         Log.Error(ex, "[!] The {RequestDescription} request to {Uri} failed.", requestDescription, uri);
-                    }
                 }
 
             return null;

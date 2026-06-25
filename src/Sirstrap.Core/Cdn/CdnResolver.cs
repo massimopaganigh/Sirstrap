@@ -5,6 +5,7 @@ namespace Sirstrap.Core.Cdn
         private readonly ICdnCandidateProvider _candidateProvider;
         private readonly ICdnUriNormalizer _normalizer;
         private readonly ICdnProber _prober;
+        private int _rankingGeneration;
         private readonly SirstrapConfiguration _sirstrapConfiguration;
         private readonly ICdnTelemetry _telemetry;
 
@@ -23,13 +24,97 @@ namespace Sirstrap.Core.Cdn
             _sirstrapConfiguration = sirstrapConfiguration;
         }
 
+        public async Task<string> ResolveAsync(Configuration configuration, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            int generation = Interlocked.Increment(ref _rankingGeneration);
+            var normalizedOverride = _normalizer.Normalize(_sirstrapConfiguration.RobloxCdnUriOverride);
+
+            _sirstrapConfiguration.RobloxCdnUriOverride = normalizedOverride;
+
+            if (!string.IsNullOrEmpty(normalizedOverride))
+            {
+                _sirstrapConfiguration.ResolvedRobloxCdnUri = normalizedOverride;
+                _sirstrapConfiguration.ResolvedRobloxCdnUris = [normalizedOverride];
+
+                Log.Information("[*] Using the Roblox CDN URI override {BaseUri}.", normalizedOverride);
+
+                _telemetry.RecordResolved(normalizedOverride, CdnResolutionSource.Override);
+
+                return normalizedOverride;
+            }
+
+            if (string.IsNullOrEmpty(configuration.VersionHash))
+            {
+                Log.Warning("[!] Skipped the Roblox CDN probe (no version hash), falling back to {BaseUri}.", RobloxCdnService.DefaultBaseUri);
+
+                _sirstrapConfiguration.ResolvedRobloxCdnUri = RobloxCdnService.DefaultBaseUri;
+                _sirstrapConfiguration.ResolvedRobloxCdnUris = [RobloxCdnService.DefaultBaseUri];
+                _telemetry.RecordResolved(RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
+
+                return RobloxCdnService.DefaultBaseUri;
+            }
+
+            (var baseUri, var source) = await SelectFastestAsync(configuration, generation, cancellationToken).ConfigureAwait(false);
+
+            _sirstrapConfiguration.ResolvedRobloxCdnUri = baseUri;
+            _telemetry.RecordResolved(baseUri, source);
+
+            return baseUri;
+        }
+
         #region PRIVATE METHODS
-        private async Task<(string BaseUri, CdnResolutionSource Source)> SelectFastestAsync(Configuration configuration, CancellationToken cancellationToken)
+        private async Task DrainRemainingProbesAsync(int generation, IReadOnlyList<CdnCandidate> candidates, List<string> ranking, List<Task<CdnProbeResult?>> pendingProbes)
+        {
+            while (pendingProbes.Count > 0)
+            {
+                var completedProbe = await Task.WhenAny(pendingProbes).ConfigureAwait(false);
+
+                pendingProbes.Remove(completedProbe);
+
+                CdnProbeResult? result;
+
+                try
+                {
+                    result = await completedProbe.ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+
+                if (result != null)
+                {
+                    ranking.Add(result.Candidate.BaseUri);
+
+                    PublishRanking(generation, candidates, ranking);
+                }
+            }
+        }
+
+        private void PublishRanking(int generation, IReadOnlyList<CdnCandidate> candidates, List<string> ranking)
+        {
+            if (Volatile.Read(ref _rankingGeneration) != generation)
+                return;
+
+            _sirstrapConfiguration.ResolvedRobloxCdnUris =
+            [
+                .. ranking,
+                .. candidates.Select(candidate => candidate.BaseUri).Where(baseUri => !ranking.Contains(baseUri))
+            ];
+        }
+
+        private async Task<(string BaseUri, CdnResolutionSource Source)> SelectFastestAsync(Configuration configuration, int generation, CancellationToken cancellationToken)
         {
             Log.Information("[*] Selecting the fastest Roblox CDN...");
 
             var candidates = _candidateProvider.GetCandidates();
+
             List<Task<CdnProbeResult?>> pendingProbes = [.. candidates.Select(candidate => _prober.ProbeAsync(candidate, configuration, cancellationToken))];
+            List<string> ranking = [];
+
+            PublishRanking(generation, candidates, ranking);
 
             while (pendingProbes.Count > 0)
             {
@@ -41,7 +126,13 @@ namespace Sirstrap.Core.Cdn
 
                 if (selected != null)
                 {
+                    ranking.Add(selected.Candidate.BaseUri);
+
+                    PublishRanking(generation, candidates, ranking);
+
                     Log.Information("[*] Selected the Roblox CDN {BaseUri} in {ElapsedMs} ms.", selected.Candidate.BaseUri, (int)selected.Elapsed.TotalMilliseconds);
+
+                    _ = DrainRemainingProbesAsync(generation, candidates, ranking, pendingProbes);
 
                     return (selected.Candidate.BaseUri, CdnResolutionSource.Probe);
                 }
@@ -52,41 +143,5 @@ namespace Sirstrap.Core.Cdn
             return (RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
         }
         #endregion
-
-        public async Task<string> ResolveAsync(Configuration configuration, CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(configuration);
-
-            var normalizedOverride = _normalizer.Normalize(_sirstrapConfiguration.RobloxCdnUriOverride);
-            _sirstrapConfiguration.RobloxCdnUriOverride = normalizedOverride;
-
-            if (!string.IsNullOrEmpty(normalizedOverride))
-            {
-                _sirstrapConfiguration.ResolvedRobloxCdnUri = normalizedOverride;
-
-                Log.Information("[*] Using the Roblox CDN URI override {BaseUri}.", normalizedOverride);
-                _telemetry.RecordResolved(normalizedOverride, CdnResolutionSource.Override);
-
-                return normalizedOverride;
-            }
-
-            if (string.IsNullOrEmpty(configuration.VersionHash))
-            {
-                Log.Warning("[!] Skipped the Roblox CDN probe (no version hash), falling back to {BaseUri}.", RobloxCdnService.DefaultBaseUri);
-
-                _sirstrapConfiguration.ResolvedRobloxCdnUri = RobloxCdnService.DefaultBaseUri;
-
-                _telemetry.RecordResolved(RobloxCdnService.DefaultBaseUri, CdnResolutionSource.Fallback);
-
-                return RobloxCdnService.DefaultBaseUri;
-            }
-
-            (var baseUri, var source) = await SelectFastestAsync(configuration, cancellationToken).ConfigureAwait(false);
-            _sirstrapConfiguration.ResolvedRobloxCdnUri = baseUri;
-
-            _telemetry.RecordResolved(baseUri, source);
-
-            return baseUri;
-        }
     }
 }

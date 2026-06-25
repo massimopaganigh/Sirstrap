@@ -119,5 +119,71 @@ namespace Sirstrap.Core.Tests.Cdn
             Assert.Equal(("https://fast.example.com", CdnResolutionSource.Probe), Assert.Single(telemetry.Resolved));
             Assert.True(stopwatch.Elapsed < TimeSpan.FromSeconds(10));
         }
+
+        [Fact]
+        public async Task ResolveAsync_PublishesRankedCdnUris_FastestFirst()
+        {
+            SirstrapConfiguration config = new() { RobloxCdnUriOverride = string.Empty };
+            CdnResolver resolver = NewResolver(
+                config,
+                new StaticCandidateProvider(
+                [
+                    new CdnCandidate("https://slow.example.com", 0),
+                    new CdnCandidate("https://fast.example.com", 2),
+                    new CdnCandidate("https://dead.example.com", 2)
+                ]),
+                new FakeCdnProber(new()
+                {
+                    ["https://slow.example.com"] = TimeSpan.FromMilliseconds(300),
+                    ["https://fast.example.com"] = TimeSpan.FromMilliseconds(50),
+                    ["https://dead.example.com"] = null
+                }),
+                new RecordingCdnTelemetry());
+
+            string resolved = await resolver.ResolveAsync(NewConfiguration(), TestContext.Current.CancellationToken);
+
+            Assert.Equal("https://fast.example.com", resolved);
+
+            DateTime deadline = DateTime.UtcNow + TimeSpan.FromSeconds(5);
+
+            while (config.ResolvedRobloxCdnUris.Count > 1 && config.ResolvedRobloxCdnUris[1] != "https://slow.example.com" && DateTime.UtcNow < deadline)
+                await Task.Delay(20, TestContext.Current.CancellationToken);
+
+            Assert.Equal(["https://fast.example.com", "https://slow.example.com", "https://dead.example.com"], config.ResolvedRobloxCdnUris);
+        }
+
+        [Fact]
+        public async Task ResolveAsync_PublishesOnlyOverride_WhenOverrideSet()
+        {
+            SirstrapConfiguration config = new() { RobloxCdnUriOverride = "https://custom.example.com" };
+            CdnResolver resolver = NewResolver(config, new StaticCandidateProvider([new CdnCandidate(RobloxCdnService.DefaultBaseUri, 0)]), new FakeCdnProber([]), new RecordingCdnTelemetry());
+
+            await resolver.ResolveAsync(NewConfiguration(), TestContext.Current.CancellationToken);
+
+            Assert.Equal(["https://custom.example.com"], config.ResolvedRobloxCdnUris);
+        }
+
+        [Fact]
+        public async Task ResolveAsync_PublishesAllCandidates_WhenAllProbesFail()
+        {
+            SirstrapConfiguration config = new() { RobloxCdnUriOverride = string.Empty };
+            CdnResolver resolver = NewResolver(
+                config,
+                new StaticCandidateProvider(
+                [
+                    new CdnCandidate("https://a.example.com", 0),
+                    new CdnCandidate("https://b.example.com", 2)
+                ]),
+                new FakeCdnProber(new()
+                {
+                    ["https://a.example.com"] = null,
+                    ["https://b.example.com"] = null
+                }),
+                new RecordingCdnTelemetry());
+
+            await resolver.ResolveAsync(NewConfiguration(), TestContext.Current.CancellationToken);
+
+            Assert.Equal(["https://a.example.com", "https://b.example.com"], config.ResolvedRobloxCdnUris);
+        }
     }
 }

@@ -20,6 +20,8 @@ namespace Sirstrap.Core.Settings
 
         public string ResolvedRobloxCdnUri { get; set; } = RobloxCdnService.DefaultBaseUri;
 
+        public IReadOnlyList<string> ResolvedRobloxCdnUris { get; set; } = [RobloxCdnService.DefaultBaseUri];
+
         public bool RobloxApi { get; set; }
 
         public string RobloxCdnUriOverride { get; set; } = string.Empty;

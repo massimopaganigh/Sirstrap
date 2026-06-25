@@ -2,8 +2,12 @@ namespace Sirstrap.Core.Tests.Deployment
 {
     public class PackageManagerTests
     {
-        private static PackageManager NewManager(HttpClient client, IPathManager pathManager)
-            => new(client, new RobloxUriFactory(new SirstrapConfiguration(), new CdnUriNormalizer()), pathManager, NullPerformanceTelemetry.Instance);
+        private static PackageManager NewManager(HttpClient client, IPathManager pathManager, SirstrapConfiguration? sirstrapConfiguration = null)
+        {
+            sirstrapConfiguration ??= new SirstrapConfiguration();
+
+            return new(client, new RobloxUriFactory(sirstrapConfiguration, new CdnUriNormalizer()), pathManager, NullPerformanceTelemetry.Instance, sirstrapConfiguration);
+        }
 
         [Fact]
         public async Task DownloadWindowsArchiveAsync_BuildsZip_WithAppSettingsAndPackages()

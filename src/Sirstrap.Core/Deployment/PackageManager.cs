@@ -1,6 +1,6 @@
 namespace Sirstrap.Core.Deployment
 {
-    public sealed class PackageManager(HttpClient httpClient, IRobloxUriFactory robloxUriFactory, IPathManager pathManager, IPerformanceTelemetry performanceTelemetry) : IPackageManager
+    public sealed class PackageManager(HttpClient httpClient, IRobloxUriFactory robloxUriFactory, IPathManager pathManager, IPerformanceTelemetry performanceTelemetry, SirstrapConfiguration sirstrapConfiguration) : IPackageManager
     {
         private const string APP_SETTINGS_XML = """<?xml version="1.0" encoding="UTF-8"?><Settings><ContentFolder>content</ContentFolder><BaseUrl>http://www.roblox.com</BaseUrl></Settings>""";
 
@@ -17,7 +17,7 @@ namespace Sirstrap.Core.Deployment
             {
                 Log.Information("[*] Downloading the Mac archive {ArchiveName}...", archiveName);
 
-                byte[]? archiveBytes = await HttpClientExtension.GetByteArrayAsync(httpClient, robloxUriFactory.GetPackageUri(configuration, archiveName))
+                byte[]? archiveBytes = await GetPackageBytesAsync(configuration, archiveName)
                     ?? throw new InvalidOperationException($"No bytes were downloaded for the package for Mac: {archiveName}.");
 
                 int byteCount = archiveBytes.Length;
@@ -50,7 +50,7 @@ namespace Sirstrap.Core.Deployment
             {
                 Log.Information("[*] Downloading the Windows packages...");
 
-                Manifest manifest = ManifestParser.Parse(await HttpClientExtension.GetStringAsync(httpClient, robloxUriFactory.GetManifestUri(configuration)));
+                Manifest manifest = ManifestParser.Parse(await GetManifestContentAsync(configuration));
 
                 if (!manifest.IsValid)
                 {
@@ -105,7 +105,7 @@ namespace Sirstrap.Core.Deployment
             {
                 Log.Information("[*] Downloading the package {Package}...", package);
 
-                byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(httpClient, robloxUriFactory.GetPackageUri(configuration, package))
+                byte[]? packageBytes = await GetPackageBytesAsync(configuration, package)
                     ?? throw new InvalidOperationException($"No bytes were downloaded for the package: {package}.");
 
                 int byteCount = packageBytes.Length;
@@ -156,5 +156,55 @@ namespace Sirstrap.Core.Deployment
             => configuration.IsWindowsPlayer()
                 ? CompressionLevel.NoCompression
                 : CompressionLevel.Fastest;
+
+        private async Task<byte[]?> GetPackageBytesAsync(Configuration configuration, string package)
+        {
+            byte[]? packageBytes = await HttpClientExtension.GetByteArrayAsync(httpClient, robloxUriFactory.GetPackageUri(configuration, package));
+
+            if (packageBytes != null)
+                return packageBytes;
+
+            string primaryCdnUri = sirstrapConfiguration.ResolvedRobloxCdnUri;
+
+            foreach (string fallbackCdnUri in sirstrapConfiguration.ResolvedRobloxCdnUris)
+            {
+                if (fallbackCdnUri.Equals(primaryCdnUri, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                Log.Warning("[!] The package {Package} is unavailable on {PrimaryCdnUri}, trying {FallbackCdnUri}...", package, primaryCdnUri, fallbackCdnUri);
+
+                packageBytes = await HttpClientExtension.GetByteArrayAsync(httpClient, robloxUriFactory.GetPackageUri(configuration, package, fallbackCdnUri));
+
+                if (packageBytes != null)
+                    return packageBytes;
+            }
+
+            return null;
+        }
+
+        private async Task<string?> GetManifestContentAsync(Configuration configuration)
+        {
+            string? manifestContent = await HttpClientExtension.GetStringAsync(httpClient, robloxUriFactory.GetManifestUri(configuration));
+
+            if (manifestContent != null)
+                return manifestContent;
+
+            string primaryCdnUri = sirstrapConfiguration.ResolvedRobloxCdnUri;
+
+            foreach (string fallbackCdnUri in sirstrapConfiguration.ResolvedRobloxCdnUris)
+            {
+                if (fallbackCdnUri.Equals(primaryCdnUri, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                Log.Warning("[!] The manifest is unavailable on {PrimaryCdnUri}, trying {FallbackCdnUri}...", primaryCdnUri, fallbackCdnUri);
+
+                manifestContent = await HttpClientExtension.GetStringAsync(httpClient, robloxUriFactory.GetManifestUri(configuration, fallbackCdnUri));
+
+                if (manifestContent != null)
+                    return manifestContent;
+            }
+
+            return null;
+        }
     }
 }
