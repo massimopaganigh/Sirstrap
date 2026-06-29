@@ -3,6 +3,7 @@
     <Project Path="Sirstrap.Core.Tests/Sirstrap.Core.Tests.csproj" />
   </Folder>
   <Project Path="Magenta.Core/Magenta.Core.csproj" />
+  <Project Path="Monsoon/Monsoon.csproj" />
   <Project Path="SirHurt.Cleaner.cli/SirHurt.Cleaner.CLI.csproj" />
   <Project Path="Sirstrap.CLI/Sirstrap.CLI.csproj" />
   <Project Path="Sirstrap.Core/Sirstrap.Core.csproj" />
