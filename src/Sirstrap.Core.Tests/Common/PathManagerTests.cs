@@ -12,7 +12,7 @@ namespace Sirstrap.Core.Tests.Common
         [Fact]
         public void GetExtractionPath_CombinesInstallationPathAndVersion()
         {
-            SirstrapConfiguration config = new() { InstallationPath = @"C:\Install" };
+            SirstrapConfiguration config = new() { RobloxInstallationPath = @"C:\Install" };
             PathManager pathManager = NewPathManager(config, out _);
 
             Assert.Equal(Path.Combine(@"C:\Install", "v1"), pathManager.GetExtractionPath("v1"));
@@ -69,15 +69,15 @@ namespace Sirstrap.Core.Tests.Common
 
             SirstrapConfiguration config = new()
             {
-                InstallationPath = temp.Combine("current"),
-                PreviousInstallationPath = previous
+                RobloxInstallationPath = temp.Combine("current"),
+                RobloxPreviousInstallationPath = previous
             };
             PathManager pathManager = NewPathManager(config, out var settings);
 
             pathManager.PurgePreviousInstallationPath();
 
             Assert.False(Directory.Exists(previous));
-            Assert.Equal(string.Empty, config.PreviousInstallationPath);
+            Assert.Equal(string.Empty, config.RobloxPreviousInstallationPath);
             Assert.Equal(1, settings.SaveCalls);
         }
 
@@ -90,8 +90,8 @@ namespace Sirstrap.Core.Tests.Common
 
             SirstrapConfiguration config = new()
             {
-                InstallationPath = shared,
-                PreviousInstallationPath = shared
+                RobloxInstallationPath = shared,
+                RobloxPreviousInstallationPath = shared
             };
             PathManager pathManager = NewPathManager(config, out var settings);
 
@@ -104,7 +104,7 @@ namespace Sirstrap.Core.Tests.Common
         [Fact]
         public void PurgePreviousInstallationPath_DoesNothing_WhenPreviousMissing()
         {
-            SirstrapConfiguration config = new() { PreviousInstallationPath = string.Empty };
+            SirstrapConfiguration config = new() { RobloxPreviousInstallationPath = string.Empty };
             PathManager pathManager = NewPathManager(config, out var settings);
 
             pathManager.PurgePreviousInstallationPath();

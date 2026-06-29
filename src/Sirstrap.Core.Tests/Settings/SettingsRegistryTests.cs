@@ -20,18 +20,17 @@ namespace Sirstrap.Core.Tests.Settings
 
             string[] keys = [.. registry.Settings.Select(s => s.Key)];
 
-            Assert.Contains("AUTO_UPDATE", keys);
-            Assert.Contains("CHANNEL_NAME", keys);
-            Assert.Contains("FONT_FAMILY", keys);
-            Assert.Contains("INCOGNITO", keys);
-            Assert.Contains("INSTALLATION_PATH", keys);
-            Assert.Contains("MULTI_INSTANCE", keys);
-            Assert.Contains("PREVIOUS_INSTALLATION_PATH", keys);
-            Assert.Contains("ROBLOX_API", keys);
             Assert.Contains("ROBLOX_CDN_URI_OVERRIDE", keys);
-            Assert.Contains("ROBLOX_VERSION_OVERRIDE", keys);
-            Assert.Contains("TELEMETRY", keys);
-            Assert.Contains("TRAY_MODE", keys);
+            Assert.Contains("ROBLOX_INCOGNITO", keys);
+            Assert.Contains("ROBLOX_INSTALLATION_PATH", keys);
+            Assert.Contains("ROBLOX_MULTI_INSTANCE", keys);
+            Assert.Contains("ROBLOX_PREVIOUS_INSTALLATION_PATH", keys);
+            Assert.Contains("ROBLOX_VERSION_SOURCE", keys);
+            Assert.Contains("SIRSTRAP_AUTO_UPDATE", keys);
+            Assert.Contains("SIRSTRAP_CHANNEL", keys);
+            Assert.Contains("SIRSTRAP_FONT_FAMILY", keys);
+            Assert.Contains("SIRSTRAP_TELEMETRY", keys);
+            Assert.Contains("SIRSTRAP_TRAY_MODE", keys);
         }
 
         [Fact]
@@ -47,7 +46,7 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
 
-            Assert.Equal(SettingsSection.State, Find(registry, "PREVIOUS_INSTALLATION_PATH").Section);
+            Assert.Equal(SettingsSection.State, Find(registry, "ROBLOX_PREVIOUS_INSTALLATION_PATH").Section);
         }
 
         [Fact]
@@ -55,14 +54,14 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            SettingDefinition setting = Find(registry, "AUTO_UPDATE");
+            SettingDefinition setting = Find(registry, "SIRSTRAP_AUTO_UPDATE");
 
             Apply(setting, "False");
-            Assert.False(config.AutoUpdate);
+            Assert.False(config.SirstrapAutoUpdate);
             Assert.Equal("False", setting.Getter());
 
             Apply(setting, "not-a-bool");
-            Assert.False(config.AutoUpdate);
+            Assert.False(config.SirstrapAutoUpdate);
         }
 
         [Fact]
@@ -70,13 +69,13 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            SettingDefinition setting = Find(registry, "FONT_FAMILY");
+            SettingDefinition setting = Find(registry, "SIRSTRAP_FONT_FAMILY");
 
             Apply(setting, "Minecraft");
-            Assert.Equal("JetBrains Mono", config.FontFamily);
+            Assert.Equal("JetBrains Mono", config.SirstrapFontFamily);
 
             Apply(setting, "Consolas");
-            Assert.Equal("Consolas", config.FontFamily);
+            Assert.Equal("Consolas", config.SirstrapFontFamily);
         }
 
         [Fact]
@@ -84,13 +83,13 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            SettingDefinition setting = Find(registry, "INSTALLATION_PATH");
+            SettingDefinition setting = Find(registry, "ROBLOX_INSTALLATION_PATH");
 
             Apply(setting, "   ");
-            Assert.Equal(SirstrapConfiguration.GetDefaultInstallationPath(), config.InstallationPath);
+            Assert.Equal(SirstrapConfiguration.GetDefaultInstallationPath(), config.RobloxInstallationPath);
 
             Apply(setting, @"C:\Custom");
-            Assert.Equal(@"C:\Custom", config.InstallationPath);
+            Assert.Equal(@"C:\Custom", config.RobloxInstallationPath);
         }
 
         [Fact]
@@ -127,17 +126,36 @@ namespace Sirstrap.Core.Tests.Settings
         }
 
         [Fact]
+        public void VersionSource_MigratesLegacyRobloxApiBool()
+        {
+            SirstrapConfiguration config = new();
+            SettingsRegistry registry = NewRegistry(config, out _);
+            SettingDefinition setting = Find(registry, "ROBLOX_VERSION_SOURCE");
+
+            Assert.Contains("ROBLOX_API", setting.LegacyKeys);
+
+            Apply(setting, "True");
+            Assert.Equal(RobloxVersionSources.Roblox, config.RobloxVersionSource);
+
+            Apply(setting, "False");
+            Assert.Equal(RobloxVersionSources.SirHurt, config.RobloxVersionSource);
+
+            Apply(setting, RobloxVersionSources.ExecutorPrefix + "Wave");
+            Assert.Equal(RobloxVersionSources.ExecutorPrefix + "Wave", config.RobloxVersionSource);
+        }
+
+        [Fact]
         public void TrayMode_ParsesEnum()
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            SettingDefinition setting = Find(registry, "TRAY_MODE");
+            SettingDefinition setting = Find(registry, "SIRSTRAP_TRAY_MODE");
 
             Apply(setting, "onroblox");
-            Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
+            Assert.Equal(TrayMode.OnRoblox, config.SirstrapTrayMode);
 
             Apply(setting, "garbage");
-            Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
+            Assert.Equal(TrayMode.OnRoblox, config.SirstrapTrayMode);
         }
 
         [Fact]
@@ -145,9 +163,9 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out var telemetry);
 
-            Find(registry, "AUTO_UPDATE").MetricEmitter!();
+            Find(registry, "SIRSTRAP_AUTO_UPDATE").MetricEmitter!();
 
-            Assert.Contains(telemetry.Counters, c => c.Name == "settings.AutoUpdate");
+            Assert.Contains(telemetry.Counters, c => c.Name == "settings.SirstrapAutoUpdate");
         }
 
         [Fact]
@@ -155,7 +173,7 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
 
-            Assert.Null(Find(registry, "TELEMETRY").MetricEmitter);
+            Assert.Null(Find(registry, "SIRSTRAP_TELEMETRY").MetricEmitter);
         }
     }
 }

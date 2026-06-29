@@ -1,15 +1,9 @@
-using Serilog;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace Monsoon.Services.Weao
+namespace Sirstrap.Core.Weao
 {
     public sealed class WeaoClient : IDisposable
     {

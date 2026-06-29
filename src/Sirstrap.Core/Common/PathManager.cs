@@ -33,7 +33,7 @@ namespace Sirstrap.Core.Common
             return cacheDirectory;
         }
 
-        public string GetExtractionPath(string versionHash) => Path.Combine(sirstrapConfiguration.InstallationPath, versionHash);
+        public string GetExtractionPath(string versionHash) => Path.Combine(sirstrapConfiguration.RobloxInstallationPath, versionHash);
 
         public string GetLogsPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Logs");
 
@@ -73,19 +73,19 @@ namespace Sirstrap.Core.Common
         {
             try
             {
-                var previousPath = sirstrapConfiguration.PreviousInstallationPath;
+                var previousPath = sirstrapConfiguration.RobloxPreviousInstallationPath;
 
                 if (string.IsNullOrWhiteSpace(previousPath)
                     || !Directory.Exists(previousPath))
                     return;
 
-                if (string.Equals(previousPath, sirstrapConfiguration.InstallationPath, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(previousPath, sirstrapConfiguration.RobloxInstallationPath, StringComparison.OrdinalIgnoreCase))
                     return;
 
                 Log.Information("[*] Purging the previous installation path {InstallationPath}...", previousPath);
                 FileSystemOperations.DeleteDirectory(previousPath);
 
-                sirstrapConfiguration.PreviousInstallationPath = string.Empty;
+                sirstrapConfiguration.RobloxPreviousInstallationPath = string.Empty;
 
                 settingsService.SaveSettings();
                 Log.Information("[*] Purged the previous installation path.");

@@ -11,6 +11,7 @@ namespace Sirstrap.UI.ViewModels
         private readonly RobloxActivityWatcher _robloxActivityWatcher;
         private readonly ISettingsService _settingsService;
         private readonly ISirHurtService _sirHurtService;
+        private readonly IWeaoService _weaoService;
 
         [ObservableProperty]
         private string _accountName = string.Empty;
@@ -46,6 +47,12 @@ namespace Sirstrap.UI.ViewModels
         [ObservableProperty]
         private bool _showServerLocation = false;
 
+        [ObservableProperty]
+        private ObservableCollection<VersionSourceOption> _versionSources = [];
+
+        [ObservableProperty]
+        private VersionSourceOption? _selectedVersionSourceMain;
+
         private bool _wasRobloxRunning;
 
         public MainWindowViewModel(
@@ -58,7 +65,8 @@ namespace Sirstrap.UI.ViewModels
             RobloxActivityWatcher robloxActivityWatcher,
             ISettingsService settingsService,
             ISirHurtService sirHurtService,
-            ISirstrapVersion sirstrapVersion)
+            ISirstrapVersion sirstrapVersion,
+            IWeaoService weaoService)
         {
             _configuration = configuration;
             _httpClient = httpClient;
@@ -69,8 +77,11 @@ namespace Sirstrap.UI.ViewModels
             _robloxActivityWatcher = robloxActivityWatcher;
             _settingsService = settingsService;
             _sirHurtService = sirHurtService;
+            _weaoService = weaoService;
 
             CurrentFullVersion = sirstrapVersion.GetFullVersion();
+
+            _ = LoadVersionSourcesAsync();
 
             _logPollingTimer = new(_currentPollingInterval);
 
@@ -89,6 +100,37 @@ namespace Sirstrap.UI.ViewModels
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool AllocConsole();
+
+        private async Task LoadVersionSourcesAsync()
+        {
+            try
+            {
+                var options = await VersionSourceCatalog.BuildAsync(_weaoService);
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    VersionSources = new ObservableCollection<VersionSourceOption>(options);
+                    SelectedVersionSourceMain = VersionSources.FirstOrDefault(option => string.Equals(option.Value, _configuration.RobloxVersionSource, StringComparison.OrdinalIgnoreCase))
+                        ?? VersionSources.FirstOrDefault();
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(LoadVersionSourcesAsync));
+            }
+        }
+
+        partial void OnSelectedVersionSourceMainChanged(VersionSourceOption? value)
+        {
+            if (value == null
+                || string.Equals(value.Value, _configuration.RobloxVersionSource, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            _configuration.RobloxVersionSource = value.Value;
+            _settingsService.SaveSettings();
+
+            Log.Information("[*] Roblox version source set to {VersionSource} from the launch menu.", value.Value);
+        }
 
         private void FindRoblox()
         {
@@ -128,7 +170,7 @@ namespace Sirstrap.UI.ViewModels
                     && isRobloxRunning
                     && !_isMinimized)
                 {
-                    if (_configuration.TrayMode == TrayMode.OnRoblox)
+                    if (_configuration.SirstrapTrayMode == TrayMode.OnRoblox)
                         Dispatcher.UIThread.InvokeAsync(() =>
                         {
                             mainWindow.Hide();

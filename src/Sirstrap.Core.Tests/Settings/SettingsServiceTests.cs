@@ -35,8 +35,8 @@ namespace Sirstrap.Core.Tests.Settings
 
             service.LoadSettings(path);
 
-            Assert.False(config.AutoUpdate);
-            Assert.Equal("zlive", config.ChannelName);
+            Assert.False(config.SirstrapAutoUpdate);
+            Assert.Equal("zlive", config.SirstrapChannel);
         }
 
         [Fact]
@@ -110,7 +110,7 @@ namespace Sirstrap.Core.Tests.Settings
 
             string content = File.ReadAllText(path);
             Assert.Contains("[SETTINGS]", content);
-            Assert.Contains("AUTO_UPDATE=", content);
+            Assert.Contains("SIRSTRAP_AUTO_UPDATE=", content);
         }
 
         [Fact]
@@ -123,8 +123,8 @@ namespace Sirstrap.Core.Tests.Settings
             service.SaveSettings(path);
 
             string content = File.ReadAllText(path);
-            Assert.Contains("CHANNEL_NAME=", content);
-            Assert.Contains("TRAY_MODE=", content);
+            Assert.Contains("SIRSTRAP_CHANNEL=", content);
+            Assert.Contains("SIRSTRAP_TRAY_MODE=", content);
         }
 
         [Fact]
@@ -141,7 +141,7 @@ namespace Sirstrap.Core.Tests.Settings
             int otherIndex = Array.FindIndex(lines, l => l.Trim() == "[OTHER]");
 
             Assert.True(settingsIndex >= 0 && otherIndex > settingsIndex);
-            Assert.Contains(lines, l => l.StartsWith("CHANNEL_NAME="));
+            Assert.Contains(lines, l => l.StartsWith("SIRSTRAP_CHANNEL="));
             Assert.Contains("FOO=1", lines);
         }
 
@@ -164,8 +164,8 @@ namespace Sirstrap.Core.Tests.Settings
 
             service.EmitSettingsMetrics();
 
-            Assert.Contains(telemetry.Counters, c => c.Name == "settings.AutoUpdate");
-            Assert.Contains(telemetry.Counters, c => c.Name == "settings.TrayMode");
+            Assert.Contains(telemetry.Counters, c => c.Name == "settings.SirstrapAutoUpdate");
+            Assert.Contains(telemetry.Counters, c => c.Name == "settings.SirstrapTrayMode");
         }
 
         [Fact]
@@ -179,31 +179,31 @@ namespace Sirstrap.Core.Tests.Settings
 
             string content = File.ReadAllText(path);
             Assert.Contains("[STATE]", content);
-            Assert.Contains("PREVIOUS_INSTALLATION_PATH=", content);
+            Assert.Contains("ROBLOX_PREVIOUS_INSTALLATION_PATH=", content);
         }
 
         [Fact]
         public void LoadSettings_AppliesStateValue_FromStateSection()
         {
             using TempDirectory temp = new();
-            string path = temp.WriteFile("Sirstrap.ini", "[STATE]\nPREVIOUS_INSTALLATION_PATH=C:\\Old\n");
+            string path = temp.WriteFile("Sirstrap.ini", "[STATE]\nROBLOX_PREVIOUS_INSTALLATION_PATH=C:\\Old\n");
             var (service, config, _) = NewService();
 
             service.LoadSettings(path);
 
-            Assert.Equal(@"C:\Old", config.PreviousInstallationPath);
+            Assert.Equal(@"C:\Old", config.RobloxPreviousInstallationPath);
         }
 
         [Fact]
         public void LoadSettings_IgnoresStateKey_PlacedInSettingsSection()
         {
             using TempDirectory temp = new();
-            string path = temp.WriteFile("Sirstrap.ini", "[SETTINGS]\nPREVIOUS_INSTALLATION_PATH=C:\\Old\n");
+            string path = temp.WriteFile("Sirstrap.ini", "[SETTINGS]\nROBLOX_PREVIOUS_INSTALLATION_PATH=C:\\Old\n");
             var (service, config, _) = NewService();
 
             service.LoadSettings(path);
 
-            Assert.Equal(string.Empty, config.PreviousInstallationPath);
+            Assert.Equal(string.Empty, config.RobloxPreviousInstallationPath);
         }
 
         [Fact]
@@ -220,7 +220,7 @@ namespace Sirstrap.Core.Tests.Settings
             int stateIndex = Array.FindIndex(lines, l => l.Trim() == "[STATE]");
 
             Assert.True(settingsIndex >= 0 && stateIndex > settingsIndex);
-            Assert.Contains(lines, l => l.StartsWith("PREVIOUS_INSTALLATION_PATH="));
+            Assert.Contains(lines, l => l.StartsWith("ROBLOX_PREVIOUS_INSTALLATION_PATH="));
         }
     }
 }

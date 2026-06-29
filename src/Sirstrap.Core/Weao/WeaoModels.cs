@@ -1,8 +1,7 @@
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Monsoon.Services.Weao
+namespace Sirstrap.Core.Weao
 {
     public sealed class RobloxVersions
     {

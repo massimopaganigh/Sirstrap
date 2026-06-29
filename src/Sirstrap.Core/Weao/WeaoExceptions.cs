@@ -1,7 +1,6 @@
-using System;
 using System.Net;
 
-namespace Monsoon.Services.Weao
+namespace Sirstrap.Core.Weao
 {
     public class WeaoException(string message, Exception? innerException = null) : Exception(message, innerException)
     {
