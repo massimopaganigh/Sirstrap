@@ -379,7 +379,7 @@ namespace Sirstrap.UI.ViewModels
                 .WriteTo.LastLog(_lastLogSink);
 
 #if !DEBUG
-            if (_configuration.Telemetry)
+            if (_configuration.SirstrapTelemetry)
                 loggerConfig = loggerConfig.WriteTo.Sentry(x =>
                 {
                     x.Dsn = "https://0cd56ab3e5eac300ecf1380dd6ad0a92@o4510907426471936.ingest.de.sentry.io/4510907479490640";
