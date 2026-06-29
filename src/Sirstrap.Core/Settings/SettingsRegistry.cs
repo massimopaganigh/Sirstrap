@@ -2,90 +2,78 @@ namespace Sirstrap.Core.Settings
 {
     public sealed class SettingsRegistry : ISettingsRegistry
     {
-        private readonly Lazy<IReadOnlyList<ISettingMigration>> _migrations;
-        private readonly Lazy<IReadOnlyList<ISetting>> _settings;
+        private readonly Lazy<IReadOnlyList<SettingDefinition>> _settings;
 
         public SettingsRegistry(SirstrapConfiguration configuration, ICdnUriNormalizer cdnUriNormalizer, IPerformanceTelemetry performanceTelemetry)
         {
             _settings = new(() => BuildSettings(configuration, cdnUriNormalizer, performanceTelemetry));
-            _migrations = new(() => BuildMigrations(configuration, cdnUriNormalizer));
         }
 
-        public IReadOnlyList<ISettingMigration> Migrations => _migrations.Value;
+        public IReadOnlyList<SettingDefinition> Settings => _settings.Value;
 
-        public IReadOnlyList<ISetting> Settings => _settings.Value;
-
-        private static IReadOnlyList<ISettingMigration> BuildMigrations(SirstrapConfiguration configuration, ICdnUriNormalizer cdnUriNormalizer)
-        {
-            void MigrateCdnUriOverride(string legacyValue)
-            {
-                string normalized = cdnUriNormalizer.Normalize(legacyValue);
-
-                if (normalized.Equals(RobloxCdnService.DefaultBaseUri, StringComparison.OrdinalIgnoreCase))
-                    normalized = string.Empty;
-
-                configuration.RobloxCdnUriOverride = normalized;
-            }
-
-            return
-            [
-                new SettingMigration("ROBLOX_CND_URI", "ROBLOX_CDN_URI_OVERRIDE", MigrateCdnUriOverride),
-                new SettingMigration("ROBLOX_CDN_URI", "ROBLOX_CDN_URI_OVERRIDE", MigrateCdnUriOverride)
-            ];
-        }
-
-        private static IReadOnlyList<ISetting> BuildSettings(SirstrapConfiguration configuration, ICdnUriNormalizer cdnUriNormalizer, IPerformanceTelemetry performanceTelemetry)
+        private static IReadOnlyList<SettingDefinition> BuildSettings(SirstrapConfiguration configuration, ICdnUriNormalizer cdnUriNormalizer, IPerformanceTelemetry performanceTelemetry)
         {
             Action Metric(string name, Func<object> getValue)
                 => () => performanceTelemetry.RecordCounter($"settings.{name}", new Dictionary<string, object> { ["value"] = getValue() });
 
+            string NormalizeCdnUriOverride(string value)
+            {
+                string normalized = cdnUriNormalizer.Normalize(value);
+
+                return normalized.Equals(RobloxCdnService.DefaultBaseUri, StringComparison.OrdinalIgnoreCase) ? string.Empty : normalized;
+            }
+
             return
             [
-                new Setting("AUTO_UPDATE",
-                    () => configuration.AutoUpdate.ToString(),
-                    value => { if (bool.TryParse(value, out var v)) configuration.AutoUpdate = v; },
+                Setting.Bool("AUTO_UPDATE",
+                    () => configuration.AutoUpdate,
+                    value => configuration.AutoUpdate = value,
                     Metric("AutoUpdate", () => configuration.AutoUpdate)),
-                new Setting("CHANNEL_NAME",
+                Setting.String("CHANNEL_NAME",
                     () => configuration.ChannelName,
                     value => configuration.ChannelName = value,
                     Metric("ChannelName", () => configuration.ChannelName)),
-                new Setting("FONT_FAMILY",
+                Setting.String("FONT_FAMILY",
                     () => configuration.FontFamily,
-                    value => configuration.FontFamily = value.Equals("Minecraft", StringComparison.OrdinalIgnoreCase) ? "JetBrains Mono" : value,
-                    Metric("FontFamily", () => configuration.FontFamily)),
-                new Setting("INCOGNITO",
-                    () => configuration.Incognito.ToString(),
-                    value => { if (bool.TryParse(value, out var v)) configuration.Incognito = v; },
+                    value => configuration.FontFamily = value,
+                    Metric("FontFamily", () => configuration.FontFamily),
+                    valueMigrator: value => value.Equals("Minecraft", StringComparison.OrdinalIgnoreCase) ? "JetBrains Mono" : value),
+                Setting.Bool("INCOGNITO",
+                    () => configuration.Incognito,
+                    value => configuration.Incognito = value,
                     Metric("Incognito", () => configuration.Incognito)),
-                new Setting("INSTALLATION_PATH",
+                Setting.String("INSTALLATION_PATH",
                     () => configuration.InstallationPath,
-                    value => configuration.InstallationPath = string.IsNullOrWhiteSpace(value) ? SirstrapConfiguration.GetDefaultInstallationPath() : value),
-                new Setting("MULTI_INSTANCE",
-                    () => configuration.MultiInstance.ToString(),
-                    value => { if (bool.TryParse(value, out var v)) configuration.MultiInstance = v; },
+                    value => configuration.InstallationPath = value,
+                    valueMigrator: value => string.IsNullOrWhiteSpace(value) ? SirstrapConfiguration.GetDefaultInstallationPath() : value),
+                Setting.Bool("MULTI_INSTANCE",
+                    () => configuration.MultiInstance,
+                    value => configuration.MultiInstance = value,
                     Metric("MultiInstance", () => configuration.MultiInstance)),
-                new Setting("PREVIOUS_INSTALLATION_PATH",
-                    () => configuration.PreviousInstallationPath,
-                    value => configuration.PreviousInstallationPath = value),
-                new Setting("ROBLOX_API",
-                    () => configuration.RobloxApi.ToString(),
-                    value => { if (bool.TryParse(value, out var v)) configuration.RobloxApi = v; },
+                Setting.Bool("ROBLOX_API",
+                    () => configuration.RobloxApi,
+                    value => configuration.RobloxApi = value,
                     Metric("RobloxApi", () => configuration.RobloxApi)),
-                new Setting("ROBLOX_CDN_URI_OVERRIDE",
+                Setting.String("ROBLOX_CDN_URI_OVERRIDE",
                     () => configuration.RobloxCdnUriOverride,
-                    value => configuration.RobloxCdnUriOverride = cdnUriNormalizer.Normalize(value),
-                    Metric("RobloxCdnUriOverride", () => string.IsNullOrEmpty(configuration.RobloxCdnUriOverride) ? "Auto" : "Custom")),
-                new Setting("ROBLOX_VERSION_OVERRIDE",
+                    value => configuration.RobloxCdnUriOverride = value,
+                    Metric("RobloxCdnUriOverride", () => string.IsNullOrEmpty(configuration.RobloxCdnUriOverride) ? "Auto" : "Custom"),
+                    legacyKeys: ["ROBLOX_CND_URI", "ROBLOX_CDN_URI"],
+                    valueMigrator: NormalizeCdnUriOverride),
+                Setting.String("ROBLOX_VERSION_OVERRIDE",
                     () => configuration.RobloxVersionOverride,
                     value => configuration.RobloxVersionOverride = value,
                     Metric("RobloxVersionOverride", () => string.IsNullOrEmpty(configuration.RobloxVersionOverride) ? "None" : "Custom")),
-                new Setting("TELEMETRY",
-                    () => configuration.Telemetry.ToString(),
-                    value => { if (bool.TryParse(value, out var v)) configuration.Telemetry = v; }),
-                new Setting("TRAY_MODE",
-                    () => configuration.TrayMode.ToString(),
-                    value => { if (Enum.TryParse<TrayMode>(value, true, out var v)) configuration.TrayMode = v; },
-                    Metric("TrayMode", () => configuration.TrayMode.ToString()))
+                Setting.Bool("TELEMETRY",
+                    () => configuration.Telemetry,
+                    value => configuration.Telemetry = value),
+                Setting.Enum("TRAY_MODE",
+                    () => configuration.TrayMode,
+                    value => configuration.TrayMode = value,
+                    Metric("TrayMode", () => configuration.TrayMode.ToString())),
+                Setting.StateString("PREVIOUS_INSTALLATION_PATH",
+                    () => configuration.PreviousInstallationPath,
+                    value => configuration.PreviousInstallationPath = value)
             ];
         }
     }

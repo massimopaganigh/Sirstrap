@@ -167,5 +167,60 @@ namespace Sirstrap.Core.Tests.Settings
             Assert.Contains(telemetry.Counters, c => c.Name == "settings.AutoUpdate");
             Assert.Contains(telemetry.Counters, c => c.Name == "settings.TrayMode");
         }
+
+        [Fact]
+        public void LoadSettings_CreatesFile_WithStateSection()
+        {
+            using TempDirectory temp = new();
+            string path = temp.Combine("Sirstrap.ini");
+            var (service, _, _) = NewService();
+
+            service.LoadSettings(path);
+
+            string content = File.ReadAllText(path);
+            Assert.Contains("[STATE]", content);
+            Assert.Contains("PREVIOUS_INSTALLATION_PATH=", content);
+        }
+
+        [Fact]
+        public void LoadSettings_AppliesStateValue_FromStateSection()
+        {
+            using TempDirectory temp = new();
+            string path = temp.WriteFile("Sirstrap.ini", "[STATE]\nPREVIOUS_INSTALLATION_PATH=C:\\Old\n");
+            var (service, config, _) = NewService();
+
+            service.LoadSettings(path);
+
+            Assert.Equal(@"C:\Old", config.PreviousInstallationPath);
+        }
+
+        [Fact]
+        public void LoadSettings_IgnoresStateKey_PlacedInSettingsSection()
+        {
+            using TempDirectory temp = new();
+            string path = temp.WriteFile("Sirstrap.ini", "[SETTINGS]\nPREVIOUS_INSTALLATION_PATH=C:\\Old\n");
+            var (service, config, _) = NewService();
+
+            service.LoadSettings(path);
+
+            Assert.Equal(string.Empty, config.PreviousInstallationPath);
+        }
+
+        [Fact]
+        public void SaveSettings_AddsStateSection_WhenAbsent()
+        {
+            using TempDirectory temp = new();
+            string path = temp.WriteFile("Sirstrap.ini", "[SETTINGS]\nAUTO_UPDATE=True\n");
+            var (service, _, _) = NewService();
+
+            service.SaveSettings(path);
+
+            string[] lines = File.ReadAllLines(path);
+            int settingsIndex = Array.FindIndex(lines, l => l.Trim() == "[SETTINGS]");
+            int stateIndex = Array.FindIndex(lines, l => l.Trim() == "[STATE]");
+
+            Assert.True(settingsIndex >= 0 && stateIndex > settingsIndex);
+            Assert.Contains(lines, l => l.StartsWith("PREVIOUS_INSTALLATION_PATH="));
+        }
     }
 }

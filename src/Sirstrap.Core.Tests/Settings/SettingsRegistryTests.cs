@@ -9,7 +9,9 @@ namespace Sirstrap.Core.Tests.Settings
             return new SettingsRegistry(config, new CdnUriNormalizer(), telemetry);
         }
 
-        private static ISetting Find(SettingsRegistry registry, string key) => registry.Settings.First(s => s.Key == key);
+        private static SettingDefinition Find(SettingsRegistry registry, string key) => registry.Settings.First(s => s.Key == key);
+
+        private static void Apply(SettingDefinition definition, string rawValue) => definition.Setter(definition.ValueMigrator?.Invoke(rawValue) ?? rawValue);
 
         [Fact]
         public void Settings_ExposeAllExpectedKeys()
@@ -38,7 +40,14 @@ namespace Sirstrap.Core.Tests.Settings
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
 
             Assert.Same(registry.Settings, registry.Settings);
-            Assert.Same(registry.Migrations, registry.Migrations);
+        }
+
+        [Fact]
+        public void PreviousInstallationPath_LivesInStateSection()
+        {
+            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
+
+            Assert.Equal(SettingsSection.State, Find(registry, "PREVIOUS_INSTALLATION_PATH").Section);
         }
 
         [Fact]
@@ -46,13 +55,13 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "AUTO_UPDATE");
+            SettingDefinition setting = Find(registry, "AUTO_UPDATE");
 
-            setting.Write("False");
+            Apply(setting, "False");
             Assert.False(config.AutoUpdate);
-            Assert.Equal("False", setting.Read());
+            Assert.Equal("False", setting.Getter());
 
-            setting.Write("not-a-bool");
+            Apply(setting, "not-a-bool");
             Assert.False(config.AutoUpdate);
         }
 
@@ -61,12 +70,12 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "FONT_FAMILY");
+            SettingDefinition setting = Find(registry, "FONT_FAMILY");
 
-            setting.Write("Minecraft");
+            Apply(setting, "Minecraft");
             Assert.Equal("JetBrains Mono", config.FontFamily);
 
-            setting.Write("Consolas");
+            Apply(setting, "Consolas");
             Assert.Equal("Consolas", config.FontFamily);
         }
 
@@ -75,12 +84,12 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "INSTALLATION_PATH");
+            SettingDefinition setting = Find(registry, "INSTALLATION_PATH");
 
-            setting.Write("   ");
+            Apply(setting, "   ");
             Assert.Equal(SirstrapConfiguration.GetDefaultInstallationPath(), config.InstallationPath);
 
-            setting.Write(@"C:\Custom");
+            Apply(setting, @"C:\Custom");
             Assert.Equal(@"C:\Custom", config.InstallationPath);
         }
 
@@ -89,10 +98,32 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "ROBLOX_CDN_URI_OVERRIDE");
+            SettingDefinition setting = Find(registry, "ROBLOX_CDN_URI_OVERRIDE");
 
-            setting.Write("  https://setup-aws.rbxcdn.com///  ");
+            Apply(setting, "  https://setup-aws.rbxcdn.com///  ");
             Assert.Equal("https://setup-aws.rbxcdn.com", config.RobloxCdnUriOverride);
+        }
+
+        [Fact]
+        public void CdnOverride_MapsDefaultUriToEmpty()
+        {
+            SirstrapConfiguration config = new();
+            SettingsRegistry registry = NewRegistry(config, out _);
+            SettingDefinition setting = Find(registry, "ROBLOX_CDN_URI_OVERRIDE");
+
+            Apply(setting, RobloxCdnService.DefaultBaseUri);
+            Assert.Equal(string.Empty, config.RobloxCdnUriOverride);
+        }
+
+        [Fact]
+        public void CdnOverride_ExposesLegacyAliases()
+        {
+            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
+
+            IReadOnlyList<string> legacyKeys = Find(registry, "ROBLOX_CDN_URI_OVERRIDE").LegacyKeys;
+
+            Assert.Contains("ROBLOX_CND_URI", legacyKeys);
+            Assert.Contains("ROBLOX_CDN_URI", legacyKeys);
         }
 
         [Fact]
@@ -100,21 +131,21 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "TRAY_MODE");
+            SettingDefinition setting = Find(registry, "TRAY_MODE");
 
-            setting.Write("onroblox");
+            Apply(setting, "onroblox");
             Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
 
-            setting.Write("garbage");
+            Apply(setting, "garbage");
             Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
         }
 
         [Fact]
-        public void EmitMetric_RecordsCounter_ForSettingWithMetric()
+        public void MetricEmitter_RecordsCounter_ForSettingWithMetric()
         {
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out var telemetry);
 
-            Find(registry, "AUTO_UPDATE").EmitMetric();
+            Find(registry, "AUTO_UPDATE").MetricEmitter!();
 
             Assert.Contains(telemetry.Counters, c => c.Name == "settings.AutoUpdate");
         }
@@ -122,35 +153,9 @@ namespace Sirstrap.Core.Tests.Settings
         [Fact]
         public void TelemetrySetting_HasNoMetricEmitter()
         {
-            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out var telemetry);
+            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
 
-            Find(registry, "TELEMETRY").EmitMetric();
-
-            Assert.DoesNotContain(telemetry.Counters, c => c.Name.StartsWith("settings.Telemetry"));
-        }
-
-        [Fact]
-        public void Migrations_NormalizeLegacyCdnUri()
-        {
-            SirstrapConfiguration config = new();
-            SettingsRegistry registry = NewRegistry(config, out _);
-
-            ISettingMigration migration = registry.Migrations[0];
-            Assert.Equal("ROBLOX_CDN_URI_OVERRIDE", migration.TargetKey);
-
-            migration.Apply("https://setup-aws.rbxcdn.com");
-            Assert.Equal("https://setup-aws.rbxcdn.com", config.RobloxCdnUriOverride);
-        }
-
-        [Fact]
-        public void Migrations_MapDefaultCdnUriToEmptyOverride()
-        {
-            SirstrapConfiguration config = new();
-            SettingsRegistry registry = NewRegistry(config, out _);
-
-            registry.Migrations[0].Apply(RobloxCdnService.DefaultBaseUri);
-
-            Assert.Equal(string.Empty, config.RobloxCdnUriOverride);
+            Assert.Null(Find(registry, "TELEMETRY").MetricEmitter);
         }
     }
 }
