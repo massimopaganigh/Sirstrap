@@ -7,7 +7,7 @@ An alternative Roblox bootstrapper packed with additional features — built by 
 [![Release](https://img.shields.io/github/v/release/massimopaganigh/sirstrap?label=Release)](https://github.com/massimopaganigh/sirstrap/releases/latest)
 [![License](https://img.shields.io/github/license/massimopaganigh/sirstrap?label=License)](https://github.com/massimopaganigh/sirstrap/blob/main/LICENSE)
 [![Downloads](https://img.shields.io/github/downloads/massimopaganigh/sirstrap/total?label=Downloads)](https://github.com/massimopaganigh/sirstrap/releases)
-[![Release Build](https://github.com/massimopaganigh/sirstrap/actions/workflows/release_build.yml/badge.svg)](https://github.com/massimopaganigh/sirstrap/actions/workflows/release_build.yml)
+[![Beta Release Build](https://github.com/massimopaganigh/sirstrap/actions/workflows/beta_release_build.yml/badge.svg)](https://github.com/massimopaganigh/sirstrap/actions/workflows/beta_release_build.yml)
 [![Alpha Release Build](https://github.com/massimopaganigh/Sirstrap/actions/workflows/alpha_release_build.yml/badge.svg)](https://github.com/massimopaganigh/Sirstrap/actions/workflows/alpha_release_build.yml)
 [![Main Branch Build](https://github.com/massimopaganigh/sirstrap/actions/workflows/main_branch_build.yml/badge.svg)](https://github.com/massimopaganigh/sirstrap/actions/workflows/main_branch_build.yml)
 [![Format Check](https://github.com/massimopaganigh/Sirstrap/actions/workflows/format_check.yml/badge.svg)](https://github.com/massimopaganigh/Sirstrap/actions/workflows/format_check.yml)

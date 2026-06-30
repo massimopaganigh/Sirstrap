@@ -11,6 +11,7 @@ global using Sirstrap.Core.Logging;
 global using Sirstrap.Core.Settings;
 global using Sirstrap.Core.Telemetry;
 global using Sirstrap.Core.Update;
+global using Sirstrap.Core.Weao;
 global using Sirstrap.Core.Windows;
 global using Sirstrap.Core.Tests.Support;
 global using System;

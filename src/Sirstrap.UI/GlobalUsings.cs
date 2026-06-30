@@ -23,6 +23,7 @@ global using Sirstrap.Core.Ipc;
 global using Sirstrap.Core.Logging;
 global using Sirstrap.Core.Settings;
 global using Sirstrap.Core.Update;
+global using Sirstrap.Core.Weao;
 global using Sirstrap.Core.Windows;
 global using Sirstrap.UI.Models;
 global using Sirstrap.UI.ViewModels;
