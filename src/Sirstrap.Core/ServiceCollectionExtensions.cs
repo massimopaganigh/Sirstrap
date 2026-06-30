@@ -14,6 +14,7 @@ namespace Sirstrap.Core
 
             AddTelemetry(services);
             AddSettings(services);
+            AddWeao(services);
             AddCdn(services);
             AddDeployment(services);
             AddLaunch(services);
@@ -66,6 +67,11 @@ namespace Sirstrap.Core
         {
             services.TryAddSingleton<ISettingsRegistry, SettingsRegistry>();
             services.TryAddSingleton<ISettingsService, SettingsService>();
+        }
+
+        private static void AddWeao(IServiceCollection services)
+        {
+            services.TryAddSingleton<IWeaoService, WeaoService>();
         }
 
         private static void AddTelemetry(IServiceCollection services)

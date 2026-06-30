@@ -9,7 +9,9 @@ namespace Sirstrap.Core.Tests.Settings
             return new SettingsRegistry(config, new CdnUriNormalizer(), telemetry);
         }
 
-        private static ISetting Find(SettingsRegistry registry, string key) => registry.Settings.First(s => s.Key == key);
+        private static SettingDefinition Find(SettingsRegistry registry, string key) => registry.Settings.First(s => s.Key == key);
+
+        private static void Apply(SettingDefinition definition, string rawValue) => definition.Setter(definition.ValueMigrator?.Invoke(rawValue) ?? rawValue);
 
         [Fact]
         public void Settings_ExposeAllExpectedKeys()
@@ -18,18 +20,17 @@ namespace Sirstrap.Core.Tests.Settings
 
             string[] keys = [.. registry.Settings.Select(s => s.Key)];
 
-            Assert.Contains("AUTO_UPDATE", keys);
-            Assert.Contains("CHANNEL_NAME", keys);
-            Assert.Contains("FONT_FAMILY", keys);
-            Assert.Contains("INCOGNITO", keys);
-            Assert.Contains("INSTALLATION_PATH", keys);
-            Assert.Contains("MULTI_INSTANCE", keys);
-            Assert.Contains("PREVIOUS_INSTALLATION_PATH", keys);
-            Assert.Contains("ROBLOX_API", keys);
             Assert.Contains("ROBLOX_CDN_URI_OVERRIDE", keys);
-            Assert.Contains("ROBLOX_VERSION_OVERRIDE", keys);
-            Assert.Contains("TELEMETRY", keys);
-            Assert.Contains("TRAY_MODE", keys);
+            Assert.Contains("ROBLOX_INCOGNITO", keys);
+            Assert.Contains("ROBLOX_INSTALLATION_PATH", keys);
+            Assert.Contains("ROBLOX_MULTI_INSTANCE", keys);
+            Assert.Contains("ROBLOX_PREVIOUS_INSTALLATION_PATH", keys);
+            Assert.Contains("ROBLOX_VERSION_SOURCE", keys);
+            Assert.Contains("SIRSTRAP_AUTO_UPDATE", keys);
+            Assert.Contains("SIRSTRAP_CHANNEL", keys);
+            Assert.Contains("SIRSTRAP_FONT_FAMILY", keys);
+            Assert.Contains("SIRSTRAP_TELEMETRY", keys);
+            Assert.Contains("SIRSTRAP_TRAY_MODE", keys);
         }
 
         [Fact]
@@ -38,7 +39,14 @@ namespace Sirstrap.Core.Tests.Settings
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
 
             Assert.Same(registry.Settings, registry.Settings);
-            Assert.Same(registry.Migrations, registry.Migrations);
+        }
+
+        [Fact]
+        public void PreviousInstallationPath_LivesInStateSection()
+        {
+            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
+
+            Assert.Equal(SettingsSection.State, Find(registry, "ROBLOX_PREVIOUS_INSTALLATION_PATH").Section);
         }
 
         [Fact]
@@ -46,14 +54,14 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "AUTO_UPDATE");
+            SettingDefinition setting = Find(registry, "SIRSTRAP_AUTO_UPDATE");
 
-            setting.Write("False");
-            Assert.False(config.AutoUpdate);
-            Assert.Equal("False", setting.Read());
+            Apply(setting, "False");
+            Assert.False(config.SirstrapAutoUpdate);
+            Assert.Equal("False", setting.Getter());
 
-            setting.Write("not-a-bool");
-            Assert.False(config.AutoUpdate);
+            Apply(setting, "not-a-bool");
+            Assert.False(config.SirstrapAutoUpdate);
         }
 
         [Fact]
@@ -61,13 +69,13 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "FONT_FAMILY");
+            SettingDefinition setting = Find(registry, "SIRSTRAP_FONT_FAMILY");
 
-            setting.Write("Minecraft");
-            Assert.Equal("JetBrains Mono", config.FontFamily);
+            Apply(setting, "Minecraft");
+            Assert.Equal("JetBrains Mono", config.SirstrapFontFamily);
 
-            setting.Write("Consolas");
-            Assert.Equal("Consolas", config.FontFamily);
+            Apply(setting, "Consolas");
+            Assert.Equal("Consolas", config.SirstrapFontFamily);
         }
 
         [Fact]
@@ -75,13 +83,13 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "INSTALLATION_PATH");
+            SettingDefinition setting = Find(registry, "ROBLOX_INSTALLATION_PATH");
 
-            setting.Write("   ");
-            Assert.Equal(SirstrapConfiguration.GetDefaultInstallationPath(), config.InstallationPath);
+            Apply(setting, "   ");
+            Assert.Equal(SirstrapConfiguration.GetDefaultInstallationPath(), config.RobloxInstallationPath);
 
-            setting.Write(@"C:\Custom");
-            Assert.Equal(@"C:\Custom", config.InstallationPath);
+            Apply(setting, @"C:\Custom");
+            Assert.Equal(@"C:\Custom", config.RobloxInstallationPath);
         }
 
         [Fact]
@@ -89,10 +97,51 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "ROBLOX_CDN_URI_OVERRIDE");
+            SettingDefinition setting = Find(registry, "ROBLOX_CDN_URI_OVERRIDE");
 
-            setting.Write("  https://setup-aws.rbxcdn.com///  ");
+            Apply(setting, "  https://setup-aws.rbxcdn.com///  ");
             Assert.Equal("https://setup-aws.rbxcdn.com", config.RobloxCdnUriOverride);
+        }
+
+        [Fact]
+        public void CdnOverride_MapsDefaultUriToEmpty()
+        {
+            SirstrapConfiguration config = new();
+            SettingsRegistry registry = NewRegistry(config, out _);
+            SettingDefinition setting = Find(registry, "ROBLOX_CDN_URI_OVERRIDE");
+
+            Apply(setting, RobloxCdnService.DefaultBaseUri);
+            Assert.Equal(string.Empty, config.RobloxCdnUriOverride);
+        }
+
+        [Fact]
+        public void CdnOverride_ExposesLegacyAliases()
+        {
+            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
+
+            IReadOnlyList<string> legacyKeys = Find(registry, "ROBLOX_CDN_URI_OVERRIDE").LegacyKeys;
+
+            Assert.Contains("ROBLOX_CND_URI", legacyKeys);
+            Assert.Contains("ROBLOX_CDN_URI", legacyKeys);
+        }
+
+        [Fact]
+        public void VersionSource_MigratesLegacyRobloxApiBool()
+        {
+            SirstrapConfiguration config = new();
+            SettingsRegistry registry = NewRegistry(config, out _);
+            SettingDefinition setting = Find(registry, "ROBLOX_VERSION_SOURCE");
+
+            Assert.Contains("ROBLOX_API", setting.LegacyKeys);
+
+            Apply(setting, "True");
+            Assert.Equal(RobloxVersionSources.Roblox, config.RobloxVersionSource);
+
+            Apply(setting, "False");
+            Assert.Equal(RobloxVersionSources.SirHurt, config.RobloxVersionSource);
+
+            Apply(setting, RobloxVersionSources.ExecutorPrefix + "Wave");
+            Assert.Equal(RobloxVersionSources.ExecutorPrefix + "Wave", config.RobloxVersionSource);
         }
 
         [Fact]
@@ -100,57 +149,31 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
             SettingsRegistry registry = NewRegistry(config, out _);
-            ISetting setting = Find(registry, "TRAY_MODE");
+            SettingDefinition setting = Find(registry, "SIRSTRAP_TRAY_MODE");
 
-            setting.Write("onroblox");
-            Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
+            Apply(setting, "onroblox");
+            Assert.Equal(TrayMode.OnRoblox, config.SirstrapTrayMode);
 
-            setting.Write("garbage");
-            Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
+            Apply(setting, "garbage");
+            Assert.Equal(TrayMode.OnRoblox, config.SirstrapTrayMode);
         }
 
         [Fact]
-        public void EmitMetric_RecordsCounter_ForSettingWithMetric()
+        public void MetricEmitter_RecordsCounter_ForSettingWithMetric()
         {
             SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out var telemetry);
 
-            Find(registry, "AUTO_UPDATE").EmitMetric();
+            Find(registry, "SIRSTRAP_AUTO_UPDATE").MetricEmitter!();
 
-            Assert.Contains(telemetry.Counters, c => c.Name == "settings.AutoUpdate");
+            Assert.Contains(telemetry.Counters, c => c.Name == "settings.SirstrapAutoUpdate");
         }
 
         [Fact]
         public void TelemetrySetting_HasNoMetricEmitter()
         {
-            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out var telemetry);
+            SettingsRegistry registry = NewRegistry(new SirstrapConfiguration(), out _);
 
-            Find(registry, "TELEMETRY").EmitMetric();
-
-            Assert.DoesNotContain(telemetry.Counters, c => c.Name.StartsWith("settings.Telemetry"));
-        }
-
-        [Fact]
-        public void Migrations_NormalizeLegacyCdnUri()
-        {
-            SirstrapConfiguration config = new();
-            SettingsRegistry registry = NewRegistry(config, out _);
-
-            ISettingMigration migration = registry.Migrations[0];
-            Assert.Equal("ROBLOX_CDN_URI_OVERRIDE", migration.TargetKey);
-
-            migration.Apply("https://setup-aws.rbxcdn.com");
-            Assert.Equal("https://setup-aws.rbxcdn.com", config.RobloxCdnUriOverride);
-        }
-
-        [Fact]
-        public void Migrations_MapDefaultCdnUriToEmptyOverride()
-        {
-            SirstrapConfiguration config = new();
-            SettingsRegistry registry = NewRegistry(config, out _);
-
-            registry.Migrations[0].Apply(RobloxCdnService.DefaultBaseUri);
-
-            Assert.Equal(string.Empty, config.RobloxCdnUriOverride);
+            Assert.Null(Find(registry, "SIRSTRAP_TELEMETRY").MetricEmitter);
         }
     }
 }

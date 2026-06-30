@@ -1,19 +1,14 @@
-import { useRef, useEffect } from "react";
-
-const accentHSL: Record<string, [number, number, number]> = {
-  blue: [210, 90, 55],
-  green: [145, 80, 42],
-  purple: [270, 60, 58],
-  red: [0, 75, 55],
-};
-
-interface WavyBackgroundProps {
-  accent: string;
-  active: boolean;
-}
+import { useEffect, useRef } from "react";
+import { ACCENT_WAVE_HSL, type Accent } from "@/config/accents";
 
 const LINE_COUNT = 18;
 const SPEED = 0.0006;
+const FADE_SPEED = 0.06;
+
+interface WavyBackgroundProps {
+  accent: Accent;
+  active: boolean;
+}
 
 export default function WavyBackground({ accent, active }: WavyBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,8 +29,8 @@ export default function WavyBackground({ accent, active }: WavyBackgroundProps) 
     };
     resize();
 
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas.parentElement!);
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas.parentElement!);
 
     let running = true;
     let lastTime = performance.now();
@@ -48,7 +43,7 @@ export default function WavyBackground({ accent, active }: WavyBackgroundProps) 
       timeRef.current += dt * SPEED;
 
       const targetOpacity = active ? 1 : 0;
-      opacityRef.current += (targetOpacity - opacityRef.current) * 0.03;
+      opacityRef.current += (targetOpacity - opacityRef.current) * FADE_SPEED;
 
       const w = canvas.width;
       const h = canvas.height;
@@ -59,7 +54,7 @@ export default function WavyBackground({ accent, active }: WavyBackgroundProps) 
         return;
       }
 
-      const [hue, sat, light] = accentHSL[accent] ?? accentHSL.green;
+      const [hue, sat, light] = ACCENT_WAVE_HSL[accent] ?? ACCENT_WAVE_HSL.teal;
       const t = timeRef.current;
 
       for (let i = 0; i < LINE_COUNT; i++) {
@@ -67,7 +62,6 @@ export default function WavyBackground({ accent, active }: WavyBackgroundProps) 
         const baseY = h * 0.1 + progress * h * 0.8;
         const phase = i * 0.7 + t;
         const amplitude = h * (0.04 + progress * 0.03);
-
         const lineOpacity = (0.08 + progress * 0.08) * opacityRef.current;
 
         ctx.beginPath();
@@ -95,7 +89,7 @@ export default function WavyBackground({ accent, active }: WavyBackgroundProps) 
     return () => {
       running = false;
       cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
+      observer.disconnect();
     };
   }, [accent, active]);
 

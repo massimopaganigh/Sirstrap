@@ -29,21 +29,80 @@ runs:
         $ErrorActionPreference = 'Stop'
         $PSNativeCommandUseErrorActionPreference = $true
 
-        $outputDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.output-dir }}'
-        $fatDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.fat-output-dir }}'
-        $releaseDir = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.release-dir }}'
-        $sircab = Join-Path $env:GITHUB_WORKSPACE '${{ inputs.sircab }}'
+        $workspace = $env:GITHUB_WORKSPACE
+        $buildDir = Join-Path $workspace 'build'
+        $outputDir = Join-Path $workspace '${{ inputs.output-dir }}'
+        $fatDir = Join-Path $workspace '${{ inputs.fat-output-dir }}'
+        $releaseDir = Join-Path $workspace '${{ inputs.release-dir }}'
+        $sircab = Join-Path $workspace '${{ inputs.sircab }}'
         $name = '${{ inputs.name }}'
 
         New-Item -ItemType Directory -Force -Path $releaseDir | Out-Null
 
-        Write-Host "Archiving $name as zip and cab into $releaseDir..."
-        Compress-Archive -Path (Join-Path $outputDir '*') -DestinationPath (Join-Path $releaseDir "$name.zip") -Force
-        & $sircab $outputDir $releaseDir $name 'Cab' 'LZX' 'False'
+        $sourceRel = '..\' + ('${{ inputs.output-dir }}' -replace '/', '\')
+        $fatRel = '..\' + ('${{ inputs.fat-output-dir }}' -replace '/', '\')
+        $releaseRel = '..\' + ('${{ inputs.release-dir }}' -replace '/', '\')
 
-        Write-Host "Archiving ${name}_fat as zip and cab into $releaseDir..."
-        Compress-Archive -Path (Join-Path $fatDir '*') -DestinationPath (Join-Path $releaseDir "${name}_fat.zip") -Force
-        & $sircab $fatDir $releaseDir "${name}_fat" 'Cab' 'LZX' 'False'
+        function Compress-Variant {
+            param([string] $SourceDir, [string] $SourceRel, [string] $VariantName)
 
-        Write-Host "Removing SirCab directive files from $releaseDir..."
+            $expectedCab = Join-Path $releaseDir "$VariantName.cab"
+            if (Test-Path $expectedCab) { Remove-Item -Path $expectedCab -Force }
+
+            Write-Host "Archiving $VariantName as zip into $releaseDir..."
+            Compress-Archive -Path (Join-Path $SourceDir '*') -DestinationPath (Join-Path $releaseDir "$VariantName.zip") -Force
+
+            # SirCab resolves its cab relative to the working directory, so it is invoked from the build
+            # directory with the same relative paths the local build scripts use.
+            Write-Host "Archiving $VariantName as cab into $releaseDir..."
+            Push-Location $buildDir
+            try {
+                & $sircab $SourceRel $releaseRel $VariantName 'Cab' 'LZX' 'False'
+            }
+            finally {
+                Pop-Location
+            }
+
+            # SirCab can return before makecab has finished writing the cabinet, and large cabinets can
+            # land in a makecab disk1 folder, so wait until the cabinet appears and its size is stable.
+            $searchDirs = @($releaseDir, $buildDir, (Join-Path $buildDir 'disk1'), $workspace, (Join-Path $workspace 'disk1'))
+            $deadline = (Get-Date).AddSeconds(180)
+            $candidate = $null
+            $previousSize = -1
+
+            while ((Get-Date) -lt $deadline) {
+                if ($null -eq $candidate -or -not (Test-Path $candidate)) {
+                    if (Test-Path $expectedCab) {
+                        $candidate = $expectedCab
+                    }
+                    else {
+                        $stray = Get-ChildItem -Path $searchDirs -Filter "$VariantName.cab" -File -ErrorAction SilentlyContinue |
+                            Sort-Object LastWriteTime -Descending | Select-Object -First 1
+                        if ($stray) { $candidate = $stray.FullName }
+                    }
+                }
+
+                if ($null -ne $candidate -and (Test-Path $candidate)) {
+                    $currentSize = (Get-Item $candidate).Length
+                    if ($currentSize -gt 0 -and $currentSize -eq $previousSize) {
+                        if ($candidate -ne $expectedCab) { Move-Item -Path $candidate -Destination $expectedCab -Force }
+                        Write-Host ("Created {0} ({1:N2} MB)." -f $expectedCab, ($currentSize / 1MB))
+                        return
+                    }
+                    $previousSize = $currentSize
+                }
+
+                Start-Sleep -Seconds 2
+            }
+
+            throw "SirCab did not produce $VariantName.cab within the timeout."
+        }
+
+        Compress-Variant -SourceDir $outputDir -SourceRel $sourceRel -VariantName $name
+        Compress-Variant -SourceDir $fatDir -SourceRel $fatRel -VariantName "${name}_fat"
+
+        Write-Host 'Removing SirCab directive and temporary files...'
         Remove-Item -Path (Join-Path $releaseDir '*.ddf') -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path (Join-Path $buildDir '*.ddf') -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path (Join-Path $buildDir 'setup.inf') -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path (Join-Path $buildDir 'setup.rpt') -Force -ErrorAction SilentlyContinue
