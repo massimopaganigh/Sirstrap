@@ -1,4 +1,4 @@
-import { BadgeCheck, Code, Download, Megaphone, Star, type LucideIcon } from "lucide-react";
+import { BadgeCheck, Code, Download, Lock, Megaphone, Star, type LucideIcon } from "lucide-react";
 
 const ICONS = {
   download: Download,
@@ -6,6 +6,7 @@ const ICONS = {
   star: Star,
   check: BadgeCheck,
   megaphone: Megaphone,
+  lock: Lock,
 } satisfies Record<string, LucideIcon>;
 
 export type IconName = keyof typeof ICONS;

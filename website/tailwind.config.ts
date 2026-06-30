@@ -66,6 +66,7 @@ export default {
           teal: "hsl(var(--glow-teal))",
           amber: "hsl(var(--glow-amber))",
           mint: "hsl(var(--glow-mint))",
+          orange: "hsl(var(--glow-orange))",
         },
       },
       borderRadius: {
