@@ -7,18 +7,17 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new();
 
-            Assert.True(config.AutoUpdate);
-            Assert.Equal("-beta", config.ChannelName);
-            Assert.Equal("JetBrains Mono", config.FontFamily);
-            Assert.False(config.Incognito);
-            Assert.True(config.MultiInstance);
-            Assert.False(config.RobloxApi);
+            Assert.True(config.SirstrapAutoUpdate);
+            Assert.Equal("-beta", config.SirstrapChannel);
+            Assert.Equal("JetBrains Mono", config.SirstrapFontFamily);
+            Assert.False(config.RobloxIncognito);
+            Assert.True(config.RobloxMultiInstance);
+            Assert.Equal(RobloxVersionSources.SirHurt, config.RobloxVersionSource);
             Assert.Equal(RobloxCdnService.DefaultBaseUri, config.ResolvedRobloxCdnUri);
             Assert.Equal(string.Empty, config.RobloxCdnUriOverride);
-            Assert.Equal(string.Empty, config.RobloxVersionOverride);
-            Assert.True(config.Telemetry);
-            Assert.Equal(TrayMode.None, config.TrayMode);
-            Assert.Equal(string.Empty, config.PreviousInstallationPath);
+            Assert.True(config.SirstrapTelemetry);
+            Assert.Equal(TrayMode.None, config.SirstrapTrayMode);
+            Assert.Equal(string.Empty, config.RobloxPreviousInstallationPath);
         }
 
         [Fact]
@@ -27,7 +26,7 @@ namespace Sirstrap.Core.Tests.Settings
             string path = SirstrapConfiguration.GetDefaultInstallationPath();
 
             Assert.EndsWith(Path.Combine("Sirstrap", "Versions"), path);
-            Assert.Equal(path, new SirstrapConfiguration().InstallationPath);
+            Assert.Equal(path, new SirstrapConfiguration().RobloxInstallationPath);
         }
 
         [Fact]
@@ -35,16 +34,16 @@ namespace Sirstrap.Core.Tests.Settings
         {
             SirstrapConfiguration config = new()
             {
-                AutoUpdate = false,
-                ChannelName = "zlive",
-                Incognito = true,
-                TrayMode = TrayMode.OnRoblox
+                SirstrapAutoUpdate = false,
+                SirstrapChannel = "zlive",
+                RobloxIncognito = true,
+                SirstrapTrayMode = TrayMode.OnRoblox
             };
 
-            Assert.False(config.AutoUpdate);
-            Assert.Equal("zlive", config.ChannelName);
-            Assert.True(config.Incognito);
-            Assert.Equal(TrayMode.OnRoblox, config.TrayMode);
+            Assert.False(config.SirstrapAutoUpdate);
+            Assert.Equal("zlive", config.SirstrapChannel);
+            Assert.True(config.RobloxIncognito);
+            Assert.Equal(TrayMode.OnRoblox, config.SirstrapTrayMode);
         }
 
         [Fact]

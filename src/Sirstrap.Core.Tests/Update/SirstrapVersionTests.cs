@@ -5,7 +5,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public void Channel_ReflectsConfiguration()
         {
-            SirstrapConfiguration config = new() { ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapChannel = "-beta" };
             SirstrapVersion version = new(config);
 
             Assert.Equal("-beta", version.Channel);

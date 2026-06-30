@@ -104,7 +104,7 @@
                             Text="{Binding LastLogMessage}"
                             TextTrimming="CharacterEllipsis" />
                     </Border>
-                    <Button
+                    <SplitButton
                         Grid.Column="0"
                         Height="32"
                         HorizontalAlignment="Stretch"
@@ -115,12 +115,30 @@
                         Command="{Binding RunCommand}"
                         CornerRadius="999"
                         IsVisible="{Binding ShowLaunchButton}"
-                        ToolTip.Tip="Launch Roblox">
+                        ToolTip.Tip="Launch Roblox (use the arrow to pick the version source)">
                         <Image
                             Margin="2.5"
                             RenderOptions.BitmapInterpolationMode="HighQuality"
                             Source="avares://Sirstrap/Assets/run.png" />
-                    </Button>
+                        <SplitButton.Flyout>
+                            <Flyout Placement="TopEdgeAlignedLeft">
+                                <ListBox
+                                    x:CompileBindings="False"
+                                    Width="320"
+                                    MaxHeight="360"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    ItemsSource="{Binding VersionSources}"
+                                    SelectedItem="{Binding SelectedVersionSourceMain, Mode=TwoWay}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Flyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
                     <Border
                         Grid.Column="1"
                         Margin="5,0,0,0"

@@ -6,7 +6,7 @@ namespace Sirstrap.Core.Tests.Deployment
         public void VersionResolutionSource_HasExpectedMembers()
         {
             Assert.Equal(
-                ["Override", "RobloxApi", "SirHurt", "SirHurtFallback", "Failed"],
+                ["Override", "RobloxApi", "SirHurt", "SirHurtFallback", "Weao", "Executor", "Failed"],
                 Enum.GetNames<VersionResolutionSource>());
         }
     }

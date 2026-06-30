@@ -2,24 +2,31 @@ namespace Sirstrap.Core.Tests.Settings
 {
     public class IniFormatTests
     {
-        [Fact]
-        public void IsSectionHeader_DetectsHeaders_AndMatchesTarget()
+        [Theory]
+        [InlineData("[SETTINGS]", true, SettingsSection.Settings)]
+        [InlineData("[settings]", true, SettingsSection.Settings)]
+        [InlineData("[STATE]", true, SettingsSection.State)]
+        [InlineData("[state]", true, SettingsSection.State)]
+        public void TryParseSectionHeader_RecognizesKnownSections(string row, bool expected, SettingsSection section)
         {
-            Assert.True(IniFormat.IsSectionHeader("[SETTINGS]", "[SETTINGS]", out var matching));
-            Assert.True(matching);
+            bool result = IniFormat.TryParseSectionHeader(row, out var actual);
 
-            Assert.True(IniFormat.IsSectionHeader("[OTHER]", "[SETTINGS]", out var other));
-            Assert.False(other);
-
-            Assert.False(IniFormat.IsSectionHeader("KEY=value", "[SETTINGS]", out var notHeader));
-            Assert.False(notHeader);
+            Assert.Equal(expected, result);
+            Assert.Equal(section, actual);
         }
 
         [Fact]
-        public void IsSectionHeader_IsCaseInsensitive()
+        public void TryParseSectionHeader_ReturnsTrueButNullSection_ForUnknownHeader()
         {
-            Assert.True(IniFormat.IsSectionHeader("[settings]", "[SETTINGS]", out var matching));
-            Assert.True(matching);
+            Assert.True(IniFormat.TryParseSectionHeader("[OTHER]", out var section));
+            Assert.Null(section);
+        }
+
+        [Fact]
+        public void TryParseSectionHeader_ReturnsFalse_ForNonHeader()
+        {
+            Assert.False(IniFormat.TryParseSectionHeader("KEY=value", out var section));
+            Assert.Null(section);
         }
 
         [Theory]
@@ -39,25 +46,6 @@ namespace Sirstrap.Core.Tests.Settings
                 Assert.Equal(key, actualKey);
                 Assert.Equal(value, actualValue);
             }
-        }
-
-        [Fact]
-        public void ExtractSectionKeys_ReturnsOnlyKeysInsideTargetSection()
-        {
-            string[] rows =
-            [
-                "[OTHER]",
-                "FOO=1",
-                "[SETTINGS]",
-                "AUTO_UPDATE=True",
-                "CHANNEL_NAME=-beta",
-                "[ANOTHER]",
-                "BAR=2"
-            ];
-
-            var keys = IniFormat.ExtractSectionKeys(rows, "[SETTINGS]");
-
-            Assert.Equal(["AUTO_UPDATE", "CHANNEL_NAME"], keys.OrderBy(k => k));
         }
     }
 }

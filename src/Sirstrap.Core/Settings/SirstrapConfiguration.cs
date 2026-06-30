@@ -4,32 +4,30 @@ namespace Sirstrap.Core.Settings
     {
         public static string GetDefaultInstallationPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Versions");
 
-        public bool AutoUpdate { get; set; } = true;
+        public bool SirstrapAutoUpdate { get; set; } = true;
 
-        public string ChannelName { get; set; } = "-beta";
+        public string SirstrapChannel { get; set; } = "-beta";
 
-        public string FontFamily { get; set; } = "JetBrains Mono";
+        public string SirstrapFontFamily { get; set; } = "JetBrains Mono";
 
-        public bool Incognito { get; set; }
+        public bool SirstrapTelemetry { get; set; } = true;
 
-        public string InstallationPath { get; set; } = GetDefaultInstallationPath();
+        public TrayMode SirstrapTrayMode { get; set; } = TrayMode.None;
 
-        public bool MultiInstance { get; set; } = true;
+        public bool RobloxIncognito { get; set; }
 
-        public string PreviousInstallationPath { get; set; } = string.Empty;
+        public string RobloxInstallationPath { get; set; } = GetDefaultInstallationPath();
+
+        public bool RobloxMultiInstance { get; set; } = true;
+
+        public string RobloxPreviousInstallationPath { get; set; } = string.Empty;
+
+        public string RobloxVersionSource { get; set; } = RobloxVersionSources.SirHurt;
+
+        public string RobloxCdnUriOverride { get; set; } = string.Empty;
 
         public string ResolvedRobloxCdnUri { get; set; } = RobloxCdnService.DefaultBaseUri;
 
         public IReadOnlyList<string> ResolvedRobloxCdnUris { get; set; } = [RobloxCdnService.DefaultBaseUri];
-
-        public bool RobloxApi { get; set; }
-
-        public string RobloxCdnUriOverride { get; set; } = string.Empty;
-
-        public string RobloxVersionOverride { get; set; } = string.Empty;
-
-        public bool Telemetry { get; set; } = true;
-
-        public TrayMode TrayMode { get; set; } = TrayMode.None;
     }
 }
