@@ -3,6 +3,7 @@
     public partial class SettingsWindowViewModel : ViewModelBase
     {
         private readonly IUninstallService _uninstallService;
+        private readonly IWeaoService _weaoService;
 
         [ObservableProperty]
         private string _currentFullVersion;
@@ -11,15 +12,49 @@
         private ObservableCollection<string> _fontFamilies = [];
 
         [ObservableProperty]
+        private ObservableCollection<VersionSourceOption> _versionSources = [];
+
+        [ObservableProperty]
+        private VersionSourceOption? _selectedVersionSource;
+
+        [ObservableProperty]
         private Settings _settings;
 
-        public SettingsWindowViewModel(Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService)
+        public SettingsWindowViewModel(Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService, IWeaoService weaoService)
         {
             _settings = settings;
             _currentFullVersion = sirstrapVersion.GetFullVersion();
             _uninstallService = uninstallService;
+            _weaoService = weaoService;
 
             GetFontFamilies();
+
+            _ = LoadVersionSourcesAsync();
+        }
+
+        private async Task LoadVersionSourcesAsync()
+        {
+            try
+            {
+                var options = await VersionSourceCatalog.BuildAsync(_weaoService);
+
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    VersionSources = new ObservableCollection<VersionSourceOption>(options);
+                    SelectedVersionSource = VersionSources.FirstOrDefault(option => string.Equals(option.Value, Settings.RobloxVersionSource, StringComparison.OrdinalIgnoreCase))
+                        ?? VersionSources.FirstOrDefault();
+                });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(LoadVersionSourcesAsync));
+            }
+        }
+
+        partial void OnSelectedVersionSourceChanged(VersionSourceOption? value)
+        {
+            if (value != null)
+                Settings.RobloxVersionSource = value.Value;
         }
 
         [RelayCommand]
@@ -34,7 +69,7 @@
 
                 var storageProvider = mainWindow.StorageProvider;
 
-                var startFolder = await storageProvider.TryGetFolderFromPathAsync(Settings.InstallationPath);
+                var startFolder = await storageProvider.TryGetFolderFromPathAsync(Settings.RobloxInstallationPath);
 
                 var result = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
                 {
@@ -44,7 +79,7 @@
                 });
 
                 if (result.Count > 0)
-                    Settings.InstallationPath = result[0].Path.LocalPath;
+                    Settings.RobloxInstallationPath = result[0].Path.LocalPath;
             }
             catch (Exception ex)
             {
@@ -181,7 +216,7 @@
 
                     Dispatcher.UIThread.Invoke(() =>
                     {
-                        App.SetTray(Settings.TrayMode != TrayMode.None);
+                        App.SetTray(Settings.SirstrapTrayMode != TrayMode.None);
 
                         CloseSpecificWindow<SettingsWindow>();
                     });

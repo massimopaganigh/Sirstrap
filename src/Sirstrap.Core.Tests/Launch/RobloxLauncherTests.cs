@@ -6,7 +6,7 @@ namespace Sirstrap.Core.Tests.Launch
         public void Launch_ReturnsFalse_WhenExecutableMissing()
         {
             using TempDirectory temp = new();
-            SirstrapConfiguration config = new() { InstallationPath = temp.Path };
+            SirstrapConfiguration config = new() { RobloxInstallationPath = temp.Path };
             RobloxLauncher launcher = new(
                 config,
                 new FakePathManager(temp.Path),

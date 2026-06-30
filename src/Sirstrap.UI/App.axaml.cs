@@ -13,7 +13,7 @@ namespace Sirstrap.UI
 
                 Program.Services.GetRequiredService<ISettingsService>().LoadSettings();
 
-                var fontFamilyName = Program.Services.GetRequiredService<SirstrapConfiguration>().FontFamily;
+                var fontFamilyName = Program.Services.GetRequiredService<SirstrapConfiguration>().SirstrapFontFamily;
 
                 FontFamily fontFamily;
 
@@ -47,7 +47,7 @@ namespace Sirstrap.UI
 
                 ApplyFontFamily();
 
-                var trayMode = Program.Services.GetRequiredService<SirstrapConfiguration>().TrayMode;
+                var trayMode = Program.Services.GetRequiredService<SirstrapConfiguration>().SirstrapTrayMode;
 
                 if (trayMode != TrayMode.None)
                     SetTray(true);
