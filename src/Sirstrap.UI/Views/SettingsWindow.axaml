@@ -41,351 +41,364 @@
             BoxShadow="0 0 10 0 #212830"
             CornerRadius="16"
             Padding="5">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="400" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="0,0,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Enable Sirstrap auto-update:" />
-                <CheckBox
-                    Grid.Row="0"
-                    Grid.Column="1"
-                    Height="32"
-                    Margin="10,0,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
+            <Grid MaxHeight="470">
+                <ScrollViewer
+                    HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+                    <Grid Margin="0,0,12,52">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="380" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- ROBLOX_CDN_URI_OVERRIDE -->
+                        <TextBlock
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            Margin="0,0,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Roblox CDN URI override:" />
+                        <TextBox
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            HorizontalAlignment="Stretch"
+                            BorderThickness="0"
+                            CornerRadius="999"
+                            DataContext="{Binding Settings}"
+                            Text="{Binding RobloxCdnUriOverride}" />
+
+                        <!-- ROBLOX_INCOGNITO -->
+                        <TextBlock
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Enable Roblox incognito:" />
+                        <CheckBox
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            Height="32"
+                            Margin="10,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="999"
+                            DataContext="{Binding Settings}"
+                            IsChecked="{Binding RobloxIncognito}"
+                            IsEnabled="{Binding RobloxMultiInstance}" />
+
+                        <!-- ROBLOX_INSTALLATION_PATH -->
+                        <TextBlock
+                            Grid.Row="2"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Roblox installation path:" />
+                        <Grid
+                            Grid.Row="2"
+                            Grid.Column="1"
+                            Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                Grid.Column="0"
+                                Margin="0,0,2.5,0"
+                                HorizontalAlignment="Stretch"
+                                BorderThickness="0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                Text="{Binding RobloxInstallationPath}" />
+                            <Button
+                                Grid.Column="1"
+                                Height="32"
+                                Margin="2.5,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                BorderThickness="0"
+                                Classes="hover-lift"
+                                Command="{Binding BrowseInstallationPathCommand}"
+                                CornerRadius="999"
+                                ToolTip.Tip="Browse for installation folder">
+                                <Image
+                                    Margin="2.5"
+                                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                                    Source="avares://Sirstrap/Assets/open.png" />
+                            </Button>
+                        </Grid>
+
+                        <!-- ROBLOX_MULTI_INSTANCE -->
+                        <TextBlock
+                            Grid.Row="3"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Enable Roblox multi-instance:" />
+                        <CheckBox
+                            Grid.Row="3"
+                            Grid.Column="1"
+                            Height="32"
+                            Margin="10,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="999"
+                            DataContext="{Binding Settings}"
+                            IsChecked="{Binding RobloxMultiInstance}" />
+
+                        <!-- SirHurt path (read-only) -->
+                        <TextBlock
+                            Grid.Row="4"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="SirHurt path:" />
+                        <Grid
+                            Grid.Row="4"
+                            Grid.Column="1"
+                            Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox
+                                Grid.Column="0"
+                                Margin="0,0,2.5,0"
+                                HorizontalAlignment="Stretch"
+                                BorderThickness="0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsReadOnly="True"
+                                Text="{Binding SirHurtPath}" />
+                            <Button
+                                Grid.Column="1"
+                                Height="32"
+                                Margin="2.5,0,0,0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                BorderThickness="0"
+                                Classes="hover-lift"
+                                Command="{Binding RunSirHurtCommand}"
+                                CornerRadius="999"
+                                IsEnabled="{Binding Settings.RunSirHurtEnabled}"
+                                ToolTip.Tip="Run SirHurt bootstrapper">
+                                <Image
+                                    Margin="2.5"
+                                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                                    Source="avares://Sirstrap/Assets/run.png" />
+                            </Button>
+                        </Grid>
+
+                        <!-- ROBLOX_VERSION_SOURCE -->
+                        <TextBlock
+                            Grid.Row="5"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Roblox version source:" />
+                        <ComboBox
+                            x:CompileBindings="False"
+                            Grid.Row="5"
+                            Grid.Column="1"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Stretch"
+                            BorderThickness="0"
+                            CornerRadius="999"
+                            ItemsSource="{Binding VersionSources}"
+                            SelectedItem="{Binding SelectedVersionSource}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                            <ComboBox.Styles>
+                                <Style Selector="ComboBox /template/ Popup">
+                                    <Setter Property="HorizontalOffset" Value="0" />
+                                    <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                                </Style>
+                            </ComboBox.Styles>
+                        </ComboBox>
+
+                        <!-- SIRSTRAP_AUTO_UPDATE -->
+                        <TextBlock
+                            Grid.Row="6"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Enable Sirstrap auto-update:" />
+                        <CheckBox
+                            Grid.Row="6"
+                            Grid.Column="1"
+                            Height="32"
+                            Margin="10,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="999"
+                            DataContext="{Binding Settings}"
+                            IsChecked="{Binding SirstrapAutoUpdate}" />
+
+                        <!-- SIRSTRAP_CHANNEL -->
+                        <TextBlock
+                            Grid.Row="7"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Sirstrap update channel:" />
+                        <TextBox
+                            Grid.Row="7"
+                            Grid.Column="1"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Stretch"
+                            BorderThickness="0"
+                            CornerRadius="999"
+                            DataContext="{Binding Settings}"
+                            Text="{Binding SirstrapChannel}" />
+
+                        <!-- SIRSTRAP_FONT_FAMILY -->
+                        <TextBlock
+                            Grid.Row="8"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Sirstrap font family:" />
+                        <ComboBox
+                            Grid.Row="8"
+                            Grid.Column="1"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Stretch"
+                            BorderThickness="0"
+                            CornerRadius="999"
+                            ItemsSource="{Binding FontFamilies}"
+                            SelectedItem="{Binding Settings.SirstrapFontFamily}">
+                            <ComboBox.Styles>
+                                <Style Selector="ComboBox /template/ Popup">
+                                    <Setter Property="HorizontalOffset" Value="0" />
+                                    <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                                </Style>
+                            </ComboBox.Styles>
+                        </ComboBox>
+
+                        <!-- SIRSTRAP_TELEMETRY -->
+                        <TextBlock
+                            Grid.Row="9"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Enable telemetry:" />
+                        <CheckBox
+                            Grid.Row="9"
+                            Grid.Column="1"
+                            Height="32"
+                            Margin="10,5,0,0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            CornerRadius="999"
+                            DataContext="{Binding Settings}"
+                            IsChecked="{Binding SirstrapTelemetry}" />
+
+                        <!-- SIRSTRAP_TRAY_MODE -->
+                        <TextBlock
+                            Grid.Row="10"
+                            Grid.Column="0"
+                            Margin="0,5,5,0"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Text="Tray icon mode:" />
+                        <ComboBox
+                            Grid.Row="10"
+                            Grid.Column="1"
+                            Margin="0,5,0,0"
+                            HorizontalAlignment="Stretch"
+                            BorderThickness="0"
+                            CornerRadius="999"
+                            ItemsSource="{Binding TrayModes}"
+                            SelectedItem="{Binding Settings.SirstrapTrayMode}">
+                            <ComboBox.Styles>
+                                <Style Selector="ComboBox /template/ Popup">
+                                    <Setter Property="HorizontalOffset" Value="0" />
+                                    <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                                </Style>
+                            </ComboBox.Styles>
+                        </ComboBox>
+                    </Grid>
+                </ScrollViewer>
+                <Border
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,4"
+                    Background="#2a323c"
+                    BoxShadow="0 0 10 0 #212830"
                     CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    IsChecked="{Binding AutoUpdate}" />
-                <TextBlock
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Sirstrap update channel name:" />
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    BorderThickness="0"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    Text="{Binding ChannelName}" />
-                <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Sirstrap font family:" />
-                <ComboBox
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    BorderThickness="0"
-                    CornerRadius="999"
-                    ItemsSource="{Binding FontFamilies}"
-                    SelectedItem="{Binding Settings.FontFamily}">
-                    <ComboBox.Styles>
-                        <Style Selector="ComboBox /template/ Popup">
-                            <Setter Property="HorizontalOffset" Value="0" />
-                            <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
-                        </Style>
-                    </ComboBox.Styles>
-                </ComboBox>
-                <TextBlock
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Enable Roblox multi-instance:" />
-                <CheckBox
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Height="32"
-                    Margin="10,5,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    IsChecked="{Binding MultiInstance}" />
-                <TextBlock
-                    Grid.Row="4"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Enable Roblox incognito:" />
-                <CheckBox
-                    Grid.Row="4"
-                    Grid.Column="1"
-                    Height="32"
-                    Margin="10,5,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    IsChecked="{Binding Incognito}"
-                    IsEnabled="{Binding MultiInstance}" />
-                <TextBlock
-                    Grid.Row="5"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Enable Roblox API/Disable Sirstrap API:" />
-                <CheckBox
-                    Grid.Row="5"
-                    Grid.Column="1"
-                    Height="32"
-                    Margin="10,5,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    IsChecked="{Binding RobloxApi}" />
-                <TextBlock
-                    Grid.Row="6"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Roblox CDN URI override:" />
-                <TextBox
-                    Grid.Row="6"
-                    Grid.Column="1"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    BorderThickness="0"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    Text="{Binding RobloxCdnUriOverride}" />
-                <TextBlock
-                    Grid.Row="7"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Roblox version override:" />
-                <TextBox
-                    Grid.Row="7"
-                    Grid.Column="1"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    BorderThickness="0"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    Text="{Binding RobloxVersionOverride}" />
-                <TextBlock
-                    Grid.Row="8"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Roblox installation path:" />
-                <Grid
-                    Grid.Row="8"
-                    Grid.Column="1"
-                    Margin="0,5,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="1*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox
-                        Grid.Column="0"
-                        Margin="0,0,2.5,0"
-                        HorizontalAlignment="Stretch"
-                        BorderThickness="0"
-                        CornerRadius="999"
-                        DataContext="{Binding Settings}"
-                        Text="{Binding InstallationPath}" />
-                    <Button
-                        Grid.Column="1"
-                        Height="32"
-                        Margin="2.5,0,0,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        BorderThickness="0"
-                        Classes="hover-lift"
-                        Command="{Binding BrowseInstallationPathCommand}"
-                        CornerRadius="999"
-                        ToolTip.Tip="Browse for installation folder">
-                        <Image
-                            Margin="2.5"
-                            RenderOptions.BitmapInterpolationMode="HighQuality"
-                            Source="avares://Sirstrap/Assets/open.png" />
-                    </Button>
-                </Grid>
-                <TextBlock
-                    Grid.Row="9"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="SirHurt path:" />
-                <Grid
-                    Grid.Row="9"
-                    Grid.Column="1"
-                    Margin="0,5,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" />
-                        <ColumnDefinition Width="1*" />
-                    </Grid.ColumnDefinitions>
-                    <TextBox
-                        Grid.Column="0"
-                        Margin="0,0,2.5,0"
-                        HorizontalAlignment="Stretch"
-                        BorderThickness="0"
-                        CornerRadius="999"
-                        DataContext="{Binding Settings}"
-                        IsReadOnly="True"
-                        Text="{Binding SirHurtPath}" />
-                    <Button
-                        Grid.Column="1"
-                        Height="32"
-                        Margin="2.5,0,0,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        BorderThickness="0"
-                        Classes="hover-lift"
-                        Command="{Binding RunSirHurtCommand}"
-                        CornerRadius="999"
-                        IsEnabled="{Binding Settings.RunSirHurtEnabled}"
-                        ToolTip.Tip="Run SirHurt bootstrapper">
-                        <Image
-                            Margin="2.5"
-                            RenderOptions.BitmapInterpolationMode="HighQuality"
-                            Source="avares://Sirstrap/Assets/run.png" />
-                    </Button>
-                </Grid>
-                <TextBlock
-                    Grid.Row="10"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Enable telemetry:" />
-                <CheckBox
-                    Grid.Row="10"
-                    Grid.Column="1"
-                    Height="32"
-                    Margin="10,5,0,0"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Center"
-                    CornerRadius="999"
-                    DataContext="{Binding Settings}"
-                    IsChecked="{Binding Telemetry}" />
-                <TextBlock
-                    Grid.Row="11"
-                    Grid.Column="0"
-                    Margin="0,5,5,0"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Text="Tray icon mode:" />
-                <ComboBox
-                    Grid.Row="11"
-                    Grid.Column="1"
-                    Margin="0,5,0,0"
-                    HorizontalAlignment="Stretch"
-                    BorderThickness="0"
-                    CornerRadius="999"
-                    ItemsSource="{Binding TrayModes}"
-                    SelectedItem="{Binding Settings.TrayMode}">
-                    <ComboBox.Styles>
-                        <Style Selector="ComboBox /template/ Popup">
-                            <Setter Property="HorizontalOffset" Value="0" />
-                            <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
-                        </Style>
-                    </ComboBox.Styles>
-                </ComboBox>
-                <Grid
-                    Grid.Row="12"
-                    Grid.Column="0"
-                    Margin="0,5,5,0">
-                    <Button
-                        Grid.Column="0"
-                        Height="32"
-                        Margin="0,0,2.5,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Background="#4dbf6a6a"
-                        BorderThickness="0"
-                        Classes="hover-lift"
-                        Command="{Binding UninstallCommand}"
-                        CornerRadius="999"
-                        ToolTip.Tip="Uninstall Sirstrap (removes registry entries, data folder and executable)">
-                        <Image
-                            Margin="2.5"
-                            RenderOptions.BitmapInterpolationMode="HighQuality"
-                            Source="avares://Sirstrap/Assets/uninstall.png" />
-                    </Button>
-                </Grid>
-                <Grid
-                    Grid.Row="12"
-                    Grid.Column="1"
-                    Margin="0,5,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="2*" />
-                    </Grid.ColumnDefinitions>
-                    <Button
-                        Grid.Column="0"
-                        Height="32"
-                        Margin="0,0,2.5,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        BorderThickness="0"
-                        Classes="hover-lift"
-                        Command="{Binding OpenIniFileCommand}"
-                        CornerRadius="999"
-                        ToolTip.Tip="Open settings in notepad.exe (?)">
-                        <Image
-                            Margin="2.5"
-                            RenderOptions.BitmapInterpolationMode="HighQuality"
-                            Source="avares://Sirstrap/Assets/open.png" />
-                    </Button>
-                    <Button
-                        Grid.Column="1"
-                        Height="32"
-                        Margin="2.5,0,0,0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        BorderThickness="0"
-                        Classes="hover-lift"
-                        Command="{Binding SaveCommand}"
-                        CornerRadius="999"
-                        ToolTip.Tip="Save settings">
-                        <Image
-                            Margin="2.5"
-                            RenderOptions.BitmapInterpolationMode="HighQuality"
-                            Source="avares://Sirstrap/Assets/save.png" />
-                    </Button>
-                </Grid>
+                    Padding="5">
+                    <StackPanel
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Horizontal"
+                        Spacing="5">
+                        <Button
+                            Width="32"
+                            Height="32"
+                            BorderThickness="0"
+                            Classes="hover-lift"
+                            Command="{Binding SaveCommand}"
+                            CornerRadius="999"
+                            ToolTip.Tip="Save settings">
+                            <Image
+                                Margin="2.5"
+                                RenderOptions.BitmapInterpolationMode="HighQuality"
+                                Source="avares://Sirstrap/Assets/save.png" />
+                        </Button>
+                        <Button
+                            Width="32"
+                            Height="32"
+                            BorderThickness="0"
+                            Classes="hover-lift"
+                            Command="{Binding OpenIniFileCommand}"
+                            CornerRadius="999"
+                            ToolTip.Tip="Open settings in notepad.exe (?)">
+                            <Image
+                                Margin="2.5"
+                                RenderOptions.BitmapInterpolationMode="HighQuality"
+                                Source="avares://Sirstrap/Assets/open.png" />
+                        </Button>
+                        <Button
+                            Width="32"
+                            Height="32"
+                            Background="#4dbf6a6a"
+                            BorderThickness="0"
+                            Classes="hover-lift"
+                            Command="{Binding UninstallCommand}"
+                            CornerRadius="999"
+                            ToolTip.Tip="Uninstall Sirstrap (removes registry entries, data folder and executable)">
+                            <Image
+                                Margin="2.5"
+                                RenderOptions.BitmapInterpolationMode="HighQuality"
+                                Source="avares://Sirstrap/Assets/uninstall.png" />
+                        </Button>
+                    </StackPanel>
+                </Border>
             </Grid>
         </Border>
         <TextBlock

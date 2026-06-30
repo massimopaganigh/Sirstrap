@@ -3,68 +3,77 @@ namespace Sirstrap.Core.Tests.Settings
     public class SettingTests
     {
         [Fact]
-        public void Setting_ReadsWritesAndEmits()
+        public void Bool_ReadsFormatsAndParses()
+        {
+            bool store = false;
+            SettingDefinition definition = Setting.Bool("KEY", () => store, v => store = v);
+
+            Assert.Equal("KEY", definition.Key);
+            Assert.Equal(SettingsSection.Settings, definition.Section);
+            Assert.Equal("False", definition.Getter());
+
+            definition.Setter("True");
+            Assert.True(store);
+
+            definition.Setter("not-a-bool");
+            Assert.True(store);
+        }
+
+        [Fact]
+        public void Enum_ParsesCaseInsensitively_AndIgnoresGarbage()
+        {
+            TrayMode store = TrayMode.None;
+            SettingDefinition definition = Setting.Enum("TRAY_MODE", () => store, v => store = v);
+
+            definition.Setter("onroblox");
+            Assert.Equal(TrayMode.OnRoblox, store);
+
+            definition.Setter("garbage");
+            Assert.Equal(TrayMode.OnRoblox, store);
+        }
+
+        [Fact]
+        public void String_PassesValueThrough()
         {
             string store = "initial";
-            int metricCalls = 0;
+            SettingDefinition definition = Setting.String("KEY", () => store, v => store = v);
 
-            Setting setting = new("KEY", () => store, v => store = v, () => metricCalls++);
+            Assert.Equal("initial", definition.Getter());
 
-            Assert.Equal("KEY", setting.Key);
-            Assert.Equal("initial", setting.Read());
-
-            setting.Write("updated");
+            definition.Setter("updated");
             Assert.Equal("updated", store);
+        }
 
-            setting.EmitMetric();
+        [Fact]
+        public void StateString_LivesInStateSection()
+        {
+            string store = string.Empty;
+            SettingDefinition definition = Setting.StateString("KEY", () => store, v => store = v);
+
+            Assert.Equal(SettingsSection.State, definition.Section);
+        }
+
+        [Fact]
+        public void Factories_CarryMetricAndLegacyKeysAndMigrator()
+        {
+            int metricCalls = 0;
+            SettingDefinition definition = Setting.String("KEY", () => "v", _ => { }, () => metricCalls++, ["OLD_KEY"], value => value.ToUpperInvariant());
+
+            Assert.Equal(["OLD_KEY"], definition.LegacyKeys);
+            Assert.Equal("ABC", definition.ValueMigrator!("abc"));
+
+            definition.MetricEmitter!();
             Assert.Equal(1, metricCalls);
         }
 
         [Fact]
-        public void Setting_EmitMetric_IsNoop_WhenEmitterNull()
+        public void Factories_DefaultMetadataIsEmpty()
         {
-            Setting setting = new("KEY", () => "v", _ => { });
+            SettingDefinition definition = Setting.Bool("KEY", () => true, _ => { });
 
-            Assert.Null(Record.Exception(setting.EmitMetric));
-        }
-
-        [Fact]
-        public void Setting_Throws_OnInvalidArguments()
-        {
-            Assert.Throws<ArgumentException>(() => new Setting(" ", () => "v", _ => { }));
-            Assert.Throws<ArgumentNullException>(() => new Setting("KEY", null!, _ => { }));
-            Assert.Throws<ArgumentNullException>(() => new Setting("KEY", () => "v", null!));
-        }
-
-        [Fact]
-        public void SettingMigration_AppliesAndDecidesMigration()
-        {
-            string applied = string.Empty;
-            SettingMigration migration = new("OLD_KEY", "NEW_KEY", v => applied = v);
-
-            Assert.Equal("OLD_KEY", migration.LegacyKey);
-            Assert.Equal("NEW_KEY", migration.TargetKey);
-
-            migration.Apply("value");
-            Assert.Equal("value", applied);
-        }
-
-        [Fact]
-        public void SettingMigration_ShouldMigrate_OnlyWhenTargetAbsent()
-        {
-            SettingMigration migration = new("OLD_KEY", "NEW_KEY", _ => { });
-
-            Assert.True(migration.ShouldMigrate(["OTHER"]));
-            Assert.False(migration.ShouldMigrate(["new_key"]));
-        }
-
-        [Fact]
-        public void SettingMigration_Throws_OnInvalidArguments()
-        {
-            Assert.Throws<ArgumentException>(() => new SettingMigration(" ", "NEW", _ => { }));
-            Assert.Throws<ArgumentException>(() => new SettingMigration("OLD", " ", _ => { }));
-            Assert.Throws<ArgumentNullException>(() => new SettingMigration("OLD", "NEW", null!));
-            Assert.Throws<ArgumentNullException>(() => new SettingMigration("OLD", "NEW", _ => { }).ShouldMigrate(null!));
+            Assert.Empty(definition.LegacyKeys);
+            Assert.Null(definition.ValueMigrator);
+            Assert.Null(definition.MetricEmitter);
         }
     }
 }

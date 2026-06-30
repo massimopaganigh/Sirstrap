@@ -2,40 +2,17 @@ namespace Sirstrap.Core.Settings
 {
     public static class IniFormat
     {
-        public static HashSet<string> ExtractSectionKeys(IEnumerable<string> rows, string sectionHeader)
+        public static bool TryParseSectionHeader(string trimmedRow, out SettingsSection? section)
         {
-            var keys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var inSection = false;
-
-            foreach (var row in rows)
-            {
-                var trimmedRow = row.Trim();
-
-                if (IsSectionHeader(trimmedRow, sectionHeader, out var isMatchingSection))
-                {
-                    inSection = isMatchingSection;
-
-                    continue;
-                }
-
-                if (!inSection)
-                    continue;
-
-                if (TryParseRow(trimmedRow, out var key, out _))
-                    keys.Add(key);
-            }
-
-            return keys;
-        }
-
-        public static bool IsSectionHeader(string trimmedRow, string sectionHeader, out bool isMatchingSection)
-        {
-            isMatchingSection = false;
+            section = null;
 
             if (!trimmedRow.StartsWith('['))
                 return false;
 
-            isMatchingSection = trimmedRow.Equals(sectionHeader, StringComparison.InvariantCultureIgnoreCase);
+            if (trimmedRow.Equals("[SETTINGS]", StringComparison.InvariantCultureIgnoreCase))
+                section = SettingsSection.Settings;
+            else if (trimmedRow.Equals("[STATE]", StringComparison.InvariantCultureIgnoreCase))
+                section = SettingsSection.State;
 
             return true;
         }

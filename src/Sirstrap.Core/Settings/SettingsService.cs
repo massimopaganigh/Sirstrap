@@ -2,14 +2,12 @@ namespace Sirstrap.Core.Settings
 {
     public sealed class SettingsService(ISettingsRegistry settingsRegistry) : ISettingsService
     {
-        private const string SettingsSectionHeader = "[SETTINGS]";
-
         public void EmitSettingsMetrics()
         {
             try
             {
                 foreach (var setting in settingsRegistry.Settings)
-                    setting.EmitMetric();
+                    setting.MetricEmitter?.Invoke();
             }
             catch (Exception ex)
             {
@@ -29,39 +27,39 @@ namespace Sirstrap.Core.Settings
                     SaveSettings(settingsFilePath);
 
                 var rows = File.ReadAllLines(settingsFilePath);
-                var settingsByKey = GetSettingsByKey();
-                var migrationsByKey = GetMigrationsByKey();
-                var existingKeys = IniFormat.ExtractSectionKeys(rows, SettingsSectionHeader);
+                var definitionsByKey = GetDefinitionsByKey();
+                var definitionsByAlias = GetDefinitionsByAlias();
 
-                var inSettingsSection = false;
+                SettingsSection? currentSection = null;
 
                 foreach (var row in rows)
                 {
                     var trimmedRow = row.Trim();
 
-                    if (IniFormat.IsSectionHeader(trimmedRow, SettingsSectionHeader, out var isSettingsSection))
+                    if (IniFormat.TryParseSectionHeader(trimmedRow, out var section))
                     {
-                        inSettingsSection = isSettingsSection;
+                        currentSection = section;
 
                         continue;
                     }
 
-                    if (!inSettingsSection
+                    if (currentSection == null
                         || !IniFormat.TryParseRow(trimmedRow, out var key, out var value))
                         continue;
 
-                    if (settingsByKey.TryGetValue(key, out var setting))
+                    if (definitionsByKey.TryGetValue(key, out var definition)
+                        && definition.Section == currentSection)
                     {
                         Log.Information("[*] Setting {Key} to {Value}...", key, value);
 
-                        setting.Write(value);
+                        ApplySetting(definition, value);
                     }
-                    else if (migrationsByKey.TryGetValue(key, out var migration)
-                        && migration.ShouldMigrate(existingKeys))
+                    else if (definitionsByAlias.TryGetValue(key, out var aliasDefinition)
+                        && aliasDefinition.Section == currentSection)
                     {
-                        Log.Information("[*] Migrating the setting {LegacyKey} to {TargetKey}...", key, migration.TargetKey);
+                        Log.Information("[*] Migrating the setting {LegacyKey} to {TargetKey}...", key, aliasDefinition.Key);
 
-                        migration.Apply(value);
+                        ApplySetting(aliasDefinition, value);
                     }
                 }
             }
@@ -94,20 +92,28 @@ namespace Sirstrap.Core.Settings
             }
         }
 
-        private HashSet<string> GetLegacyKeys()
-            => new(settingsRegistry.Migrations.Select(migration => migration.LegacyKey), StringComparer.OrdinalIgnoreCase);
+        private static void ApplySetting(SettingDefinition definition, string rawValue)
+            => definition.Setter(definition.ValueMigrator?.Invoke(rawValue) ?? rawValue);
 
-        private IReadOnlyDictionary<string, ISettingMigration> GetMigrationsByKey()
-            => settingsRegistry.Migrations.ToDictionary(migration => migration.LegacyKey, StringComparer.OrdinalIgnoreCase);
+        private IReadOnlyDictionary<string, SettingDefinition> GetDefinitionsByAlias()
+        {
+            var map = new Dictionary<string, SettingDefinition>(StringComparer.OrdinalIgnoreCase);
 
-        private List<string> GetMissingKeys(HashSet<string> foundKeys)
+            foreach (var definition in settingsRegistry.Settings)
+                foreach (var legacyKey in definition.LegacyKeys)
+                    map[legacyKey] = definition;
+
+            return map;
+        }
+
+        private IReadOnlyDictionary<string, SettingDefinition> GetDefinitionsByKey()
+            => settingsRegistry.Settings.ToDictionary(definition => definition.Key, StringComparer.OrdinalIgnoreCase);
+
+        private List<string> GetMissingRows(SettingsSection section, HashSet<string> foundKeys)
             => settingsRegistry.Settings
-                .Where(setting => !foundKeys.Contains(setting.Key))
-                .Select(setting => $"{setting.Key}={setting.Read()}")
+                .Where(definition => definition.Section == section && !foundKeys.Contains(definition.Key))
+                .Select(definition => $"{definition.Key}={definition.Getter()}")
                 .ToList();
-
-        private IReadOnlyDictionary<string, ISetting> GetSettingsByKey()
-            => settingsRegistry.Settings.ToDictionary(setting => setting.Key, StringComparer.OrdinalIgnoreCase);
 
         private static string GetSettingsFilePath()
         {
@@ -126,13 +132,24 @@ namespace Sirstrap.Core.Settings
             return Path.Combine(settingsPath, "Sirstrap.ini");
         }
 
+        private static string SectionHeader(SettingsSection section) => section switch
+        {
+            SettingsSection.Settings => "[SETTINGS]",
+            SettingsSection.State => "[STATE]",
+            _ => throw new ArgumentOutOfRangeException(nameof(section))
+        };
+
         private List<string> UpdateSettingsRows(List<string> rows)
         {
-            var legacyKeys = GetLegacyKeys();
-            var settingsByKey = GetSettingsByKey();
-            var inSettingsSection = false;
-            var settingsSectionIndex = -1;
-            var foundKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var definitionsByKey = GetDefinitionsByKey();
+            var sectionIndexes = new Dictionary<SettingsSection, int>();
+            var foundKeys = new Dictionary<SettingsSection, HashSet<string>>
+            {
+                [SettingsSection.Settings] = new(StringComparer.OrdinalIgnoreCase),
+                [SettingsSection.State] = new(StringComparer.OrdinalIgnoreCase)
+            };
+
+            SettingsSection? currentSection = null;
 
             var i = 0;
 
@@ -140,23 +157,28 @@ namespace Sirstrap.Core.Settings
             {
                 var trimmedRow = rows[i].Trim();
 
-                if (IniFormat.IsSectionHeader(trimmedRow, SettingsSectionHeader, out var isSettingsSection))
+                if (IniFormat.TryParseSectionHeader(trimmedRow, out var section))
                 {
-                    var wasSettingsSection = inSettingsSection;
+                    var previousSection = currentSection;
 
-                    inSettingsSection = isSettingsSection;
+                    currentSection = section;
 
-                    if (inSettingsSection)
-                        settingsSectionIndex = i;
+                    if (currentSection.HasValue)
+                        sectionIndexes[currentSection.Value] = i;
 
-                    if (wasSettingsSection
-                        && !inSettingsSection)
+                    if (previousSection.HasValue
+                        && previousSection != currentSection)
                     {
-                        var missingKeys = GetMissingKeys(foundKeys);
+                        var missingRows = GetMissingRows(previousSection.Value, foundKeys[previousSection.Value]);
+                        var insertIndex = i;
 
-                        rows.InsertRange(i, missingKeys);
+                        while (insertIndex > 0
+                            && string.IsNullOrWhiteSpace(rows[insertIndex - 1]))
+                            insertIndex--;
 
-                        i += missingKeys.Count;
+                        rows.InsertRange(insertIndex, missingRows);
+
+                        i += missingRows.Count;
                     }
 
                     i++;
@@ -164,7 +186,7 @@ namespace Sirstrap.Core.Settings
                     continue;
                 }
 
-                if (!inSettingsSection
+                if (currentSection == null
                     || !IniFormat.TryParseRow(trimmedRow, out var key, out _))
                 {
                     i++;
@@ -172,30 +194,41 @@ namespace Sirstrap.Core.Settings
                     continue;
                 }
 
-                if (legacyKeys.Contains(key))
+                if (!definitionsByKey.TryGetValue(key, out var definition)
+                    || definition.Section != currentSection.Value)
                 {
                     rows.RemoveAt(i);
 
                     continue;
                 }
 
-                foundKeys.Add(key);
-
-                if (settingsByKey.TryGetValue(key, out var setting))
-                    rows[i] = $"{key}={setting.Read()}";
+                foundKeys[currentSection.Value].Add(key);
+                rows[i] = $"{key}={definition.Getter()}";
 
                 i++;
             }
 
-            if (settingsSectionIndex == -1)
-            {
-                rows.Insert(0, SettingsSectionHeader);
-                rows.InsertRange(1, GetMissingKeys(foundKeys));
-            }
-            else if (inSettingsSection)
-                rows.AddRange(GetMissingKeys(foundKeys));
+            AppendOrInsertSection(rows, SettingsSection.Settings, currentSection, sectionIndexes, foundKeys);
+            AppendOrInsertSection(rows, SettingsSection.State, currentSection, sectionIndexes, foundKeys);
 
             return rows;
+        }
+
+        private void AppendOrInsertSection(List<string> rows, SettingsSection section, SettingsSection? currentSection, Dictionary<SettingsSection, int> sectionIndexes, Dictionary<SettingsSection, HashSet<string>> foundKeys)
+        {
+            if (sectionIndexes.ContainsKey(section))
+            {
+                if (currentSection == section)
+                    rows.AddRange(GetMissingRows(section, foundKeys[section]));
+
+                return;
+            }
+
+            if (rows.Count > 0)
+                rows.Add(string.Empty);
+
+            rows.Add(SectionHeader(section));
+            rows.AddRange(GetMissingRows(section, foundKeys[section]));
         }
 
         private void WriteFreshSettingsFile(string settingsFilePath)
@@ -208,12 +241,19 @@ namespace Sirstrap.Core.Settings
 
             var content = new StringBuilder();
 
-            content.AppendLine(SettingsSectionHeader);
-
-            foreach (var setting in settingsRegistry.Settings)
-                content.AppendLine($"{setting.Key}={setting.Read()}");
+            AppendSection(content, SettingsSection.Settings);
+            content.AppendLine();
+            AppendSection(content, SettingsSection.State);
 
             File.WriteAllText(settingsFilePath, content.ToString(), Encoding.UTF8);
+        }
+
+        private void AppendSection(StringBuilder content, SettingsSection section)
+        {
+            content.AppendLine(SectionHeader(section));
+
+            foreach (var definition in settingsRegistry.Settings.Where(definition => definition.Section == section))
+                content.AppendLine($"{definition.Key}={definition.Getter()}");
         }
     }
 }
