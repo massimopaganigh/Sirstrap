@@ -10,49 +10,49 @@
   }
 
   :root {
-    --background: 220 20% 6%;
-    --foreground: 210 20% 92%;
+    --background: 197 100% 5%;
+    --foreground: 45 60% 78%;
 
-    --card: 220 18% 10%;
-    --card-foreground: 210 20% 92%;
+    --card: 192 85% 10%;
+    --card-foreground: 45 60% 78%;
 
-    --popover: 220 18% 10%;
-    --popover-foreground: 210 20% 92%;
+    --popover: 192 85% 10%;
+    --popover-foreground: 45 60% 78%;
 
-    --primary: 145 80% 42%;
-    --primary-foreground: 220 20% 6%;
+    --primary: 181 87% 31%;
+    --primary-foreground: 197 100% 5%;
 
-    --secondary: 220 16% 16%;
-    --secondary-foreground: 210 20% 85%;
+    --secondary: 190 50% 16%;
+    --secondary-foreground: 45 50% 82%;
 
-    --muted: 220 14% 14%;
-    --muted-foreground: 215 12% 55%;
+    --muted: 193 40% 14%;
+    --muted-foreground: 183 18% 60%;
 
-    --accent: 270 60% 58%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 181 87% 31%;
+    --accent-foreground: 197 100% 5%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 5 81% 38%;
+    --destructive-foreground: 45 60% 78%;
 
-    --border: 220 14% 18%;
-    --input: 220 14% 18%;
-    --ring: 145 80% 42%;
+    --border: 191 40% 20%;
+    --input: 191 40% 20%;
+    --ring: 181 87% 35%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 220 18% 10%;
-    --sidebar-foreground: 210 20% 85%;
-    --sidebar-primary: 145 80% 42%;
-    --sidebar-primary-foreground: 220 20% 6%;
-    --sidebar-accent: 220 16% 16%;
-    --sidebar-accent-foreground: 210 20% 85%;
-    --sidebar-border: 220 14% 18%;
-    --sidebar-ring: 145 80% 42%;
+    --sidebar-background: 192 85% 10%;
+    --sidebar-foreground: 45 60% 78%;
+    --sidebar-primary: 181 87% 31%;
+    --sidebar-primary-foreground: 197 100% 5%;
+    --sidebar-accent: 190 50% 16%;
+    --sidebar-accent-foreground: 45 50% 82%;
+    --sidebar-border: 191 40% 20%;
+    --sidebar-ring: 181 87% 35%;
 
-    --glow-green: 145 80% 42%;
-    --glow-purple: 270 60% 58%;
-    --glow-blue: 210 90% 55%;
-    --glow-red: 0 75% 55%;
+    --glow-red: 5 81% 38%;
+    --glow-teal: 181 87% 31%;
+    --glow-amber: 39 100% 47%;
+    --glow-mint: 160 41% 70%;
   }
 }
 
@@ -75,11 +75,11 @@
 .title-shimmer {
   background: linear-gradient(
     90deg,
-    hsl(270 60% 58%)  0%,
-    hsl(270 60% 58%) 40%,
-    hsl(270 60% 92%) 50%,
-    hsl(270 60% 58%) 60%,
-    hsl(270 60% 58%) 100%
+    hsl(39 100% 47%)  0%,
+    hsl(39 100% 47%) 40%,
+    hsl(45 100% 85%) 50%,
+    hsl(39 100% 47%) 60%,
+    hsl(39 100% 47%) 100%
   );
   background-size: 400% auto;
   -webkit-background-clip: text;
