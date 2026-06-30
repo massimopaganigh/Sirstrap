@@ -14,8 +14,8 @@ namespace Sirstrap.Core.Launch
         {
             using ITelemetryScope scope = performanceTelemetry.Measure("roblox.launch", new Dictionary<string, object>
             {
-                ["multiInstance"] = sirstrapConfiguration.MultiInstance,
-                ["incognito"] = sirstrapConfiguration.Incognito
+                ["multiInstance"] = sirstrapConfiguration.RobloxMultiInstance,
+                ["incognito"] = sirstrapConfiguration.RobloxIncognito
             });
 
             var robloxPlayerBetaExePath = Path.Combine(pathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
@@ -33,11 +33,11 @@ namespace Sirstrap.Core.Launch
             {
                 var existingPids = robloxProcessService.SnapshotGameProcessIds();
 
-                if (sirstrapConfiguration.MultiInstance)
+                if (sirstrapConfiguration.RobloxMultiInstance)
                 {
                     singletonCaptured = singletonManager.CaptureSingleton();
 
-                    if (sirstrapConfiguration.Incognito
+                    if (sirstrapConfiguration.RobloxIncognito
                         && singletonManager.CurrentInstanceType == InstanceType.Master)
                         incognitoManager.MoveRobloxFolderToCache();
                 }

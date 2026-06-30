@@ -28,7 +28,7 @@ namespace Sirstrap.Core.Update
 
             try
             {
-                if (!sirstrapConfiguration.AutoUpdate)
+                if (!sirstrapConfiguration.SirstrapAutoUpdate)
                 {
                     Log.Information("[*] AutoUpdate is disabled, skipping the update check.");
 

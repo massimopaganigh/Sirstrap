@@ -4,7 +4,7 @@ namespace Sirstrap.Core.Update
     {
         private static readonly string? _informationalVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion.Split('+')[0];
 
-        public string Channel => sirstrapConfiguration.ChannelName;
+        public string Channel => sirstrapConfiguration.SirstrapChannel;
 
         public Version Current => new(_informationalVersion!);
 

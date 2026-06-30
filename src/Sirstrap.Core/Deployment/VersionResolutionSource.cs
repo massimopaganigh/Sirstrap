@@ -6,6 +6,8 @@ namespace Sirstrap.Core.Deployment
         RobloxApi,
         SirHurt,
         SirHurtFallback,
+        Weao,
+        Executor,
         Failed
     }
 }

@@ -14,7 +14,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task UpdateAsync_IsDisabled_WhenAutoUpdateOff()
         {
-            SirstrapConfiguration config = new() { AutoUpdate = false };
+            SirstrapConfiguration config = new() { SirstrapAutoUpdate = false };
             SirstrapUpdateService service = NewService(config, new FakeSirstrapVersion(new Version("1.0.0.0")), ReleasesClient("[]"), out var telemetry);
 
             await service.UpdateAsync(SirstrapType.CLI, []);
@@ -25,7 +25,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task UpdateAsync_IsUpToDate_WhenLatestNotNewer()
         {
-            SirstrapConfiguration config = new() { AutoUpdate = true, ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapAutoUpdate = true, SirstrapChannel = "-beta" };
             FakeSirstrapVersion version = new(new Version("9.9.9.9"), "-beta");
             HttpClient releases = ReleasesClient("""[{"tag_name":"v0.0.1.0-beta","draft":false,"body":"old"}]""");
             SirstrapUpdateService service = NewService(config, version, releases, out var telemetry);
@@ -38,7 +38,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task UpdateAsync_IsUpToDate_WhenReleaseLookupFails()
         {
-            SirstrapConfiguration config = new() { AutoUpdate = true, ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapAutoUpdate = true, SirstrapChannel = "-beta" };
             FakeSirstrapVersion version = new(new Version("1.0.0.0"), "-beta");
             SirstrapUpdateService service = NewService(config, version, ReleasesClient("[]"), out var telemetry);
 
@@ -50,7 +50,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task UpdateAsync_Fails_WhenUpdateNeededButAssetMissing()
         {
-            SirstrapConfiguration config = new() { AutoUpdate = true, ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapAutoUpdate = true, SirstrapChannel = "-beta" };
             FakeSirstrapVersion version = new(new Version("1.0.0.0"), "-beta");
             HttpClient releases = ReleasesClient("""[{"tag_name":"v2.0.0.0-beta","draft":false,"body":"newer","assets":[]}]""");
             SirstrapUpdateService service = NewService(config, version, releases, out var telemetry);
@@ -63,7 +63,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task GetLatestChangelogAsync_ReturnsBody_ForMatchingChannel()
         {
-            SirstrapConfiguration config = new() { ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapChannel = "-beta" };
             FakeSirstrapVersion version = new(new Version("1.0.0.0"), "-beta");
             HttpClient releases = ReleasesClient("""[{"tag_name":"v2.0.0.0-beta","draft":false,"body":"the changelog"}]""");
             SirstrapUpdateService service = NewService(config, version, releases, out _);
@@ -74,7 +74,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task GetLatestChangelogAsync_ReturnsEmpty_WhenNoMatchingRelease()
         {
-            SirstrapConfiguration config = new() { ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapChannel = "-beta" };
             FakeSirstrapVersion version = new(new Version("1.0.0.0"), "-beta");
             HttpClient releases = ReleasesClient("""[{"tag_name":"v2.0.0.0-alpha","draft":false,"body":"other channel"}]""");
             SirstrapUpdateService service = NewService(config, version, releases, out _);
@@ -85,7 +85,7 @@ namespace Sirstrap.Core.Tests.Update
         [Fact]
         public async Task GetLatestChangelogAsync_IgnoresDraftReleases()
         {
-            SirstrapConfiguration config = new() { ChannelName = "-beta" };
+            SirstrapConfiguration config = new() { SirstrapChannel = "-beta" };
             FakeSirstrapVersion version = new(new Version("1.0.0.0"), "-beta");
             HttpClient releases = ReleasesClient("""[{"tag_name":"v3.0.0.0-beta","draft":true,"body":"draft body"}]""");
             SirstrapUpdateService service = NewService(config, version, releases, out _);
