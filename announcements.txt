@@ -1,1 +1,1 @@
-Sirstrap.Core has been rewritten from scratch to be more scalable and testable; if you encounter any issues, please report them ^^
+You can now choose your Roblox version source, including WEAO API support for current, previous, future, and executor-specific versions; if you encounter any issues, please report them ^^
