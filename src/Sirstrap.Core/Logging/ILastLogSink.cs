@@ -7,5 +7,9 @@ namespace Sirstrap.Core.Logging
         LogEventLevel? LastLogLevel { get; }
 
         DateTimeOffset? LastLogTimestamp { get; }
+
+        int SessionLogCount { get; }
+
+        IReadOnlyList<string> GetSessionLog();
     }
 }
