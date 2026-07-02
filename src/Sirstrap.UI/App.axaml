@@ -8,10 +8,16 @@
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Resources>
-        <FontFamily x:Key="AppFontFamily">avares://Sirstrap/Assets#JetBrains Mono</FontFamily>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Sirstrap/Views/Common/SettingsRow.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <FontFamily x:Key="AppFontFamily">avares://Sirstrap/Assets#JetBrains Mono</FontFamily>
+        </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://Sirstrap/Views/Common/ScrollBar.axaml" />
         <Style Selector="TextBlock">
             <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />

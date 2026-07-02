@@ -12,6 +12,10 @@
             Closing += OnClosing;
         }
 
+        public event EventHandler? OpenAnimationCompleted;
+
+        public bool OpenAnimationFinished { get; private set; }
+
         private async Task AnimateWindowClose()
         {
             var animationDuration = 150;
@@ -90,6 +94,13 @@
             Close();
         }
 
-        protected async void OnLoaded(object? sender, RoutedEventArgs e) => await AnimateWindowOpen();
+        protected async void OnLoaded(object? sender, RoutedEventArgs e)
+        {
+            await AnimateWindowOpen();
+
+            OpenAnimationFinished = true;
+
+            OpenAnimationCompleted?.Invoke(this, EventArgs.Empty);
+        }
     }
 }

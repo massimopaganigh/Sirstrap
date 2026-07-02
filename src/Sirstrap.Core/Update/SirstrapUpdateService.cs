@@ -70,11 +70,12 @@ namespace Sirstrap.Core.Update
         {
             try
             {
+                var assetName = GetAssetName(sirstrapType);
                 var (_, _, release) = await FindLatestReleaseAsync();
-                var downloadUri = release?.FindAssetDownloadUri(GetAssetName(sirstrapType)) ?? string.Empty;
+                var downloadUri = release?.FindAssetDownloadUri(assetName) ?? string.Empty;
 
                 if (string.IsNullOrEmpty(downloadUri))
-                    throw new InvalidOperationException($"{nameof(FindLatestReleaseAsync)} failed.");
+                    throw new InvalidOperationException($"No '{assetName}' asset found in the latest release.");
 
                 await updateApplier.ApplyAsync(downloadUri, args);
 
@@ -98,7 +99,7 @@ namespace Sirstrap.Core.Update
             {
                 if (release.IsDraft
                     || !ReleaseTag.TryParse(release.TagName, out var tag)
-                    || !string.Equals(tag.Channel, sirstrapVersion.Channel, StringComparison.OrdinalIgnoreCase))
+                    || !string.Equals(NormalizeChannel(tag.Channel), NormalizeChannel(sirstrapVersion.Channel), StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 if (tag.Version > latestVersion)
@@ -114,16 +115,22 @@ namespace Sirstrap.Core.Update
 
         private static string GetAssetName(SirstrapType sirstrapType) => sirstrapType == SirstrapType.CLI ? CLI_ZIP_FILENAME : UI_ZIP_FILENAME;
 
+        private static string NormalizeChannel(string? channel) => channel?.Trim().TrimStart('-') ?? string.Empty;
+
         private async Task<bool> IsUpToDateAsync()
         {
             try
             {
                 var currentVersion = sirstrapVersion.Current;
                 var currentChannel = sirstrapVersion.Channel;
-                var (latestVersion, latestChannel, _) = await FindLatestReleaseAsync();
+                var (latestVersion, latestChannel, latestRelease) = await FindLatestReleaseAsync();
 
-                if (latestVersion == new Version("0.0.0.0") || string.IsNullOrWhiteSpace(latestChannel))
-                    throw new InvalidOperationException($"{nameof(FindLatestReleaseAsync)} failed.");
+                if (latestRelease is null)
+                {
+                    Log.Warning("[*] No Sirstrap release found for the {Channel} channel, skipping the update check.", currentChannel);
+
+                    return true;
+                }
 
                 if (latestVersion > currentVersion)
                 {

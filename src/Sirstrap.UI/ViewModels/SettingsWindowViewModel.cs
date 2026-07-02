@@ -18,6 +18,9 @@
         private VersionSourceOption? _selectedVersionSource;
 
         [ObservableProperty]
+        private string _searchText = string.Empty;
+
+        [ObservableProperty]
         private Settings _settings;
 
         public SettingsWindowViewModel(Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService, IWeaoService weaoService)

@@ -83,6 +83,17 @@ namespace Sirstrap.Core.Tests.Update
         }
 
         [Fact]
+        public async Task GetLatestChangelogAsync_MatchesChannel_WithoutLeadingDash()
+        {
+            SirstrapConfiguration config = new() { SirstrapChannel = "beta" };
+            FakeSirstrapVersion version = new(new Version("1.0.0.0"), "beta");
+            HttpClient releases = ReleasesClient("""[{"tag_name":"v2.0.0.0-beta","draft":false,"body":"the changelog"}]""");
+            SirstrapUpdateService service = NewService(config, version, releases, out _);
+
+            Assert.Equal("the changelog", await service.GetLatestChangelogAsync());
+        }
+
+        [Fact]
         public async Task GetLatestChangelogAsync_IgnoresDraftReleases()
         {
             SirstrapConfiguration config = new() { SirstrapChannel = "-beta" };
