@@ -7,6 +7,9 @@ namespace Sirstrap.UI.Models
         private readonly IPathManager _pathManager;
 
         [ObservableProperty]
+        private Color _sirstrapAccentColorValue = Color.Parse("#454ee6");
+
+        [ObservableProperty]
         private bool _sirstrapAutoUpdate = true;
 
         [ObservableProperty]
@@ -52,6 +55,9 @@ namespace Sirstrap.UI.Models
 
             var sirHurtPath = sirHurtService.GetSirHurtPath();
 
+            if (Color.TryParse(configuration.SirstrapAccentColor, out var accentColor))
+                SirstrapAccentColorValue = accentColor;
+
             SirstrapAutoUpdate = configuration.SirstrapAutoUpdate;
             SirstrapChannel = configuration.SirstrapChannel;
             SirstrapFontFamily = configuration.SirstrapFontFamily;
@@ -71,6 +77,7 @@ namespace Sirstrap.UI.Models
             if (!string.Equals(_configuration.RobloxInstallationPath, RobloxInstallationPath, StringComparison.OrdinalIgnoreCase))
                 _configuration.RobloxPreviousInstallationPath = _configuration.RobloxInstallationPath;
 
+            _configuration.SirstrapAccentColor = $"#{SirstrapAccentColorValue.R:x2}{SirstrapAccentColorValue.G:x2}{SirstrapAccentColorValue.B:x2}";
             _configuration.SirstrapAutoUpdate = SirstrapAutoUpdate;
             _configuration.SirstrapChannel = SirstrapChannel;
             _configuration.SirstrapFontFamily = SirstrapFontFamily;

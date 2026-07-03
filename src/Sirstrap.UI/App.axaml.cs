@@ -4,6 +4,33 @@ namespace Sirstrap.UI
     {
         private static TrayIcon? _trayIcon;
 
+        public static void ApplyAccentColor()
+        {
+            try
+            {
+                SetAccentColor(Program.Services.GetRequiredService<SirstrapConfiguration>().SirstrapAccentColor);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Failed to apply the accent color.");
+            }
+        }
+
+        public static void SetAccentColor(string hexColor)
+        {
+            if (Current?.Resources == null
+                || !Color.TryParse(hexColor, out var color))
+                return;
+
+            Current.Resources["SystemAccentColor"] = color;
+            Current.Resources["SystemAccentColorLight1"] = LightenColor(color, 0.15);
+            Current.Resources["SystemAccentColorLight2"] = LightenColor(color, 0.30);
+            Current.Resources["SystemAccentColorLight3"] = LightenColor(color, 0.45);
+            Current.Resources["SystemAccentColorDark1"] = DarkenColor(color, 0.15);
+            Current.Resources["SystemAccentColorDark2"] = DarkenColor(color, 0.30);
+            Current.Resources["SystemAccentColorDark3"] = DarkenColor(color, 0.45);
+        }
+
         public static void ApplyFontFamily()
         {
             try
@@ -46,6 +73,7 @@ namespace Sirstrap.UI
                 desktop.MainWindow = new MainWindow { DataContext = Program.Services.GetRequiredService<MainWindowViewModel>() };
 
                 ApplyFontFamily();
+                ApplyAccentColor();
 
                 var trayMode = Program.Services.GetRequiredService<SirstrapConfiguration>().SirstrapTrayMode;
 
@@ -133,5 +161,9 @@ namespace Sirstrap.UI
         }
 
         public static void SetTrayIconVisible(bool visible) => _trayIcon?.IsVisible = visible;
+
+        private static Color DarkenColor(Color color, double factor) => new(color.A, (byte)(color.R * (1 - factor)), (byte)(color.G * (1 - factor)), (byte)(color.B * (1 - factor)));
+
+        private static Color LightenColor(Color color, double factor) => new(color.A, (byte)Math.Min(255, color.R + (255 - color.R) * factor), (byte)Math.Min(255, color.G + (255 - color.G) * factor), (byte)Math.Min(255, color.B + (255 - color.B) * factor));
     }
 }

@@ -48,6 +48,9 @@ namespace Sirstrap.UI.ViewModels
         private bool _showServerLocation = false;
 
         [ObservableProperty]
+        private string _sirHurtUser = string.Empty;
+
+        [ObservableProperty]
         private ObservableCollection<VersionSourceOption> _versionSources = [];
 
         [ObservableProperty]
@@ -80,6 +83,7 @@ namespace Sirstrap.UI.ViewModels
             _weaoService = weaoService;
 
             CurrentFullVersion = sirstrapVersion.GetFullVersion();
+            SirHurtUser = _sirHurtService.GetSirHurtUser();
 
             _ = LoadVersionSourcesAsync();
             _ = LoadImagesAsync();
@@ -259,6 +263,22 @@ namespace Sirstrap.UI.ViewModels
             catch (Exception ex)
             {
                 Log.Error(ex, "[!] Failed to adjust the log polling interval.");
+            }
+        }
+
+        [RelayCommand]
+        private void Logout()
+        {
+            try
+            {
+                if (_sirHurtService.Logout())
+                    SirHurtUser = _sirHurtService.GetSirHurtUser();
+
+                Sentry.SentrySdk.Metrics.EmitCounter(nameof(Logout), 1);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "[!] Failed to log out from SirHurt.");
             }
         }
 

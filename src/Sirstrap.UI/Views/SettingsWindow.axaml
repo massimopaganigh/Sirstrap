@@ -24,6 +24,11 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <common:WavyBackground
+            Grid.Row="0"
+            Grid.RowSpan="4"
+            Margin="-5"
+            IsHitTestVisible="False" />
         <TextBlock
             Grid.Row="0"
             Margin="0,4,0,9"
@@ -40,7 +45,7 @@
             Grid.Row="2"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
-            Background="#212830"
+            Background="#80212830"
             BoxShadow="0 0 10 0 #212830"
             CornerRadius="5"
             Padding="5">
@@ -84,7 +89,6 @@
                                     Grid.Column="1"
                                     Width="32"
                                     Height="32"
-                                    BorderThickness="0"
                                     Classes="hover-lift"
                                     Command="{Binding BrowseInstallationPathCommand}"
                                     CornerRadius="999"
@@ -118,7 +122,6 @@
                                     Grid.Column="1"
                                     Width="32"
                                     Height="32"
-                                    BorderThickness="0"
                                     Classes="hover-lift"
                                     Command="{Binding RunSirHurtCommand}"
                                     CornerRadius="999"
@@ -151,6 +154,13 @@
                                     </Style>
                                 </ComboBox.Styles>
                             </ComboBox>
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Sirstrap accent color:">
+                            <ColorPicker
+                                Width="200"
+                                CornerRadius="999"
+                                Color="{Binding SirstrapAccentColorValue}"
+                                DataContext="{Binding Settings}" />
                         </common:SettingsRow>
                         <common:SettingsRow Label="Enable Sirstrap auto-update:">
                             <CheckBox
@@ -248,12 +258,16 @@
                         <Button
                             Width="32"
                             Height="32"
-                            Background="#4dbf6a6a"
-                            BorderThickness="0"
                             Classes="hover-lift"
                             Command="{Binding UninstallCommand}"
                             CornerRadius="999"
                             ToolTip.Tip="Uninstall Sirstrap">
+                            <Button.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                                    <GradientStop Offset="0" Color="#73bf6a6a" />
+                                    <GradientStop Offset="1" Color="#26bf6a6a" />
+                                </LinearGradientBrush>
+                            </Button.Background>
                             <Image
                                 Margin="0"
                                 RenderOptions.BitmapInterpolationMode="HighQuality"
@@ -262,7 +276,6 @@
                         <Button
                             Width="32"
                             Height="32"
-                            BorderThickness="0"
                             Classes="hover-lift"
                             Command="{Binding OpenIniFileCommand}"
                             CornerRadius="999"
@@ -275,7 +288,6 @@
                         <Button
                             Width="64"
                             Height="32"
-                            BorderThickness="0"
                             Classes="hover-lift"
                             Command="{Binding SaveCommand}"
                             CornerRadius="999"

@@ -219,6 +219,7 @@
 
                     Dispatcher.UIThread.Invoke(() =>
                     {
+                        App.ApplyAccentColor();
                         App.SetTray(Settings.SirstrapTrayMode != TrayMode.None);
 
                         CloseSpecificWindow<SettingsWindow>();
