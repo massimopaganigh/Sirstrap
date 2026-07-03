@@ -6,6 +6,7 @@
     xmlns:common="using:Sirstrap.UI.Views.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Sirstrap.UI.Models"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
     MaxHeight="250"
     mc:Ignorable="d"
@@ -169,7 +170,6 @@
                             <TextBlock
                                 Margin="10,0,0,0"
                                 VerticalAlignment="Center"
-                                FontSize="10"
                                 Text="{Binding SirHurtUser}" />
                             <Border
                                 Width="1"
@@ -243,13 +243,14 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         ItemsSource="{Binding VersionSources}"
-                                        SelectedItem="{Binding SelectedVersionSourceMain, Mode=TwoWay}"
-                                        x:CompileBindings="False">
+                                        SelectedItem="{Binding SelectedVersionSourceMain, Mode=TwoWay}">
                                         <ListBox.Styles>
                                             <Style Selector="ListBoxItem">
                                                 <Setter Property="MinHeight" Value="0" />
+                                                <Setter Property="Height" Value="32" />
                                                 <Setter Property="Margin" Value="0,1" />
-                                                <Setter Property="Padding" Value="10,6" />
+                                                <Setter Property="Padding" Value="10,0" />
+                                                <Setter Property="VerticalContentAlignment" Value="Center" />
                                                 <Setter Property="CornerRadius" Value="999" />
                                             </Style>
                                             <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -260,9 +261,8 @@
                                             </Style>
                                         </ListBox.Styles>
                                         <ListBox.ItemTemplate>
-                                            <DataTemplate>
+                                            <DataTemplate x:DataType="models:VersionSourceOption">
                                                 <TextBlock
-                                                    FontSize="10"
                                                     Text="{Binding Display}"
                                                     TextTrimming="CharacterEllipsis" />
                                             </DataTemplate>

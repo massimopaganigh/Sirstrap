@@ -6,6 +6,7 @@
     xmlns:common="using:Sirstrap.UI.Views.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Sirstrap.UI.Models"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
     MaxHeight="500"
     mc:Ignorable="d"
@@ -140,10 +141,9 @@
                                 BorderThickness="0"
                                 CornerRadius="999"
                                 ItemsSource="{Binding VersionSources}"
-                                SelectedItem="{Binding SelectedVersionSource}"
-                                x:CompileBindings="False">
+                                SelectedItem="{Binding SelectedVersionSource}">
                                 <ComboBox.ItemTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate x:DataType="models:VersionSourceOption">
                                         <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
