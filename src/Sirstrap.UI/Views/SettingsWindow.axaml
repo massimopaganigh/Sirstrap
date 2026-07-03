@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Sirstrap.UI.Models"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
-    MaxHeight="500"
+    MaxHeight="600"
     mc:Ignorable="d"
     CanResize="False"
     ExtendClientAreaToDecorationsHint="True"
