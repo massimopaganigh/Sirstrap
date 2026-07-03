@@ -2,8 +2,14 @@
 {
     public partial class SettingsWindowViewModel : ViewModelBase
     {
+        private const string ANNOUNCEMENTS_URI = "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt";
+
+        private readonly HttpClient _httpClient;
         private readonly IUninstallService _uninstallService;
         private readonly IWeaoService _weaoService;
+
+        [ObservableProperty]
+        private string _announcements = string.Empty;
 
         [ObservableProperty]
         private string _currentFullVersion;
@@ -23,8 +29,9 @@
         [ObservableProperty]
         private Settings _settings;
 
-        public SettingsWindowViewModel(Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService, IWeaoService weaoService)
+        public SettingsWindowViewModel(HttpClient httpClient, Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService, IWeaoService weaoService)
         {
+            _httpClient = httpClient;
             _settings = settings;
             _currentFullVersion = sirstrapVersion.GetFullVersion();
             _uninstallService = uninstallService;
@@ -32,7 +39,22 @@
 
             GetFontFamilies();
 
+            _ = LoadAnnouncementsAsync();
             _ = LoadVersionSourcesAsync();
+        }
+
+        private async Task LoadAnnouncementsAsync()
+        {
+            try
+            {
+                var announcements = (await _httpClient.GetStringAsync(ANNOUNCEMENTS_URI)).Trim();
+
+                await Dispatcher.UIThread.InvokeAsync(() => Announcements = announcements);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(LoadAnnouncementsAsync));
+            }
         }
 
         private async Task LoadVersionSourcesAsync()
