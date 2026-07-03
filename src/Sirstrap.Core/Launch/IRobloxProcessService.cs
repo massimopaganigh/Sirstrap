@@ -2,7 +2,9 @@ namespace Sirstrap.Core.Launch
 {
     public interface IRobloxProcessService
     {
-        List<Process> FindNewGameProcesses(HashSet<int> knownIds, int attempts = 20);
+        bool AnyGameProcessRunning(IEnumerable<int> processIds);
+
+        List<int> FindNewGameProcessIds(HashSet<int> knownIds, int attempts = 20);
 
         int GetRunningGameProcessCount();
 
