@@ -42,16 +42,12 @@ namespace Sirstrap.Core.Launch
                         incognitoManager.MoveRobloxFolderToCache();
                 }
 
-                var launcherProcess = StartRoblox(robloxPlayerBetaExePath, configuration.LaunchUri);
-
-                if (launcherProcess == null)
+                if (!StartRoblox(robloxPlayerBetaExePath, configuration.LaunchUri))
                 {
                     Log.Error("[!] Failed to launch Roblox (Process.Start returned null).");
 
                     return Fail(scope, "ProcessStartFailed");
                 }
-
-                WaitForInputIdle(launcherProcess);
 
                 performanceTelemetry.RecordCounter("roblox.launch.outcome", new Dictionary<string, object> { ["value"] = "Success" });
 
@@ -82,7 +78,7 @@ namespace Sirstrap.Core.Launch
             return false;
         }
 
-        private static Process? StartRoblox(string exePath, string launchUri)
+        private static bool StartRoblox(string exePath, string launchUri)
         {
             ProcessStartInfo startInfo = new()
             {
@@ -100,16 +96,23 @@ namespace Sirstrap.Core.Launch
             else
                 Log.Information("[*] Launching Roblox without a launch URI...");
 
-            return Process.Start(startInfo);
+            using var process = Process.Start(startInfo);
+
+            if (process == null)
+                return false;
+
+            WaitForInputIdle(process);
+
+            return true;
         }
 
         private void WaitForGameExit(HashSet<int> existingPids)
         {
             Log.Information("[*] Launched Roblox, waiting for the game process to exit (MultiInstance mode)...");
 
-            var gameProcesses = robloxProcessService.FindNewGameProcesses(existingPids);
+            var gamePids = robloxProcessService.FindNewGameProcessIds(existingPids);
 
-            if (gameProcesses.Count == 0)
+            if (gamePids.Count == 0)
             {
                 Log.Warning("[!] No new Roblox game processes were detected after the launch, cannot monitor the exit.");
 
@@ -117,10 +120,10 @@ namespace Sirstrap.Core.Launch
             }
 
             while (singletonManager.HasCapturedSingleton
-                && gameProcesses.Any(p => !p.HasExited))
+                && robloxProcessService.AnyGameProcessRunning(gamePids))
                 Thread.Sleep(100);
 
-            Log.Information("[*] The game exit wait ended (singleton captured: {HasCapturedSingleton}, all game processes exited: {AllExited}, Roblox processes still running: {RunningCount}).", singletonManager.HasCapturedSingleton, gameProcesses.All(p => p.HasExited), robloxProcessService.GetRunningGameProcessCount());
+            Log.Information("[*] The game exit wait ended (singleton captured: {HasCapturedSingleton}, all game processes exited: {AllExited}, Roblox processes still running: {RunningCount}).", singletonManager.HasCapturedSingleton, !robloxProcessService.AnyGameProcessRunning(gamePids), robloxProcessService.GetRunningGameProcessCount());
 
             robloxProcessService.LogRunningGameProcesses();
         }

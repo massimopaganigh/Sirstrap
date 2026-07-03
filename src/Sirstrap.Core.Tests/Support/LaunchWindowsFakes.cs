@@ -1,5 +1,4 @@
 using Serilog;
-using System.Diagnostics;
 
 namespace Sirstrap.Core.Tests.Support
 {
@@ -74,7 +73,9 @@ namespace Sirstrap.Core.Tests.Support
     {
         public int KillAllCalls { get; private set; }
 
-        public List<Process> FindNewGameProcesses(HashSet<int> knownIds, int attempts = 20) => [];
+        public bool AnyGameProcessRunning(IEnumerable<int> processIds) => false;
+
+        public List<int> FindNewGameProcessIds(HashSet<int> knownIds, int attempts = 20) => [];
 
         public int GetRunningGameProcessCount() => 0;
 

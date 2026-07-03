@@ -17,9 +17,15 @@ namespace Sirstrap.Core.Tests.Launch
         }
 
         [Fact]
-        public void FindNewGameProcesses_ReturnsEmpty_WhenNoNewProcesses()
+        public void FindNewGameProcessIds_ReturnsEmpty_WhenNoNewProcesses()
         {
-            Assert.Empty(_service.FindNewGameProcesses(_service.SnapshotGameProcessIds(), attempts: 1));
+            Assert.Empty(_service.FindNewGameProcessIds(_service.SnapshotGameProcessIds(), attempts: 1));
+        }
+
+        [Fact]
+        public void AnyGameProcessRunning_ReturnsFalse_ForUnknownIds()
+        {
+            Assert.False(_service.AnyGameProcessRunning([int.MaxValue]));
         }
 
         [Fact]
