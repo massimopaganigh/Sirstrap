@@ -158,8 +158,8 @@
                         <common:SettingsRow Label="Sirstrap accent color:">
                             <ColorPicker
                                 Width="200"
-                                CornerRadius="999"
                                 Color="{Binding SirstrapAccentColorValue}"
+                                CornerRadius="999"
                                 DataContext="{Binding Settings}" />
                         </common:SettingsRow>
                         <common:SettingsRow Label="Enable Sirstrap auto-update:">
@@ -237,8 +237,8 @@
                             VerticalContentAlignment="Center"
                             BorderThickness="0"
                             CornerRadius="999"
-                            Text="{Binding SearchText}"
-                            PlaceholderText="Search" />
+                            PlaceholderText="Search"
+                            Text="{Binding SearchText}" />
                     </StackPanel>
                 </Border>
                 <Border

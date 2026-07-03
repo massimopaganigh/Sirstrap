@@ -1,8 +1,21 @@
 <div align="center">
 
-# <image src="images/SirstrapIcon.png" height="24"> Sirstrap
+# <image src="src/SirHurt.Cleaner.CLI/Assets/favicon.ico" height="24"> SirHurt.Cleaner.CLI
 
-An alternative Roblox bootstrapper packed with additional features — built by exploiters, for exploiters.
+A complete cleanup utility that wipes Roblox, SirHurt, and Sirstrap from your filesystem and registry — built by exploiters, for exploiters.
+
+# <image src="src/Sirstrap.CLI/Assets/favicon.ico" height="24"> Sirstrap.CLI
+
+An alternative Roblox bootstrapper CLI packed with additional features — built by exploiters, for exploiters.
+
+# <image src="src/Sirstrap.UI/Assets/favicon.ico" height="24"> Sirstrap.UI
+
+An alternative Roblox bootstrapper UI packed with additional features — built by exploiters, for exploiters.
+
+<p align="center">
+  <img src="images/Sirstrap.png" width="49%" />
+  <img src="images/Settings.png" width="49%" />
+</p>
 
 [![Release](https://img.shields.io/github/v/release/massimopaganigh/sirstrap?label=Release)](https://github.com/massimopaganigh/sirstrap/releases/latest)
 [![License](https://img.shields.io/github/license/massimopaganigh/sirstrap?label=License)](https://github.com/massimopaganigh/sirstrap/blob/main/LICENSE)
@@ -10,15 +23,9 @@ An alternative Roblox bootstrapper packed with additional features — built by 
 [![Beta Release Build](https://github.com/massimopaganigh/sirstrap/actions/workflows/beta_release_build.yml/badge.svg)](https://github.com/massimopaganigh/sirstrap/actions/workflows/beta_release_build.yml)
 [![Alpha Release Build](https://github.com/massimopaganigh/Sirstrap/actions/workflows/alpha_release_build.yml/badge.svg)](https://github.com/massimopaganigh/Sirstrap/actions/workflows/alpha_release_build.yml)
 [![Main Branch Build](https://github.com/massimopaganigh/sirstrap/actions/workflows/main_branch_build.yml/badge.svg)](https://github.com/massimopaganigh/sirstrap/actions/workflows/main_branch_build.yml)
-[![Format Check](https://github.com/massimopaganigh/Sirstrap/actions/workflows/format_check.yml/badge.svg)](https://github.com/massimopaganigh/Sirstrap/actions/workflows/format_check.yml)
 [![Develop Branch Build](https://github.com/massimopaganigh/Sirstrap/actions/workflows/develop_branch_build.yml/badge.svg)](https://github.com/massimopaganigh/Sirstrap/actions/workflows/develop_branch_build.yml)
-[![Tested On](https://img.shields.io/badge/Tested_On-SirHurt-2daaea)](https://sirhurt.net)
-[![Roblox Version](https://img.shields.io/badge/dynamic/json?url=https%3A//sirhurt.net/status/fetch_2.php%3Fexploit%3DSirHurt%2520V5&query=%24%5B0%5D%5B%27SirHurt%20V5%27%5D.roblox_version&label=&color=2daaea)](https://sirhurt.net)
+[![Format Check](https://github.com/massimopaganigh/Sirstrap/actions/workflows/format_check.yml/badge.svg)](https://github.com/massimopaganigh/Sirstrap/actions/workflows/format_check.yml)
+[![Tested With](https://img.shields.io/badge/Tested_With-SirHurt-2daaea)](https://sirhurt.net)
 [![Made With Love By](https://img.shields.io/badge/Made_With_Love_By-SirHurt_CSR_Team-f2504b)](https://sirhurt.net)
-
-<p align="center">
-  <img src="images/Sirstrap.png" width="49%" />
-  <img src="images/Settings.png" width="49%" />
-</p>
 
 </div>
