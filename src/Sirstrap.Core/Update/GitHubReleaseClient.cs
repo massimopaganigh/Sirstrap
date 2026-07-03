@@ -16,7 +16,7 @@ namespace Sirstrap.Core.Update
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Failed to retrieve the Sirstrap releases from GitHub.");
+                Log.Warning(ex, "[*] Failed to retrieve the Sirstrap releases from GitHub.");
 
                 return [];
             }

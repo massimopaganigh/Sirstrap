@@ -4,6 +4,8 @@ namespace Sirstrap.Core.Settings
     {
         public static string GetDefaultInstallationPath() => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sirstrap", "Versions");
 
+        public string SirstrapAccentColor { get; set; } = "#454ee6";
+
         public bool SirstrapAutoUpdate { get; set; } = true;
 
         public string SirstrapChannel { get; set; } = "-beta";

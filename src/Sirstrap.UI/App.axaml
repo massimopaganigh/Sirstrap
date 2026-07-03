@@ -2,17 +2,147 @@
     x:Class="Sirstrap.UI.App"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="using:Sirstrap.UI.Behaviors"
     xmlns:local="using:Sirstrap.UI"
     RequestedThemeVariant="Dark">
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
     <Application.Resources>
-        <FontFamily x:Key="AppFontFamily">avares://Sirstrap/Assets#JetBrains Mono</FontFamily>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://Sirstrap/Views/Common/SettingsRow.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <FontFamily x:Key="AppFontFamily">avares://Sirstrap/Assets#JetBrains Mono</FontFamily>
+            <!--#region LG-->
+            <LinearGradientBrush
+                x:Key="ButtonBackground"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#3dffffff" />
+                <GradientStop Offset="1" Color="#14ffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ButtonBackgroundPointerOver"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#59ffffff" />
+                <GradientStop Offset="1" Color="#26ffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ButtonBackgroundPressed"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#26ffffff" />
+                <GradientStop Offset="1" Color="#0fffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ButtonBackgroundChecked"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#59ffffff" />
+                <GradientStop Offset="1" Color="#26ffffff" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="#0affffff" />
+            <LinearGradientBrush
+                x:Key="ButtonBorderBrush"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#59ffffff" />
+                <GradientStop Offset="1" Color="#1fffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ButtonBorderBrushPointerOver"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#73ffffff" />
+                <GradientStop Offset="1" Color="#2effffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ButtonBorderBrushPressed"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#40ffffff" />
+                <GradientStop Offset="1" Color="#1affffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ButtonBorderBrushChecked"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#73ffffff" />
+                <GradientStop Offset="1" Color="#2effffff" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="#0fffffff" />
+            <LinearGradientBrush
+                x:Key="SplitButtonBackground"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#3dffffff" />
+                <GradientStop Offset="1" Color="#14ffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="SplitButtonBackgroundPointerOver"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#59ffffff" />
+                <GradientStop Offset="1" Color="#26ffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="SplitButtonBackgroundPressed"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#26ffffff" />
+                <GradientStop Offset="1" Color="#0fffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="SplitButtonBackgroundChecked"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#59ffffff" />
+                <GradientStop Offset="1" Color="#26ffffff" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="SplitButtonBackgroundDisabled" Color="#0affffff" />
+            <LinearGradientBrush
+                x:Key="SplitButtonBorderBrush"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#59ffffff" />
+                <GradientStop Offset="1" Color="#1fffffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="SplitButtonBorderBrushPointerOver"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#73ffffff" />
+                <GradientStop Offset="1" Color="#2effffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="SplitButtonBorderBrushPressed"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#40ffffff" />
+                <GradientStop Offset="1" Color="#1affffff" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="SplitButtonBorderBrushChecked"
+                StartPoint="0%,0%"
+                EndPoint="0%,100%">
+                <GradientStop Offset="0" Color="#73ffffff" />
+                <GradientStop Offset="1" Color="#2effffff" />
+            </LinearGradientBrush>
+            <SolidColorBrush x:Key="SplitButtonBorderBrushDisabled" Color="#0fffffff" />
+            <!--#endregion-->
+        </ResourceDictionary>
     </Application.Resources>
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+        <StyleInclude Source="avares://Sirstrap/Views/Common/ScrollBar.axaml" />
         <Style Selector="TextBlock">
+            <Setter Property="Foreground" Value="#f0f6fc" />
+            <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        </Style>
+        <Style Selector="SelectableTextBlock">
             <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         </Style>
@@ -24,11 +154,27 @@
             <Setter Property="Foreground" Value="#f0f6fc" />
             <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         </Style>
+        <Style Selector="Button">
+            <Setter Property="behaviors:PointerLight.IsEnabled" Value="True" />
+        </Style>
         <Style Selector="Button.hover-lift:pointerover">
+            <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
+        </Style>
+        <Style Selector="SplitButton">
+            <Setter Property="behaviors:PointerLight.IsEnabled" Value="True" />
+        </Style>
+        <Style Selector="SplitButton.hover-lift:pointerover">
             <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
         </Style>
         <Style Selector="Border.hover-lift:pointerover">
             <Setter Property="RenderTransform" Value="translate(0px, -2.5px)" />
+        </Style>
+        <Style Selector="FlyoutPresenter">
+            <Setter Property="Background" Value="#2a323c" />
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Padding" Value="5" />
         </Style>
     </Application.Styles>
 </Application>

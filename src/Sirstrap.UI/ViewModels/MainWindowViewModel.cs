@@ -13,39 +13,42 @@ namespace Sirstrap.UI.ViewModels
         private readonly ISirHurtService _sirHurtService;
         private readonly IWeaoService _weaoService;
 
-        [ObservableProperty]
-        private string _accountName = string.Empty;
-
-        [ObservableProperty]
-        private string _announcement = string.Empty;
+        private const string GITHUB_PROFILE_URI = "https://github.com/massimopaganigh";
+        private const string LOGO_IMAGE_URI = "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/images/SirstrapIcon.png";
+        private const string PROFILE_IMAGE_URI = "https://github.com/massimopaganigh.png";
 
         [ObservableProperty]
         private string _currentFullVersion = string.Empty;
 
         private int _currentPollingInterval = 100;
 
-        [ObservableProperty]
-        private bool _isLoggedIn = false;
-
         private bool _isMinimized;
-
-        [ObservableProperty]
-        private string _lastLogMessage = "...";
 
         private DateTimeOffset? _lastLogReceived;
         private readonly Timer _logPollingTimer;
 
         [ObservableProperty]
+        private Bitmap? _logoImage;
+
+        [ObservableProperty]
+        private Bitmap? _profileImage;
+
+        [ObservableProperty]
         private string _serverLocation = string.Empty;
 
         [ObservableProperty]
-        private bool _showAnnouncement = false;
+        private string _sessionLog = string.Empty;
+
+        private int _sessionLogCount;
 
         [ObservableProperty]
         private bool _showLaunchButton = Program.Args == null || Program.Args.Length == 0;
 
         [ObservableProperty]
         private bool _showServerLocation = false;
+
+        [ObservableProperty]
+        private string _sirHurtUser = string.Empty;
 
         [ObservableProperty]
         private ObservableCollection<VersionSourceOption> _versionSources = [];
@@ -80,8 +83,10 @@ namespace Sirstrap.UI.ViewModels
             _weaoService = weaoService;
 
             CurrentFullVersion = sirstrapVersion.GetFullVersion();
+            SirHurtUser = _sirHurtService.GetSirHurtUser();
 
             _ = LoadVersionSourcesAsync();
+            _ = LoadImagesAsync();
 
             _logPollingTimer = new(_currentPollingInterval);
 
@@ -196,10 +201,12 @@ namespace Sirstrap.UI.ViewModels
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(_lastLogSink.LastLog)
-                    && !string.Equals(LastLogMessage, _lastLogSink.LastLog))
+                var sessionLogCount = _lastLogSink.SessionLogCount;
+
+                if (sessionLogCount != _sessionLogCount)
                 {
-                    LastLogMessage = _lastLogSink.LastLog;
+                    _sessionLogCount = sessionLogCount;
+                    SessionLog = string.Join(Environment.NewLine, _lastLogSink.GetSessionLog());
                     _lastLogReceived = _lastLogSink.LastLogTimestamp;
                 }
 
@@ -208,8 +215,37 @@ namespace Sirstrap.UI.ViewModels
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Failed to read the last log message.");
+                Log.Error(ex, "[!] Failed to read the session log.");
             }
+        }
+
+        private async Task<Bitmap?> LoadImageAsync(string uri)
+        {
+            try
+            {
+                var bytes = await _httpClient.GetByteArrayAsync(uri);
+
+                using MemoryStream stream = new(bytes);
+
+                return new Bitmap(stream);
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "[!] Failed to load the image from {Uri}.", uri);
+
+                return null;
+            }
+        }
+
+        private async Task LoadImagesAsync()
+        {
+            var profileImage = await LoadImageAsync(PROFILE_IMAGE_URI);
+
+            await Dispatcher.UIThread.InvokeAsync(() => ProfileImage = profileImage);
+
+            var logoImage = await LoadImageAsync(LOGO_IMAGE_URI);
+
+            await Dispatcher.UIThread.InvokeAsync(() => LogoImage = logoImage);
         }
 
         private void GetPollingInterval()
@@ -230,36 +266,15 @@ namespace Sirstrap.UI.ViewModels
             }
         }
 
-        private async Task LoadAnnouncementAsync()
-        {
-            try
-            {
-#pragma warning disable S1075 // remote announcements endpoint, not a local path
-                var announcement = await HttpClientExtension.GetStringAsync(_httpClient, "https://raw.githubusercontent.com/massimopaganigh/Sirstrap/main/announcements.txt");
-#pragma warning restore S1075
-
-                if (!string.IsNullOrWhiteSpace(announcement))
-                {
-                    Announcement = announcement.Trim();
-                    ShowAnnouncement = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Warning(ex, "[!] Failed to load the announcement.");
-            }
-        }
-
         [RelayCommand]
         private void Logout()
         {
             try
             {
                 if (_sirHurtService.Logout())
-                {
-                    AccountName = string.Empty;
-                    IsLoggedIn = false;
-                }
+                    SirHurtUser = _sirHurtService.GetSirHurtUser();
+
+                Sentry.SentrySdk.Metrics.EmitCounter(nameof(Logout), 1);
             }
             catch (Exception ex)
             {
@@ -292,20 +307,20 @@ namespace Sirstrap.UI.ViewModels
         }
 
         [RelayCommand]
-        private void OpenIssue()
+        private void OpenGitHubProfile()
         {
             try
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "https://github.com/massimopaganigh/Sirstrap/issues/new",
+                    FileName = GITHUB_PROFILE_URI,
                     UseShellExecute = true
                 });
-                Sentry.SentrySdk.Metrics.EmitCounter(nameof(OpenIssue), 1);
+                Sentry.SentrySdk.Metrics.EmitCounter(nameof(OpenGitHubProfile), 1);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "[!] Failed to open the GitHub issue page.");
+                Log.Error(ex, "[!] Failed to open the GitHub profile.");
             }
         }
 
@@ -411,13 +426,6 @@ namespace Sirstrap.UI.ViewModels
             await _ipcService.StartAsync("SirstrapIpc");
 
             _protocolHandlerRegistrar.RegisterProtocolHandler("roblox-player", Program.Args ?? []);
-
-            var user = _sirHurtService.GetSirHurtUser();
-
-            AccountName = user;
-            IsLoggedIn = !string.IsNullOrWhiteSpace(user);
-
-            await LoadAnnouncementAsync();
         }
     }
 }

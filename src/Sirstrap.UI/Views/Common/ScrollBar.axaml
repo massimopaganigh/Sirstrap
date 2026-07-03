@@ -1,0 +1,205 @@
+<Styles xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <SolidColorBrush x:Key="ScrollBar.FG1" Color="#f0f6fc" />
+        <SolidColorBrush x:Key="ScrollBar.FG2" Color="#6b7480" />
+    </Styles.Resources>
+    <Style Selector="ScrollBar">
+        <Setter Property="MinWidth" Value="12" />
+        <Setter Property="MinHeight" Value="12" />
+        <Setter Property="ShowDelay" Value="0:0:0.1" />
+        <Setter Property="HideDelay" Value="0:0:0.2" />
+        <Setter Property="Background" Value="Transparent" />
+        <Style Selector="^ /template/ RepeatButton">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource ScrollBar.FG1}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" Padding="0">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            Foreground="{TemplateBinding Foreground}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^:horizontal">
+            <Setter Property="Height" Value="8" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border Background="{TemplateBinding Background}" UseLayoutRounding="False">
+                        <Grid ColumnDefinitions="12,*,12" Name="PART_RootGrid">
+                            <RepeatButton
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                VerticalAlignment="Center"
+                                Focusable="False"
+                                Name="PART_LineUpButton">
+                                <Path
+                                    Width="8"
+                                    Height="8"
+                                    Data="M16.32 6.96v10.13a.5.5 0 0 1-.78.41l-7.6-5.06a.5.5 0 0 1 0-.83l7.6-5.07a.5.5 0 0 1 .78.42Z"
+                                    Fill="{DynamicResource ScrollBar.FG2}"
+                                    Stretch="Uniform" />
+                            </RepeatButton>
+                            <Track
+                                Grid.Column="1"
+                                Value="{TemplateBinding Value, Mode=TwoWay}"
+                                DeferThumbDrag="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}"
+                                Maximum="{TemplateBinding Maximum}"
+                                Minimum="{TemplateBinding Minimum}"
+                                Orientation="{TemplateBinding Orientation}"
+                                ViewportSize="{TemplateBinding ViewportSize}">
+                                <Track.DecreaseButton>
+                                    <RepeatButton
+                                        MinWidth="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        CornerRadius="0"
+                                        Focusable="False"
+                                        Name="PART_PageUpButton" />
+                                </Track.DecreaseButton>
+                                <Track.IncreaseButton>
+                                    <RepeatButton
+                                        MinWidth="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        CornerRadius="0"
+                                        Focusable="False"
+                                        Name="PART_PageDownButton" />
+                                </Track.IncreaseButton>
+                                <Thumb
+                                    Height="8"
+                                    MinWidth="24"
+                                    VerticalAlignment="Center" />
+                            </Track>
+                            <RepeatButton
+                                Grid.Column="2"
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Focusable="False"
+                                Name="PART_LineDownButton">
+                                <Path
+                                    Width="8"
+                                    Height="8"
+                                    Data="M9 17.07V6.93c0-.4.45-.63.78-.41l7.6 5.06c.3.2.3.64 0 .84l-7.6 5.06a.5.5 0 0 1-.78-.41Z"
+                                    Fill="{DynamicResource ScrollBar.FG2}"
+                                    Stretch="Uniform" />
+                            </RepeatButton>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^:vertical">
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Template">
+                <ControlTemplate TargetType="ScrollBar">
+                    <Border Background="{TemplateBinding Background}" UseLayoutRounding="False">
+                        <Grid RowDefinitions="12,*,12">
+                            <RepeatButton
+                                Grid.Row="0"
+                                VerticalAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Focusable="False"
+                                Name="PART_LineUpButton">
+                                <Path
+                                    Width="8"
+                                    Height="8"
+                                    Data="M17.08 16.32H6.95a.5.5 0 0 1-.41-.78l5.06-7.6c.2-.3.64-.3.83 0l5.07 7.6a.5.5 0 0 1-.42.78Z"
+                                    Fill="{DynamicResource ScrollBar.FG2}"
+                                    Stretch="Uniform" />
+                            </RepeatButton>
+                            <Track
+                                Grid.Row="1"
+                                Value="{TemplateBinding Value, Mode=TwoWay}"
+                                DeferThumbDrag="{TemplateBinding ScrollViewer.IsDeferredScrollingEnabled}"
+                                IsDirectionReversed="True"
+                                Maximum="{TemplateBinding Maximum}"
+                                Minimum="{TemplateBinding Minimum}"
+                                Orientation="{TemplateBinding Orientation}"
+                                ViewportSize="{TemplateBinding ViewportSize}">
+                                <Track.DecreaseButton>
+                                    <RepeatButton
+                                        MinHeight="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        CornerRadius="0"
+                                        Focusable="False"
+                                        Name="PART_PageUpButton" />
+                                </Track.DecreaseButton>
+                                <Track.IncreaseButton>
+                                    <RepeatButton
+                                        MinHeight="0"
+                                        HorizontalAlignment="Stretch"
+                                        VerticalAlignment="Stretch"
+                                        CornerRadius="0"
+                                        Focusable="False"
+                                        Name="PART_PageDownButton" />
+                                </Track.IncreaseButton>
+                                <Thumb
+                                    Width="8"
+                                    MinHeight="24"
+                                    HorizontalAlignment="Center" />
+                            </Track>
+                            <RepeatButton
+                                Grid.Row="2"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Focusable="False"
+                                Name="PART_LineDownButton">
+                                <Path
+                                    Width="8"
+                                    Height="8"
+                                    Data="M6.95 7.72h10.13c.4 0 .64.45.42.78l-5.07 7.6a.5.5 0 0 1-.83 0L6.54 8.5a.5.5 0 0 1 .41-.78Z"
+                                    Fill="{DynamicResource ScrollBar.FG2}"
+                                    Stretch="Uniform" />
+                            </RepeatButton>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ Thumb">
+            <Setter Property="Transitions">
+                <Transitions>
+                    <DoubleTransition Property="Width" Duration="0:0:0.1" />
+                    <DoubleTransition Property="Height" Duration="0:0:0.1" />
+                </Transitions>
+            </Setter>
+            <Setter Property="Foreground" Value="{DynamicResource ScrollBar.FG2}" />
+            <Setter Property="Template">
+                <ControlTemplate>
+                    <Border
+                        Background="{TemplateBinding Foreground}"
+                        CornerRadius="2.5"
+                        UseLayoutRounding="False" />
+                </ControlTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="^ /template/ RepeatButton:pointerover > Path">
+            <Setter Property="Fill" Value="{DynamicResource ScrollBar.FG1}" />
+        </Style>
+        <Style Selector="^ /template/ Thumb:pointerover">
+            <Setter Property="Foreground" Value="{DynamicResource ScrollBar.FG1}" />
+        </Style>
+        <Style Selector="^[IsExpanded=False]">
+            <Style Selector="^ /template/ RepeatButton">
+                <Setter Property="IsVisible" Value="False" />
+            </Style>
+            <Style Selector="^:vertical /template/ Thumb">
+                <Setter Property="Width" Value="2" />
+            </Style>
+            <Style Selector="^:horizontal /template/ Thumb">
+                <Setter Property="Height" Value="2" />
+            </Style>
+        </Style>
+    </Style>
+</Styles>
