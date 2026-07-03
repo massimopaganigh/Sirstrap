@@ -3,6 +3,8 @@ import iconCleaner from "../../../src/SirHurt.Cleaner.CLI/Assets/favicon.ico";
 import iconCli from "../../../src/Sirstrap.CLI/Assets/favicon.ico";
 import iconUi from "../../../src/Sirstrap.UI/Assets/favicon.ico";
 import iconKnee from "@/assets/kneesurgery.ico";
+import shotUiMain from "../../../images/Sirstrap.png";
+import shotUiSettings from "../../../images/Settings.png";
 
 export const products: Product[] = [
   {
@@ -46,6 +48,10 @@ export const products: Product[] = [
     accent: "amber",
     title: { kind: "shimmer", head: "Sirstrap", tail: ".UI" },
     core: true,
+    screenshots: [
+      { src: shotUiMain, alt: "Sirstrap.UI main window" },
+      { src: shotUiSettings, alt: "Sirstrap.UI settings window" },
+    ],
   },
   {
     name: "KneeSurgery",

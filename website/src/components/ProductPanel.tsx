@@ -9,6 +9,7 @@ import { ProductTitle } from "@/components/title/ProductTitle";
 import { ProductByline } from "@/components/ProductByline";
 import { ProductBadges } from "@/components/ProductBadges";
 import { ProductActions } from "@/components/ProductActions";
+import { ProductScreenshots } from "@/components/ProductScreenshots";
 
 interface ProductPanelProps {
   product: Product;
@@ -111,6 +112,10 @@ export function ProductPanel({
             <p className="font-body text-[0.85rem] leading-[1.55] text-muted-foreground max-w-xs">
               {product.description}
             </p>
+          )}
+
+          {product.screenshots && (
+            <ProductScreenshots screenshots={product.screenshots} accent={product.accent} active={active} />
           )}
         </div>
       </div>

@@ -15,6 +15,11 @@ export type TitleAnimation =
   | { kind: "shimmer"; head: string; tail: string }
   | { kind: "rapid"; head: string; tail: string; glyph: string; max: number };
 
+export interface ProductScreenshot {
+  src: string;
+  alt: string;
+}
+
 export interface Product {
   name: string;
   description: string;
@@ -29,4 +34,5 @@ export interface Product {
   core?: boolean;
   repo?: string;
   downloadUrl?: string;
+  screenshots?: ProductScreenshot[];
 }
