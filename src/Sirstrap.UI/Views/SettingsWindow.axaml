@@ -6,8 +6,9 @@
     xmlns:common="using:Sirstrap.UI.Views.Common"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Sirstrap.UI.Models"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
-    MaxHeight="500"
+    MaxHeight="600"
     mc:Ignorable="d"
     CanResize="False"
     ExtendClientAreaToDecorationsHint="True"
@@ -21,12 +22,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <common:WavyBackground
             Grid.Row="0"
-            Grid.RowSpan="4"
+            Grid.RowSpan="5"
             Margin="-5"
             IsHitTestVisible="False" />
         <TextBlock
@@ -43,6 +45,18 @@
             Text="Settings" />
         <Border
             Grid.Row="2"
+            Margin="0,0,0,5"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Background="#80212830"
+            BoxShadow="0 0 10 0 #212830"
+            CornerRadius="5"
+            Padding="5"
+            IsVisible="{Binding Announcements, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <SelectableTextBlock Text="{Binding Announcements}" TextWrapping="Wrap" />
+        </Border>
+        <Border
+            Grid.Row="3"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Background="#80212830"
@@ -140,10 +154,9 @@
                                 BorderThickness="0"
                                 CornerRadius="999"
                                 ItemsSource="{Binding VersionSources}"
-                                SelectedItem="{Binding SelectedVersionSource}"
-                                x:CompileBindings="False">
+                                SelectedItem="{Binding SelectedVersionSource}">
                                 <ComboBox.ItemTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate x:DataType="models:VersionSourceOption">
                                         <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
                                     </DataTemplate>
                                 </ComboBox.ItemTemplate>
@@ -302,7 +315,7 @@
             </Grid>
         </Border>
         <TextBlock
-            Grid.Row="3"
+            Grid.Row="4"
             Margin="0,9,0,4"
             HorizontalAlignment="Center"
             FontSize="10"
