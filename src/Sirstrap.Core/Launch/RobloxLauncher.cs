@@ -5,6 +5,7 @@ namespace Sirstrap.Core.Launch
         IPathManager pathManager,
         ISingletonManager singletonManager,
         IIncognitoManager incognitoManager,
+        IFastFlagService fastFlagService,
         IRobloxProcessService robloxProcessService,
         IPerformanceTelemetry performanceTelemetry) : IRobloxLauncher
     {
@@ -18,7 +19,8 @@ namespace Sirstrap.Core.Launch
                 ["incognito"] = sirstrapConfiguration.RobloxIncognito
             });
 
-            var robloxPlayerBetaExePath = Path.Combine(pathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
+            var extractionPath = pathManager.GetExtractionPath(configuration.VersionHash);
+            var robloxPlayerBetaExePath = Path.Combine(extractionPath, ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {
@@ -26,6 +28,8 @@ namespace Sirstrap.Core.Launch
 
                 return Fail(scope, "NotFound");
             }
+
+            fastFlagService.Apply(extractionPath);
 
             var singletonCaptured = false;
 

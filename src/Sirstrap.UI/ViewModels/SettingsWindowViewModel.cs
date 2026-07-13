@@ -24,6 +24,12 @@
         private VersionSourceOption? _selectedVersionSource;
 
         [ObservableProperty]
+        private string _newFastFlagName = string.Empty;
+
+        [ObservableProperty]
+        private string _newFastFlagValue = string.Empty;
+
+        [ObservableProperty]
         private string _searchText = string.Empty;
 
         [ObservableProperty]
@@ -81,6 +87,29 @@
             if (value != null)
                 Settings.RobloxVersionSource = value.Value;
         }
+
+        [RelayCommand]
+        private void AddFastFlag()
+        {
+            if (string.IsNullOrWhiteSpace(NewFastFlagName))
+                return;
+
+            FastFlagEntry entry = new() { Name = NewFastFlagName.Trim(), Value = NewFastFlagValue };
+
+            var index = 0;
+
+            while (index < Settings.RobloxFastFlags.Count
+                && string.Compare(Settings.RobloxFastFlags[index].Name, entry.Name, StringComparison.Ordinal) < 0)
+                index++;
+
+            Settings.RobloxFastFlags.Insert(index, entry);
+
+            NewFastFlagName = string.Empty;
+            NewFastFlagValue = string.Empty;
+        }
+
+        [RelayCommand]
+        private void RemoveFastFlag(FastFlagEntry entry) => Settings.RobloxFastFlags.Remove(entry);
 
         [RelayCommand]
         private async Task BrowseInstallationPathAsync()

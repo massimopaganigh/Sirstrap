@@ -10,6 +10,7 @@ namespace Sirstrap.Core.Tests.Settings
             Assert.True(config.SirstrapAutoUpdate);
             Assert.Equal("-beta", config.SirstrapChannel);
             Assert.Equal("JetBrains Mono", config.SirstrapFontFamily);
+            Assert.True(config.RobloxFastFlagsEnabled);
             Assert.False(config.RobloxIncognito);
             Assert.True(config.RobloxMultiInstance);
             Assert.Equal(RobloxVersionSources.SirHurt, config.RobloxVersionSource);

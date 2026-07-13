@@ -12,6 +12,7 @@ namespace Sirstrap.Core.Tests.Launch
                 new FakePathManager(temp.Path),
                 new FakeSingletonManager(),
                 new FakeIncognitoManager(),
+                new FastFlagService(config),
                 new FakeRobloxProcessService(),
                 NullPerformanceTelemetry.Instance);
 

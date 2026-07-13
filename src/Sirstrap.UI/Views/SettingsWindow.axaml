@@ -60,13 +60,13 @@
                         Grid.IsSharedSizeScope="True"
                         SearchTerm="{Binding SearchText}"
                         Spacing="5">
-                        <common:SettingsRow Label="Roblox CDN URI override:">
-                            <TextBox
-                                Width="200"
-                                BorderThickness="0"
+                        <common:SettingsRow Label="Enable Roblox FastFlags:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
                                 CornerRadius="999"
                                 DataContext="{Binding Settings}"
-                                Text="{Binding RobloxCdnUriOverride}" />
+                                IsChecked="{Binding RobloxFastFlagsEnabled}" />
                         </common:SettingsRow>
                         <common:SettingsRow Label="Enable Roblox incognito:">
                             <CheckBox
@@ -76,6 +76,115 @@
                                 DataContext="{Binding Settings}"
                                 IsChecked="{Binding RobloxIncognito}"
                                 IsEnabled="{Binding RobloxMultiInstance}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Enable Roblox multi-instance:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding RobloxMultiInstance}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Enable Sirstrap auto-update:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding SirstrapAutoUpdate}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Enable telemetry:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding SirstrapTelemetry}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Roblox CDN URI override:">
+                            <TextBox
+                                Width="200"
+                                BorderThickness="0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                Text="{Binding RobloxCdnUriOverride}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Roblox FastFlags:">
+                            <StackPanel
+                                Width="200"
+                                IsEnabled="{Binding Settings.RobloxFastFlagsEnabled}"
+                                Spacing="5">
+                                <ItemsControl IsVisible="{Binding !!Settings.RobloxFastFlags.Count}" ItemsSource="{Binding Settings.RobloxFastFlags}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <StackPanel Spacing="5" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:FastFlagEntry">
+                                            <Grid ColumnDefinitions="*,*,Auto">
+                                                <TextBox
+                                                    Grid.Column="0"
+                                                    Margin="0,0,5,0"
+                                                    BorderThickness="0"
+                                                    CornerRadius="999"
+                                                    PlaceholderText="Name"
+                                                    Text="{Binding Name}" />
+                                                <TextBox
+                                                    Grid.Column="1"
+                                                    Margin="0,0,5,0"
+                                                    BorderThickness="0"
+                                                    CornerRadius="999"
+                                                    PlaceholderText="Value"
+                                                    Text="{Binding Value}" />
+                                                <Button
+                                                    Grid.Column="2"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Classes="hover-lift"
+                                                    Command="{Binding $parent[Window].((vm:SettingsWindowViewModel)DataContext).RemoveFastFlagCommand}"
+                                                    CommandParameter="{Binding}"
+                                                    CornerRadius="999"
+                                                    ToolTip.Tip="Remove FastFlag">
+                                                    <Image
+                                                        Margin="-5"
+                                                        RenderOptions.BitmapInterpolationMode="HighQuality"
+                                                        Source="avares://Sirstrap/Assets/remove.png" />
+                                                </Button>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Grid ColumnDefinitions="*,*,Auto">
+                                    <TextBox
+                                        Grid.Column="0"
+                                        Margin="0,0,5,0"
+                                        BorderThickness="0"
+                                        CornerRadius="999"
+                                        PlaceholderText="Name"
+                                        Text="{Binding NewFastFlagName}" />
+                                    <TextBox
+                                        Grid.Column="1"
+                                        Margin="0,0,5,0"
+                                        BorderThickness="0"
+                                        CornerRadius="999"
+                                        PlaceholderText="Value"
+                                        Text="{Binding NewFastFlagValue}" />
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="32"
+                                        Height="32"
+                                        Classes="hover-lift"
+                                        Command="{Binding AddFastFlagCommand}"
+                                        CornerRadius="999"
+                                        ToolTip.Tip="Add FastFlag">
+                                        <Image
+                                            Margin="-5"
+                                            RenderOptions.BitmapInterpolationMode="HighQuality"
+                                            Source="avares://Sirstrap/Assets/add.png" />
+                                    </Button>
+                                </Grid>
+                            </StackPanel>
                         </common:SettingsRow>
                         <common:SettingsRow Label="Roblox installation path:">
                             <Grid Width="200" ColumnDefinitions="*,Auto">
@@ -101,13 +210,25 @@
                                 </Button>
                             </Grid>
                         </common:SettingsRow>
-                        <common:SettingsRow Label="Enable Roblox multi-instance:">
-                            <CheckBox
-                                Height="32"
-                                Margin="10,0,0,0"
+                        <common:SettingsRow Label="Roblox version source:">
+                            <ComboBox
+                                Width="200"
+                                BorderThickness="0"
                                 CornerRadius="999"
-                                DataContext="{Binding Settings}"
-                                IsChecked="{Binding RobloxMultiInstance}" />
+                                ItemsSource="{Binding VersionSources}"
+                                SelectedItem="{Binding SelectedVersionSource}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="models:VersionSourceOption">
+                                        <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                                <ComboBox.Styles>
+                                    <Style Selector="ComboBox /template/ Popup">
+                                        <Setter Property="HorizontalOffset" Value="0" />
+                                        <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
+                                    </Style>
+                                </ComboBox.Styles>
+                            </ComboBox>
                         </common:SettingsRow>
                         <common:SettingsRow Label="SirHurt path:">
                             <Grid Width="200" ColumnDefinitions="*,Auto">
@@ -135,48 +256,12 @@
                                 </Button>
                             </Grid>
                         </common:SettingsRow>
-                        <common:SettingsRow Label="Roblox version source:">
-                            <ComboBox
-                                Width="200"
-                                BorderThickness="0"
-                                CornerRadius="999"
-                                ItemsSource="{Binding VersionSources}"
-                                SelectedItem="{Binding SelectedVersionSource}">
-                                <ComboBox.ItemTemplate>
-                                    <DataTemplate x:DataType="models:VersionSourceOption">
-                                        <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
-                                    </DataTemplate>
-                                </ComboBox.ItemTemplate>
-                                <ComboBox.Styles>
-                                    <Style Selector="ComboBox /template/ Popup">
-                                        <Setter Property="HorizontalOffset" Value="0" />
-                                        <Setter Property="Placement" Value="BottomEdgeAlignedLeft" />
-                                    </Style>
-                                </ComboBox.Styles>
-                            </ComboBox>
-                        </common:SettingsRow>
                         <common:SettingsRow Label="Sirstrap accent color:">
                             <ColorPicker
                                 Width="200"
                                 Color="{Binding SirstrapAccentColorValue}"
                                 CornerRadius="999"
                                 DataContext="{Binding Settings}" />
-                        </common:SettingsRow>
-                        <common:SettingsRow Label="Enable Sirstrap auto-update:">
-                            <CheckBox
-                                Height="32"
-                                Margin="10,0,0,0"
-                                CornerRadius="999"
-                                DataContext="{Binding Settings}"
-                                IsChecked="{Binding SirstrapAutoUpdate}" />
-                        </common:SettingsRow>
-                        <common:SettingsRow Label="Sirstrap update channel:">
-                            <TextBox
-                                Width="200"
-                                BorderThickness="0"
-                                CornerRadius="999"
-                                DataContext="{Binding Settings}"
-                                Text="{Binding SirstrapChannel}" />
                         </common:SettingsRow>
                         <common:SettingsRow Label="Sirstrap font family:">
                             <ComboBox
@@ -193,13 +278,13 @@
                                 </ComboBox.Styles>
                             </ComboBox>
                         </common:SettingsRow>
-                        <common:SettingsRow Label="Enable telemetry:">
-                            <CheckBox
-                                Height="32"
-                                Margin="10,0,0,0"
+                        <common:SettingsRow Label="Sirstrap update channel:">
+                            <TextBox
+                                Width="200"
+                                BorderThickness="0"
                                 CornerRadius="999"
                                 DataContext="{Binding Settings}"
-                                IsChecked="{Binding SirstrapTelemetry}" />
+                                Text="{Binding SirstrapChannel}" />
                         </common:SettingsRow>
                         <common:SettingsRow Label="Tray icon mode:">
                             <ComboBox

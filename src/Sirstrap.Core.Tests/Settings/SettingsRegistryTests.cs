@@ -21,6 +21,7 @@ namespace Sirstrap.Core.Tests.Settings
             string[] keys = [.. registry.Settings.Select(s => s.Key)];
 
             Assert.Contains("ROBLOX_CDN_URI_OVERRIDE", keys);
+            Assert.Contains("ROBLOX_FAST_FLAGS_ENABLED", keys);
             Assert.Contains("ROBLOX_INCOGNITO", keys);
             Assert.Contains("ROBLOX_INSTALLATION_PATH", keys);
             Assert.Contains("ROBLOX_MULTI_INSTANCE", keys);

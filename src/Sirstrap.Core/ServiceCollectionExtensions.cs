@@ -57,6 +57,7 @@ namespace Sirstrap.Core
 
         private static void AddLaunch(IServiceCollection services)
         {
+            services.TryAddSingleton<IFastFlagService, FastFlagService>();
             services.TryAddSingleton<IRobloxProcessService, RobloxProcessService>();
             services.TryAddSingleton<ISingletonManager, SingletonManager>();
             services.TryAddSingleton<IIncognitoManager, IncognitoManager>();

@@ -7,6 +7,7 @@ global using Sirstrap.Core.Cleaner;
 global using Sirstrap.Core.Cleaner.Steps;
 global using Sirstrap.Core.Common;
 global using Sirstrap.Core.Deployment;
+global using Sirstrap.Core.FastFlags;
 global using Sirstrap.Core.Ipc;
 global using Sirstrap.Core.Launch;
 global using Sirstrap.Core.Logging;

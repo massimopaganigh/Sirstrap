@@ -3,6 +3,7 @@ namespace Sirstrap.UI.Models
     public partial class Settings : ModelBase
     {
         private readonly SirstrapConfiguration _configuration;
+        private readonly IFastFlagService _fastFlagService;
         private readonly ISettingsService _settingsService;
         private readonly IPathManager _pathManager;
 
@@ -25,6 +26,12 @@ namespace Sirstrap.UI.Models
         private TrayMode _sirstrapTrayMode = TrayMode.None;
 
         [ObservableProperty]
+        private ObservableCollection<FastFlagEntry> _robloxFastFlags = [];
+
+        [ObservableProperty]
+        private bool _robloxFastFlagsEnabled = true;
+
+        [ObservableProperty]
         private bool _robloxIncognito = false;
 
         [ObservableProperty]
@@ -45,9 +52,10 @@ namespace Sirstrap.UI.Models
         [ObservableProperty]
         private string _sirHurtPath = string.Empty;
 
-        public Settings(SirstrapConfiguration configuration, ISettingsService settingsService, IPathManager pathManager, ISirHurtService sirHurtService)
+        public Settings(SirstrapConfiguration configuration, IFastFlagService fastFlagService, ISettingsService settingsService, IPathManager pathManager, ISirHurtService sirHurtService)
         {
             _configuration = configuration;
+            _fastFlagService = fastFlagService;
             _settingsService = settingsService;
             _pathManager = pathManager;
 
@@ -63,6 +71,8 @@ namespace Sirstrap.UI.Models
             SirstrapFontFamily = configuration.SirstrapFontFamily;
             SirstrapTelemetry = configuration.SirstrapTelemetry;
             SirstrapTrayMode = configuration.SirstrapTrayMode;
+            RobloxFastFlags = new(fastFlagService.GetFlags().Select(flag => new FastFlagEntry { Name = flag.Key, Value = flag.Value }));
+            RobloxFastFlagsEnabled = configuration.RobloxFastFlagsEnabled;
             RobloxIncognito = configuration.RobloxIncognito;
             RobloxInstallationPath = configuration.RobloxInstallationPath;
             RobloxMultiInstance = configuration.RobloxMultiInstance;
@@ -83,7 +93,15 @@ namespace Sirstrap.UI.Models
             _configuration.SirstrapFontFamily = SirstrapFontFamily;
             _configuration.SirstrapTelemetry = SirstrapTelemetry;
             _configuration.SirstrapTrayMode = SirstrapTrayMode;
+            _configuration.RobloxFastFlagsEnabled = RobloxFastFlagsEnabled;
             _configuration.RobloxIncognito = RobloxIncognito;
+
+            Dictionary<string, string> flags = new(StringComparer.Ordinal);
+
+            foreach (var entry in RobloxFastFlags.Where(entry => !string.IsNullOrWhiteSpace(entry.Name)))
+                flags[entry.Name.Trim()] = entry.Value;
+
+            _fastFlagService.SetFlags(flags);
             _configuration.RobloxInstallationPath = RobloxInstallationPath;
             _configuration.RobloxMultiInstance = RobloxMultiInstance;
             _configuration.RobloxVersionSource = RobloxVersionSource;

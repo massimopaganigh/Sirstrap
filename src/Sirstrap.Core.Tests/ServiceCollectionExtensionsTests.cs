@@ -27,6 +27,7 @@ namespace Sirstrap.Core.Tests
         [InlineData(typeof(IPackageManager))]
         [InlineData(typeof(IInstaller))]
         [InlineData(typeof(IRobloxDownloader))]
+        [InlineData(typeof(IFastFlagService))]
         [InlineData(typeof(IRobloxProcessService))]
         [InlineData(typeof(ISingletonManager))]
         [InlineData(typeof(IIncognitoManager))]

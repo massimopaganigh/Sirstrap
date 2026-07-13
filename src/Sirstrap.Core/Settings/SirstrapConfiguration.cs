@@ -16,6 +16,8 @@ namespace Sirstrap.Core.Settings
 
         public TrayMode SirstrapTrayMode { get; set; } = TrayMode.None;
 
+        public bool RobloxFastFlagsEnabled { get; set; } = true;
+
         public bool RobloxIncognito { get; set; }
 
         public string RobloxInstallationPath { get; set; } = GetDefaultInstallationPath();
