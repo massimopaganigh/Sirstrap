@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="using:Sirstrap.UI.Models"
     xmlns:vm="using:Sirstrap.UI.ViewModels"
-    MaxHeight="600"
+    MaxHeight="500"
     mc:Ignorable="d"
     CanResize="False"
     ExtendClientAreaToDecorationsHint="True"
@@ -20,7 +20,6 @@
     x:DataType="vm:SettingsWindowViewModel">
     <Grid Margin="5">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -45,18 +44,6 @@
             Text="Settings" />
         <Border
             Grid.Row="2"
-            Margin="0,0,0,5"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Top"
-            Background="#80212830"
-            BoxShadow="0 0 10 0 #212830"
-            CornerRadius="5"
-            Padding="5"
-            IsVisible="{Binding Announcements, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <SelectableTextBlock Text="{Binding Announcements}" TextWrapping="Wrap" />
-        </Border>
-        <Border
-            Grid.Row="3"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Background="#80212830"
@@ -315,7 +302,7 @@
             </Grid>
         </Border>
         <TextBlock
-            Grid.Row="4"
+            Grid.Row="3"
             Margin="0,9,0,4"
             HorizontalAlignment="Center"
             FontSize="10"
