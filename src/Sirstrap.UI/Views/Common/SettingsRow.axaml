@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:common="using:Sirstrap.UI.Views.Common">
     <ControlTheme x:Key="{x:Type common:SettingsRow}" TargetType="common:SettingsRow">
+        <Setter Property="ClipToBounds" Value="False" />
         <Setter Property="Template">
             <ControlTemplate>
                 <Grid>
