@@ -8,7 +8,7 @@ namespace Sirstrap.Core.Settings
                 setter(v);
         }, legacyKeys ?? [], valueMigrator, metric);
 
-        public static SettingDefinition Enum<T>(string key, Func<T> getter, Action<T> setter, Action? metric = null, IReadOnlyList<string>? legacyKeys = null, Func<string, string>? valueMigrator = null) where T : struct, Enum => new(key, SettingsSection.Settings, () => getter().ToString()!, value =>
+        public static SettingDefinition Enum<T>(string key, Func<T> getter, Action<T> setter, Action? metric = null, IReadOnlyList<string>? legacyKeys = null, Func<string, string>? valueMigrator = null) where T : struct, Enum => new(key, SettingsSection.Settings, () => getter().ToString(), value =>
         {
             if (System.Enum.TryParse<T>(value, true, out var v))
                 setter(v);
