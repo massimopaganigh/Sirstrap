@@ -31,5 +31,17 @@ namespace Sirstrap.Core.Settings
         public string ResolvedRobloxCdnUri { get; set; } = RobloxCdnService.DefaultBaseUri;
 
         public IReadOnlyList<string> ResolvedRobloxCdnUris { get; set; } = [RobloxCdnService.DefaultBaseUri];
+
+        public bool CleanerEnabled { get; set; }
+
+        public bool CleanerFirstTimeConfigured { get; set; }
+
+        public bool CleanerCleanOnLaunch { get; set; }
+
+        public bool CleanerCleanOnExit { get; set; }
+
+        public bool CleanerCleanTempFolders { get; set; } = true;
+
+        public bool CleanerCleanProtectedFiles { get; set; }
     }
 }

@@ -92,7 +92,30 @@ namespace Sirstrap.Core.Settings
                 Setting.StateString("ROBLOX_PREVIOUS_INSTALLATION_PATH",
                     () => configuration.RobloxPreviousInstallationPath,
                     value => configuration.RobloxPreviousInstallationPath = value,
-                    legacyKeys: ["PREVIOUS_INSTALLATION_PATH"])
+                    legacyKeys: ["PREVIOUS_INSTALLATION_PATH"]),
+                Setting.Bool("CLEANER_ENABLED",
+                    () => configuration.CleanerEnabled,
+                    value => configuration.CleanerEnabled = value,
+                    Metric("CleanerEnabled", () => configuration.CleanerEnabled)),
+                Setting.Bool("CLEANER_FIRST_TIME_CONFIGURED",
+                    () => configuration.CleanerFirstTimeConfigured,
+                    value => configuration.CleanerFirstTimeConfigured = value),
+                Setting.Bool("CLEANER_CLEAN_ON_LAUNCH",
+                    () => configuration.CleanerCleanOnLaunch,
+                    value => configuration.CleanerCleanOnLaunch = value,
+                    Metric("CleanerCleanOnLaunch", () => configuration.CleanerCleanOnLaunch)),
+                Setting.Bool("CLEANER_CLEAN_ON_EXIT",
+                    () => configuration.CleanerCleanOnExit,
+                    value => configuration.CleanerCleanOnExit = value,
+                    Metric("CleanerCleanOnExit", () => configuration.CleanerCleanOnExit)),
+                Setting.Bool("CLEANER_CLEAN_TEMP_FOLDERS",
+                    () => configuration.CleanerCleanTempFolders,
+                    value => configuration.CleanerCleanTempFolders = value,
+                    Metric("CleanerCleanTempFolders", () => configuration.CleanerCleanTempFolders)),
+                Setting.Bool("CLEANER_CLEAN_PROTECTED_FILES",
+                    () => configuration.CleanerCleanProtectedFiles,
+                    value => configuration.CleanerCleanProtectedFiles = value,
+                    Metric("CleanerCleanProtectedFiles", () => configuration.CleanerCleanProtectedFiles))
             ];
         }
     }

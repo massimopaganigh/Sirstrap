@@ -1,4 +1,4 @@
-﻿namespace Sirstrap.UI.ViewModels
+namespace Sirstrap.UI.ViewModels
 {
     public partial class SettingsWindowViewModel : ViewModelBase
     {
@@ -7,6 +7,8 @@
         private readonly HttpClient _httpClient;
         private readonly IUninstallService _uninstallService;
         private readonly IWeaoService _weaoService;
+        private readonly ICleanupOrchestrator _cleanupOrchestrator;
+        private readonly CleanerConfig _cleanerConfig;
 
         [ObservableProperty]
         private string _announcements = string.Empty;
@@ -29,13 +31,28 @@
         [ObservableProperty]
         private Settings _settings;
 
-        public SettingsWindowViewModel(HttpClient httpClient, Settings settings, ISirstrapVersion sirstrapVersion, IUninstallService uninstallService, IWeaoService weaoService)
+        [ObservableProperty]
+        private bool _isCleanerRunning;
+
+        [ObservableProperty]
+        private string _cleanerStatusText = string.Empty;
+
+        public SettingsWindowViewModel(
+            HttpClient httpClient,
+            Settings settings,
+            ISirstrapVersion sirstrapVersion,
+            IUninstallService uninstallService,
+            IWeaoService weaoService,
+            ICleanupOrchestrator cleanupOrchestrator,
+            CleanerConfig cleanerConfig)
         {
             _httpClient = httpClient;
             _settings = settings;
             _currentFullVersion = sirstrapVersion.GetFullVersion();
             _uninstallService = uninstallService;
             _weaoService = weaoService;
+            _cleanupOrchestrator = cleanupOrchestrator;
+            _cleanerConfig = cleanerConfig;
 
             GetFontFamilies();
 
@@ -195,6 +212,71 @@
             }
         }
 
+
+        [RelayCommand]
+        private async Task RunCleanerAsync()
+        {
+            if (IsCleanerRunning)
+                return;
+
+            try
+            {
+                IsCleanerRunning = true;
+                CleanerStatusText = "Cleaner running...";
+
+                await Task.Run(() =>
+                {
+                    _cleanerConfig.CleanTempFolders = Settings.CleanerCleanTempFolders;
+                    _cleanerConfig.CleanProtectedFiles = Settings.CleanerCleanProtectedFiles;
+
+                    _cleanupOrchestrator.Run();
+                });
+
+                CleanerStatusText = "Cleanup complete!";
+
+                const uint MB_OK = 0x00000000;
+                const uint MB_ICONINFORMATION = 0x00000040;
+
+                await Task.Run(() =>
+                    MessageBoxW(
+                        IntPtr.Zero,
+                        "SirHurt Cleaner completed successfully.",
+                        "Cleaner Finished",
+                        MB_OK | MB_ICONINFORMATION));
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(RunCleanerAsync));
+                CleanerStatusText = "Cleanup failed!";
+            }
+            finally
+            {
+                IsCleanerRunning = false;
+            }
+        }
+
+        [RelayCommand]
+        private void OpenFFlagEditor()
+        {
+            try
+            {
+                var fflagManager = Program.Services.GetRequiredService<IFFlagManager>();
+                var viewModel = new FFlagEditorWindowViewModel(fflagManager);
+                var window = new FFlagEditorWindow
+                {
+                    DataContext = viewModel
+                };
+
+                if (GetMainWindow() is { } owner)
+                    window.ShowDialog(owner);
+                else
+                    window.Show();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, nameof(OpenFFlagEditor));
+            }
+        }
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         private static extern int MessageBoxW(IntPtr hWnd, string text, string caption, uint type);

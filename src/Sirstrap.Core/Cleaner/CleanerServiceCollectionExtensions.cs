@@ -12,8 +12,8 @@ namespace Sirstrap.Core.Cleaner
             services.TryAddSingleton<IUserProfileProvider, UserProfileProvider>();
             services.TryAddSingleton<IFolderDeleter, FolderDeleter>();
             services.TryAddSingleton<ISelectiveFolderCleaner, SelectiveFolderCleaner>();
-            services.TryAddSingleton<IStatusLine, ConsoleStatusLine>();
-            services.TryAddSingleton<IUserInteraction, ConsoleUserInteraction>();
+            services.TryAddSingleton<IStatusLine, GuiStatusLine>();
+            services.TryAddSingleton<IUserInteraction, GuiUserInteraction>();
             services.TryAddSingleton<IRegistryManager, RegistryManager>();
             services.AddSingleton<ICleanupStep, ProcessCloser>();
             services.AddSingleton<ICleanupStep, SystemFoldersCleanupStep>();

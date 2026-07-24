@@ -21,10 +21,12 @@ namespace Sirstrap.Core
             AddActivity(services);
             AddWindows(services);
             AddUpdate(services);
+            services.AddSirstrapCleaner();
 
             services.TryAddSingleton<ISirHurtService, SirHurtService>();
             services.TryAddSingleton<IPathManager, PathManager>();
             services.TryAddSingleton<IIpcService, IpcService>();
+            services.TryAddSingleton<IFFlagManager, FFlagManager>();
 
             return services;
         }
