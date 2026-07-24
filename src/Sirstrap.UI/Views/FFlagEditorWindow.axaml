@@ -1,0 +1,216 @@
+<Window
+    x:Class="Sirstrap.UI.Views.FFlagEditorWindow"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="using:Sirstrap.UI.Behaviors"
+    xmlns:common="using:Sirstrap.UI.Views.Common"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="using:Sirstrap.Core.FFlags"
+    xmlns:vm="using:Sirstrap.UI.ViewModels"
+    Width="650"
+    Height="600"
+    mc:Ignorable="d"
+    CanResize="False"
+    ExtendClientAreaToDecorationsHint="True"
+    Icon="/Assets/favicon.ico"
+    Title="Sirstrap FFlag Editor"
+    TransparencyLevelHint="AcrylicBlur"
+    WindowStartupLocation="CenterOwner"
+    x:DataType="vm:FFlagEditorWindowViewModel">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <common:WavyBackground
+            Grid.Row="0"
+            Grid.RowSpan="5"
+            Margin="-5"
+            IsHitTestVisible="False" />
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,4,0,9"
+            HorizontalAlignment="Center"
+            FontSize="10"
+            Text="Sirstrap" />
+        <TextBlock
+            Grid.Row="1"
+            FontSize="24"
+            FontWeight="UltraBold"
+            Padding="10"
+            Text="Fast Flag Editor" />
+
+        <!-- Presets Row -->
+        <Border
+            Grid.Row="2"
+            Margin="0,0,0,5"
+            Background="#80212830"
+            BoxShadow="0 0 10 0 #212830"
+            CornerRadius="5"
+            Padding="8">
+            <Grid ColumnDefinitions="*,*,*">
+                <StackPanel Grid.Column="0" Margin="4" Spacing="4">
+                    <TextBlock FontSize="11" Foreground="#A0A0A0" Text="Target FPS Limit:" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        BorderThickness="0"
+                        CornerRadius="999"
+                        ItemsSource="{Binding FpsPresetOptions}"
+                        SelectedItem="{Binding SelectedFpsPreset}" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="4" Spacing="4">
+                    <TextBlock FontSize="11" Foreground="#A0A0A0" Text="Graphics API:" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        BorderThickness="0"
+                        CornerRadius="999"
+                        ItemsSource="{Binding GraphicsApiPresetOptions}"
+                        SelectedItem="{Binding SelectedGraphicsApiPreset}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="4" Spacing="4">
+                    <TextBlock FontSize="11" Foreground="#A0A0A0" Text="MSAA Quality:" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        BorderThickness="0"
+                        CornerRadius="999"
+                        ItemsSource="{Binding MsaaPresetOptions}"
+                        SelectedItem="{Binding SelectedMsaaPreset}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content (Tabs) -->
+        <Border
+            Grid.Row="3"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Background="#80212830"
+            BoxShadow="0 0 10 0 #212830"
+            CornerRadius="5"
+            Padding="5">
+            <TabControl SelectedIndex="{Binding SelectedTabIndex}">
+                <!-- Table View Tab -->
+                <TabItem Header="Flag List">
+                    <Grid RowDefinitions="Auto,Auto,*">
+                        <!-- Add Flag Bar -->
+                        <Grid Grid.Row="0" Margin="0,5,0,5" ColumnDefinitions="*,*,Auto">
+                            <TextBox
+                                Grid.Column="0"
+                                Margin="0,0,4,0"
+                                BorderThickness="0"
+                                CornerRadius="999"
+                                PlaceholderText="Flag Name (e.g. FFlagDebug...)"
+                                Text="{Binding NewFlagName}" />
+                            <TextBox
+                                Grid.Column="1"
+                                Margin="0,0,4,0"
+                                BorderThickness="0"
+                                CornerRadius="999"
+                                PlaceholderText="Flag Value"
+                                Text="{Binding NewFlagValue}" />
+                            <Button
+                                Grid.Column="2"
+                                Width="70"
+                                Height="32"
+                                Classes="hover-lift"
+                                Command="{Binding AddFlagCommand}"
+                                CornerRadius="999">
+                                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Text="Add" />
+                            </Button>
+                        </Grid>
+
+                        <!-- Search Bar -->
+                        <TextBox
+                            Grid.Row="1"
+                            Margin="0,0,0,5"
+                            BorderThickness="0"
+                            CornerRadius="999"
+                            PlaceholderText="Search flags..."
+                            Text="{Binding SearchText}" />
+
+                        <!-- Flag List ScrollViewer -->
+                        <ScrollViewer
+                            Grid.Row="2"
+                            behaviors:ScrollFade.IsEnabled="True"
+                            HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding FilteredFlags}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="models:FFlagEntry">
+                                        <Grid Margin="0,2,0,2" ColumnDefinitions="*,*,Auto">
+                                            <TextBox
+                                                Grid.Column="0"
+                                                Margin="0,0,4,0"
+                                                BorderThickness="0"
+                                                CornerRadius="999"
+                                                Text="{Binding Name}" />
+                                            <TextBox
+                                                Grid.Column="1"
+                                                Margin="0,0,4,0"
+                                                BorderThickness="0"
+                                                CornerRadius="999"
+                                                Text="{Binding Value}" />
+                                            <Button
+                                                Grid.Column="2"
+                                                Width="32"
+                                                Height="32"
+                                                Classes="hover-lift"
+                                                Command="{Binding $parent[Window].((vm:FFlagEditorWindowViewModel)DataContext).DeleteFlagCommand}"
+                                                CommandParameter="{Binding}"
+                                                CornerRadius="999"
+                                                ToolTip.Tip="Delete Flag">
+                                                <Image
+                                                    Margin="0"
+                                                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                                                    Source="avares://Sirstrap/Assets/uninstall.png" />
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+
+                <!-- Raw JSON Tab -->
+                <TabItem Header="Raw JSON">
+                    <TextBox
+                        AcceptsReturn="True"
+                        AcceptsTab="True"
+                        BorderThickness="0"
+                        CornerRadius="5"
+                        FontFamily="Consolas, JetBrains Mono, Courier New"
+                        FontSize="12"
+                        Text="{Binding RawJsonText}"
+                        TextWrapping="NoWrap" />
+                </TabItem>
+            </TabControl>
+        </Border>
+
+        <!-- Footer Bar -->
+        <Border
+            Grid.Row="4"
+            Margin="0,5,0,0"
+            HorizontalAlignment="Right"
+            Background="#2a323c"
+            BoxShadow="0 0 10 0 #212830"
+            CornerRadius="999"
+            Padding="5">
+            <Button
+                Width="80"
+                Height="32"
+                Classes="hover-lift"
+                Command="{Binding SaveCommand}"
+                CornerRadius="999">
+                <Image
+                    Margin="0"
+                    RenderOptions.BitmapInterpolationMode="HighQuality"
+                    Source="avares://Sirstrap/Assets/save.png" />
+            </Button>
+        </Border>
+    </Grid>
+</Window>

@@ -13,7 +13,8 @@ namespace Sirstrap.Core.Tests.Launch
                 new FakeSingletonManager(),
                 new FakeIncognitoManager(),
                 new FakeRobloxProcessService(),
-                NullPerformanceTelemetry.Instance);
+                NullPerformanceTelemetry.Instance,
+                new FakeFFlagManager());
 
             Configuration configuration = new() { BinaryType = "WindowsPlayer", VersionHash = "v1" };
 

@@ -45,6 +45,24 @@ namespace Sirstrap.UI.Models
         [ObservableProperty]
         private string _sirHurtPath = string.Empty;
 
+        [ObservableProperty]
+        private bool _cleanerEnabled;
+
+        [ObservableProperty]
+        private bool _cleanerFirstTimeConfigured;
+
+        [ObservableProperty]
+        private bool _cleanerCleanOnLaunch;
+
+        [ObservableProperty]
+        private bool _cleanerCleanOnExit;
+
+        [ObservableProperty]
+        private bool _cleanerCleanTempFolders = true;
+
+        [ObservableProperty]
+        private bool _cleanerCleanProtectedFiles;
+
         public Settings(SirstrapConfiguration configuration, ISettingsService settingsService, IPathManager pathManager, ISirHurtService sirHurtService)
         {
             _configuration = configuration;
@@ -68,6 +86,12 @@ namespace Sirstrap.UI.Models
             RobloxMultiInstance = configuration.RobloxMultiInstance;
             RobloxVersionSource = configuration.RobloxVersionSource;
             RobloxCdnUriOverride = configuration.RobloxCdnUriOverride;
+            CleanerEnabled = configuration.CleanerEnabled;
+            CleanerFirstTimeConfigured = configuration.CleanerFirstTimeConfigured;
+            CleanerCleanOnLaunch = configuration.CleanerCleanOnLaunch;
+            CleanerCleanOnExit = configuration.CleanerCleanOnExit;
+            CleanerCleanTempFolders = configuration.CleanerCleanTempFolders;
+            CleanerCleanProtectedFiles = configuration.CleanerCleanProtectedFiles;
             RunSirHurtEnabled = File.Exists(Path.Combine(sirHurtPath, "bootstrapper.exe"));
             SirHurtPath = sirHurtPath;
         }
@@ -88,6 +112,12 @@ namespace Sirstrap.UI.Models
             _configuration.RobloxMultiInstance = RobloxMultiInstance;
             _configuration.RobloxVersionSource = RobloxVersionSource;
             _configuration.RobloxCdnUriOverride = RobloxCdnService.NormalizeCdnUriOverride(RobloxCdnUriOverride);
+            _configuration.CleanerEnabled = CleanerEnabled;
+            _configuration.CleanerFirstTimeConfigured = CleanerFirstTimeConfigured;
+            _configuration.CleanerCleanOnLaunch = CleanerCleanOnLaunch;
+            _configuration.CleanerCleanOnExit = CleanerCleanOnExit;
+            _configuration.CleanerCleanTempFolders = CleanerCleanTempFolders;
+            _configuration.CleanerCleanProtectedFiles = CleanerCleanProtectedFiles;
             RobloxCdnUriOverride = _configuration.RobloxCdnUriOverride;
 
             _settingsService.SaveSettings();

@@ -4,6 +4,8 @@ namespace Sirstrap.Core.Cleaner
     {
         public bool CleanTempFolders { get; set; } = true;
 
+        public bool CleanProtectedFiles { get; set; }
+
         public IReadOnlyList<string> ExcludedFiles { get; } =
         [
             "GlobalBasicSettings_13_Studio.xml"

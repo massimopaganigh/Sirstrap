@@ -229,6 +229,77 @@
                                 </ComboBox.Styles>
                             </ComboBox>
                         </common:SettingsRow>
+                        <common:SettingsRow Label="Enable SirHurt Cleaner:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding CleanerEnabled}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Clean on launch:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding CleanerCleanOnLaunch}"
+                                IsEnabled="{Binding CleanerEnabled}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Clean on exit:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding CleanerCleanOnExit}"
+                                IsEnabled="{Binding CleanerEnabled}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Clean temporary folders:">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding CleanerCleanTempFolders}"
+                                IsEnabled="{Binding CleanerEnabled}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Clean protected files (auth/cfg):">
+                            <CheckBox
+                                Height="32"
+                                Margin="10,0,0,0"
+                                CornerRadius="999"
+                                DataContext="{Binding Settings}"
+                                IsChecked="{Binding CleanerCleanProtectedFiles}"
+                                IsEnabled="{Binding CleanerEnabled}" />
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Run SirHurt Cleaner:">
+                            <Button
+                                Width="200"
+                                Height="32"
+                                Classes="hover-lift"
+                                Command="{Binding RunCleanerCommand}"
+                                CornerRadius="999"
+                                IsEnabled="{Binding !IsCleanerRunning}">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="Run Cleaner Now" />
+                            </Button>
+                        </common:SettingsRow>
+                        <common:SettingsRow Label="Fast Flag (FFlag) Editor:">
+                            <Button
+                                Width="200"
+                                Height="32"
+                                Classes="hover-lift"
+                                Command="{Binding OpenFFlagEditorCommand}"
+                                CornerRadius="999">
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Text="Open FFlag Editor" />
+                            </Button>
+                        </common:SettingsRow>
                     </common:SettingsList>
                 </ScrollViewer>
                 <Border

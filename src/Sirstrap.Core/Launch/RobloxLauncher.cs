@@ -6,7 +6,8 @@ namespace Sirstrap.Core.Launch
         ISingletonManager singletonManager,
         IIncognitoManager incognitoManager,
         IRobloxProcessService robloxProcessService,
-        IPerformanceTelemetry performanceTelemetry) : IRobloxLauncher
+        IPerformanceTelemetry performanceTelemetry,
+        IFFlagManager fflagManager) : IRobloxLauncher
     {
         private const string ROBLOX_PLAYER_BETA_EXE = "RobloxPlayerBeta.exe";
 
@@ -18,7 +19,8 @@ namespace Sirstrap.Core.Launch
                 ["incognito"] = sirstrapConfiguration.RobloxIncognito
             });
 
-            var robloxPlayerBetaExePath = Path.Combine(pathManager.GetExtractionPath(configuration.VersionHash), ROBLOX_PLAYER_BETA_EXE);
+            var extractionPath = pathManager.GetExtractionPath(configuration.VersionHash);
+            var robloxPlayerBetaExePath = Path.Combine(extractionPath, ROBLOX_PLAYER_BETA_EXE);
 
             if (!File.Exists(robloxPlayerBetaExePath))
             {
@@ -26,6 +28,8 @@ namespace Sirstrap.Core.Launch
 
                 return Fail(scope, "NotFound");
             }
+
+            fflagManager.DeployFFlags(extractionPath);
 
             var singletonCaptured = false;
 

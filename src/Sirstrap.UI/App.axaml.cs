@@ -93,6 +93,44 @@ namespace Sirstrap.UI
 
                     desktop.MainWindow.Opened += OnFirstOpen;
                 }
+
+                var config = Program.Services.GetRequiredService<SirstrapConfiguration>();
+
+                if (config.CleanerEnabled && config.CleanerCleanOnLaunch)
+                {
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            var cleanerConfig = Program.Services.GetRequiredService<CleanerConfig>();
+                            cleanerConfig.CleanTempFolders = config.CleanerCleanTempFolders;
+                            cleanerConfig.CleanProtectedFiles = config.CleanerCleanProtectedFiles;
+                            Program.Services.GetRequiredService<ICleanupOrchestrator>().Run();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "[!] Failed automated launch cleanup.");
+                        }
+                    });
+                }
+
+                desktop.Exit += (_, _) =>
+                {
+                    if (config.CleanerEnabled && config.CleanerCleanOnExit)
+                    {
+                        try
+                        {
+                            var cleanerConfig = Program.Services.GetRequiredService<CleanerConfig>();
+                            cleanerConfig.CleanTempFolders = config.CleanerCleanTempFolders;
+                            cleanerConfig.CleanProtectedFiles = config.CleanerCleanProtectedFiles;
+                            Program.Services.GetRequiredService<ICleanupOrchestrator>().Run();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex, "[!] Failed automated exit cleanup.");
+                        }
+                    }
+                };
             }
 
             base.OnFrameworkInitializationCompleted();

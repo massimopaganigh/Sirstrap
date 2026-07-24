@@ -77,4 +77,20 @@ namespace Sirstrap.Core.Tests.Support
             return result;
         }
     }
+
+    public sealed class FakeFFlagManager : IFFlagManager
+    {
+        public int DeployCalls { get; private set; }
+
+        public string GetFFlagsPath() => "fake/path/ClientAppSettings.json";
+
+        public Dictionary<string, object> LoadFFlags() => [];
+
+        public void SaveFFlags(Dictionary<string, object> flags) { }
+
+        public void DeployFFlags(string targetDirectory)
+        {
+            DeployCalls++;
+        }
+    }
 }
