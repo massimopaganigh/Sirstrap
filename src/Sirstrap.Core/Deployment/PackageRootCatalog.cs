@@ -75,7 +75,7 @@ namespace Sirstrap.Core.Deployment
                 ? _studioRoots
                 : _playerRoots;
 
-            return roots.TryGetValue(package, out root!);
+            return roots.TryGetValue(package, out root);
         }
     }
 }
